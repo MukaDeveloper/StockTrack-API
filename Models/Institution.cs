@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace StockTrack_API.Models
 {
-    public class AlmoxarifadoItem
+    public class Institution
     {
         
     }

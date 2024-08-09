@@ -11,12 +11,12 @@ namespace StockTrack_API.Controllers
 {
     [ApiController]
     [Route("[Controller]")]
-    public class AlmoxarifadosController : ControllerBase
+    public class WarehousesController : ControllerBase
     {
         private readonly DataContext _context;
 
 
-        public AlmoxarifadosController(DataContext context)
+        public WarehousesController(DataContext context)
         {
             _context = context;
         }

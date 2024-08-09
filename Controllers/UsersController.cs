@@ -10,11 +10,11 @@ using StockTrack_API.Data;
 namespace StockTrack_API.Controllers
 {
     [Route("[controller]")]
-    public class UtilizadoresController : Controller
+    public class UsersController : Controller
     {
         private readonly DataContext _context;
 
-        public UtilizadoresController(DataContext context)
+        public UsersController(DataContext context)
         {
             _context = context;
         }

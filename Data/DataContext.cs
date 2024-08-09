@@ -15,11 +15,13 @@ namespace StockTrack_API.Data
 
         }
 
-        public DbSet<Item> ST_ITENS { get; set; }
+        public DbSet<Area> ST_AREAS { get; set; }
+        public DbSet<Warehouse> ST_WAREHOUSES { get; set; }
+        public DbSet<Material> ST_MATERIALS { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            modelBuilder.Entity<Item>().ToTable("ST_ITENS");
-            modelBuilder.Entity<Item>().HasData(new Item() { Id = 1, Name = "Test" });
+            modelBuilder.Entity<Material>().ToTable("ST_MATERIALS");
+            modelBuilder.Entity<Material>().HasData(new Material() { Id = 1, Name = "Test" });
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder) {
