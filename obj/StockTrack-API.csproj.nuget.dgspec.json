@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\Catarine & Samuel\\DTCC\\StockTrack-API\\StockTrack-API.csproj": {}
+    "D:\\Catarine & Samuel\\DTCC\\StockTrack-API\\StockTrack-API.csproj": {}
   },
   "projects": {
-    "d:\\Catarine & Samuel\\DTCC\\StockTrack-API\\StockTrack-API.csproj": {
+    "D:\\Catarine & Samuel\\DTCC\\StockTrack-API\\StockTrack-API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Catarine & Samuel\\DTCC\\StockTrack-API\\StockTrack-API.csproj",
+        "projectUniqueName": "D:\\Catarine & Samuel\\DTCC\\StockTrack-API\\StockTrack-API.csproj",
         "projectName": "StockTrack-API",
-        "projectPath": "d:\\Catarine & Samuel\\DTCC\\StockTrack-API\\StockTrack-API.csproj",
+        "projectPath": "D:\\Catarine & Samuel\\DTCC\\StockTrack-API\\StockTrack-API.csproj",
         "packagesPath": "C:\\Users\\etechas\\.nuget\\packages\\",
-        "outputPath": "d:\\Catarine & Samuel\\DTCC\\StockTrack-API\\obj\\",
+        "outputPath": "D:\\Catarine & Samuel\\DTCC\\StockTrack-API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
