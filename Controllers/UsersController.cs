@@ -25,7 +25,7 @@ namespace StockTrack_API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("Autenticar")]
+        [HttpPost("Authenticate")]
         public async Task<IActionResult> Authenticate(User credenciais)
         {
             try
@@ -36,7 +36,7 @@ namespace StockTrack_API.Controllers
                 {
                     throw new Exception("Usuário não encontrado.");
                 }
-                else if (!Cryptography.VerificarPasswordHash(credenciais.PasswordString, user.PasswordHash, user.PasswordSalt))
+                else if (!Cryptography.VerifyPasswordHash(credenciais.PasswordString, user.PasswordHash, user.PasswordSalt))
                 {
                     throw new Exception("Senha incorreta.");
                 }
