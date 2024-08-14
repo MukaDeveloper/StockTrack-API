@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
 using StockTrack_API.Models;
+using StockTrack_API.Models.Enums;
 using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
@@ -17,26 +18,46 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsersController(DataContext context, IConfiguration configuration)
+        public UsersController(DataContext context, 
+        IConfiguration configuration, 
+        IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserByIdAsync(int userId)
+        {
+            try
+            {
+                User user = await _context.ST_USERS
+                   .FirstOrDefaultAsync(x => x.Id == userId);
+
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [AllowAnonymous]
         [HttpPost("Authenticate")]
-        public async Task<IActionResult> Authenticate(User credenciais)
+        public async Task<IActionResult> AuthenticateAsync(User credentials)
         {
             try
             {
-                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Name.ToLower().Equals(credenciais.Name.ToLower()));
+                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(credentials.Email.ToLower()));
 
                 if (user == null)
                 {
                     throw new Exception("Usuário não encontrado.");
                 }
-                else if (!Cryptography.VerifyPasswordHash(credenciais.PasswordString, user.PasswordHash, user.PasswordSalt))
+                else if (!Cryptography.VerifyPasswordHash(credentials.PasswordString, user.PasswordHash!, user.PasswordSalt!))
                 {
                     throw new Exception("Senha incorreta.");
                 }
@@ -49,9 +70,33 @@ namespace StockTrack_API.Controllers
                     user.PasswordHash = null;
                     user.PasswordSalt = null;
                     user.Token = CreateToken(user);
-                    
-                    return Ok(user);  
+
+                    return Ok(user);
                 }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("Registrar")]
+        public async Task<IActionResult> RegisterAsync(User user)
+        {
+            try
+            {
+
+                if (await ExistUser(user.Email))
+                    throw new Exception("Usuário já existente.");
+
+                Cryptography.CreatePasswordHash(user.PasswordString, out byte[] hash, out byte[] salt);
+                user.PasswordString = string.Empty;
+                user.PasswordHash = hash;
+                user.PasswordSalt = salt;
+                await _context.ST_USERS.AddAsync(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(user.Id);
             }
             catch (Exception ex)
             {
@@ -67,22 +112,47 @@ namespace StockTrack_API.Controllers
                 new Claim(ClaimTypes.Name, user.Name),
             };
 
-            SymmetricSecurityKey key = 
+            SymmetricSecurityKey key =
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes
                 (_configuration.GetSection("TokenConfiguration:Key").Value!));
 
-            SigningCredentials creds = 
+            SigningCredentials creds =
                 new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor {
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTime.Now.AddDays(30),
                 SigningCredentials = creds
             };
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        private async Task<bool> ExistUser(string email)
+        {
+            if (await _context.ST_USERS.AnyAsync(x => x.Email.ToLower() == email.ToLower()))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private int GetUserId()
+        {
+            return int.Parse(
+            _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        }
+
+        private async Task<bool> VerifyAdmin()
+        {
+            if (await _context.ST_USERS.AnyAsync(x => x.UserType == UserType.ADMIN))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

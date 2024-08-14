@@ -1235,8 +1235,7 @@
         },
         "runtime": {
           "lib/net6.0/System.Composition.TypedParts.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "fileVersion": "0.0.0.0"
           }
         }
       },

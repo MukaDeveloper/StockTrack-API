@@ -8,13 +8,8 @@ namespace StockTrack_API.Models
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-
-        public int InstitutionId { get; set; }
-        [JsonIgnore]
-        public Institution? Institution { get; set; }
-
+        public string Email { get; set; } = string.Empty;
         public UserType UserType { get; set; }
-
         [NotMapped]
         public string PasswordString { get; set; } = string.Empty;
         public byte[]? PasswordHash { get; set; } 
@@ -22,6 +17,11 @@ namespace StockTrack_API.Models
         public string PhotoUrl { get; set; } = string.Empty;
 
         public DateTime? AccessDate { get; set; }
+
+        public int InstitutionId { get; set; }
+        [JsonIgnore]
+        public Institution? Institution { get; set; }
+
         public string Token { get; set; } = string.Empty;
     }
 }

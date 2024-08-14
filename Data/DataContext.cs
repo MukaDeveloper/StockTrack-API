@@ -48,6 +48,7 @@ namespace StockTrack_API.Data
             Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
             user.Id = 1;
             user.Name = "Admin";
+            user.Email = "admin@stocktrack.com";
             user.InstitutionId = 1;
             user.UserType = UserType.USER;
             user.PasswordString = string.Empty;

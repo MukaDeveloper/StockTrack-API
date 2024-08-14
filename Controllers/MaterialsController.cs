@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
@@ -5,6 +6,7 @@ using StockTrack_API.Models;
 
 namespace StockTrack_API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[Controller]")]
     public class MaterialsController : ControllerBase
@@ -31,7 +33,7 @@ namespace StockTrack_API.Controllers
 
                 return Ok(i);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -45,7 +47,7 @@ namespace StockTrack_API.Controllers
                 List<Material> list = await _context.ST_MATERIALS.ToListAsync();
                 return Ok(list);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -61,7 +63,7 @@ namespace StockTrack_API.Controllers
 
                 return Ok(newMaterial);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
