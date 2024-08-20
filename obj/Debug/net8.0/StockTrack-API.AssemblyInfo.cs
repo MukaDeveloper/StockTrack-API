@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StockTrack-API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7a5061269c52e20771f60736ca83e753e95b8017")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e3c3aca5eb8833c3bf7900984bc1443a6f79e5a")]
 [assembly: System.Reflection.AssemblyProductAttribute("StockTrack-API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StockTrack-API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
