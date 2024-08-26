@@ -50,7 +50,7 @@ namespace StockTrack_API.Data
             user.Name = "Admin";
             user.Email = "admin@stocktrack.com";
             user.InstitutionId = 1;
-            user.UserType = UserType.USER;
+            user.UserType = UserType.ADMIN;
             user.PasswordString = string.Empty;
             user.PasswordHash = hash;
             user.PasswordSalt = salt;

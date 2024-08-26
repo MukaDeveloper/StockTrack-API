@@ -9,7 +9,7 @@ namespace StockTrack_API.Models
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public UserType UserType { get; set; }
+        public UserType? UserType { get; set; }
         [NotMapped]
         public string PasswordString { get; set; } = string.Empty;
         public byte[]? PasswordHash { get; set; } 

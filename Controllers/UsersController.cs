@@ -49,17 +49,17 @@ namespace StockTrack_API.Controllers
         [HttpPost("Authenticate")]
         public async Task<IActionResult> AuthenticateAsync(User credentials)
         {
+            if (credentials.Email == null || credentials.PasswordString == null)
+            {
+                return BadRequest("Email e senha são obrigatórios.");
+            }
             try
             {
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(credentials.Email.ToLower()));
 
-                if (user == null)
+                if (user == null || !Cryptography.VerifyPasswordHash(credentials.PasswordString, user.PasswordHash!, user.PasswordSalt!))
                 {
-                    throw new Exception("Usuário não encontrado.");
-                }
-                else if (!Cryptography.VerifyPasswordHash(credentials.PasswordString, user.PasswordHash!, user.PasswordSalt!))
-                {
-                    throw new Exception("Senha incorreta.");
+                    throw new Exception("Usuário ou senha incorreto(s).");
                 }
                 else
                 {
@@ -80,7 +80,7 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        [HttpPost("Registrar")]
+        [HttpPost("Register")]
         public async Task<IActionResult> RegisterAsync(User user)
         {
             try
@@ -108,8 +108,8 @@ namespace StockTrack_API.Controllers
         {
             List<Claim> claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
+                new Claim("id", user.Id.ToString()),
+                new Claim("name", user.Name),
             };
 
             SymmetricSecurityKey key =
