@@ -20,9 +20,11 @@ namespace StockTrack_API.Controllers
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsersController(DataContext context, 
-        IConfiguration configuration, 
-        IHttpContextAccessor httpContextAccessor)
+        public UsersController(
+            DataContext context,
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor
+        )
         {
             _context = context;
             _configuration = configuration;
@@ -34,9 +36,12 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                User user = await _context.ST_USERS
-                   .FirstOrDefaultAsync(x => x.Id == userId);
+                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
 
+                if (user == null)
+                {
+                    throw new Exception("Usuário não encontrado.");
+                }
                 return Ok(user);
             }
             catch (Exception ex)
@@ -49,15 +54,25 @@ namespace StockTrack_API.Controllers
         [HttpPost("Authenticate")]
         public async Task<IActionResult> AuthenticateAsync(User credentials)
         {
-            if (credentials.Email == null || credentials.PasswordString == null)
-            {
-                return BadRequest("Email e senha são obrigatórios.");
-            }
             try
             {
-                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(credentials.Email.ToLower()));
+                if (credentials.Email.IsNullOrEmpty() || credentials.PasswordString.IsNullOrEmpty())
+                {
+                    throw new Exception("Email e senha são obrigatórios.");
+                }
 
-                if (user == null || !Cryptography.VerifyPasswordHash(credentials.PasswordString, user.PasswordHash!, user.PasswordSalt!))
+                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x =>
+                    x.Email.ToLower().Equals(credentials.Email.ToLower())
+                );
+
+                if (
+                    user == null
+                    || !Cryptography.VerifyPasswordHash(
+                        credentials.PasswordString,
+                        user.PasswordHash!,
+                        user.PasswordSalt!
+                    )
+                )
                 {
                     throw new Exception("Usuário ou senha incorreto(s).");
                 }
@@ -85,11 +100,14 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-
                 if (await ExistUser(user.Email))
                     throw new Exception("Usuário já existente.");
 
-                Cryptography.CreatePasswordHash(user.PasswordString, out byte[] hash, out byte[] salt);
+                Cryptography.CreatePasswordHash(
+                    user.PasswordString,
+                    out byte[] hash,
+                    out byte[] salt
+                );
                 user.PasswordString = string.Empty;
                 user.PasswordHash = hash;
                 user.PasswordSalt = salt;
@@ -110,20 +128,24 @@ namespace StockTrack_API.Controllers
             {
                 new Claim("id", user.Id.ToString()),
                 new Claim("name", user.Name),
+                new Claim("institutionId", user.InstitutionId.ToString()),
+                new Claim("photoUrl", user.PhotoUrl),
             };
 
-            SymmetricSecurityKey key =
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes
-                (_configuration.GetSection("TokenConfiguration:Key").Value!));
+            SymmetricSecurityKey key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_configuration.GetSection("TokenConfiguration:Key").Value!)
+            );
 
-            SigningCredentials creds =
-                new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            SigningCredentials creds = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha512Signature
+            );
 
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(30),
-                SigningCredentials = creds
+                SigningCredentials = creds,
             };
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -143,7 +165,8 @@ namespace StockTrack_API.Controllers
         private int GetUserId()
         {
             return int.Parse(
-            _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!
+            );
         }
 
         private async Task<bool> VerifyAdmin()

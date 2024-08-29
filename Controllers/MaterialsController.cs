@@ -39,7 +39,7 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllAsync()
         {
             try
