@@ -31,7 +31,7 @@ namespace StockTrack_API.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        [HttpGet("{userId}")]
+        [HttpGet("get-by-uid/{userId}")]
         public async Task<IActionResult> GetUserByIdAsync(int userId)
         {
             try
@@ -46,19 +46,23 @@ namespace StockTrack_API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
         }
 
         [AllowAnonymous]
-        [HttpPost("Authenticate")]
+        [HttpPost("auth")]
         public async Task<IActionResult> AuthenticateAsync(User credentials)
         {
             try
             {
-                if (credentials.Email.IsNullOrEmpty() || credentials.PasswordString.IsNullOrEmpty())
+                if (
+                    credentials.Email.IsNullOrEmpty()
+                    || credentials.PasswordString.IsNullOrEmpty()
+                    || credentials.InstitutionId <= 0
+                )
                 {
-                    throw new Exception("Email e senha são obrigatórios.");
+                    throw new Exception("Todos os campos são obrigatórios.");
                 }
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x =>
@@ -76,18 +80,19 @@ namespace StockTrack_API.Controllers
                 {
                     throw new Exception("Usuário ou senha incorreto(s).");
                 }
-                else
-                {
-                    user.AccessDate = DateTime.Now;
-                    _context.ST_USERS.Update(user);
-                    await _context.SaveChangesAsync();
 
-                    user.PasswordHash = null;
-                    user.PasswordSalt = null;
-                    user.Token = CreateToken(user);
+                // TODO: Verificar na tabela UserInstitution se o usuário pertence a instituição
 
-                    return Ok(user);
-                }
+                user.AccessDate = DateTime.Now;
+                _context.ST_USERS.Update(user);
+                await _context.SaveChangesAsync();
+
+                user.PasswordHash = null;
+                user.PasswordSalt = null;
+                user.InstitutionId = 1;
+                user.Token = CreateToken(user);
+
+                return Ok(user);
             }
             catch (Exception ex)
             {
@@ -95,7 +100,7 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        [HttpPost("Register")]
+        [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync(User user)
         {
             try
@@ -118,9 +123,10 @@ namespace StockTrack_API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
         }
+
 
         private string CreateToken(User user)
         {
@@ -128,7 +134,7 @@ namespace StockTrack_API.Controllers
             {
                 new Claim("id", user.Id.ToString()),
                 new Claim("name", user.Name),
-                new Claim("institutionId", user.InstitutionId.ToString()),
+                new Claim("email", user.Email),
                 new Claim("photoUrl", user.PhotoUrl),
             };
 
@@ -165,13 +171,13 @@ namespace StockTrack_API.Controllers
         private int GetUserId()
         {
             return int.Parse(
-                _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!
+                _httpContextAccessor.HttpContext?.User.FindFirstValue("id")!
             );
         }
 
-        private async Task<bool> VerifyAdmin()
+        private async Task<bool> VerifySupport()
         {
-            if (await _context.ST_USERS.AnyAsync(x => x.UserType == UserType.ADMIN))
+            if (await _context.ST_USERS.AnyAsync(x => x.UserType == UserType.SUPPORT))
             {
                 return true;
             }

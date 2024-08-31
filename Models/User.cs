@@ -10,18 +10,17 @@ namespace StockTrack_API.Models
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public UserType? UserType { get; set; }
-        [NotMapped]
-        public string PasswordString { get; set; } = string.Empty;
         public byte[]? PasswordHash { get; set; } 
         public byte[]? PasswordSalt { get; set; } 
         public string PhotoUrl { get; set; } = string.Empty;
-
         public DateTime? AccessDate { get; set; }
+        public List<UserInstitution>? UserInstitutions { get; set; }
 
+        [NotMapped]
+        public string PasswordString { get; set; } = string.Empty;
+        [NotMapped]
         public int InstitutionId { get; set; }
-        [JsonIgnore]
-        public Institution? Institution { get; set; }
-
+        [NotMapped]
         public string Token { get; set; } = string.Empty;
     }
 }

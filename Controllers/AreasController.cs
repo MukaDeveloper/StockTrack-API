@@ -9,29 +9,29 @@ namespace StockTrack_API.Controllers
     [Authorize]
     [ApiController]
     [Route("[Controller]")]
-    public class MaterialsController : ControllerBase
+    public class AreasController : ControllerBase
     {
         private readonly DataContext _context;
 
-        public MaterialsController(DataContext context)
+        public AreasController(DataContext context)
         {
             _context = context;
         }
 
-        [HttpGet("get-by-id/{id}")] //Buscar pelo id
+        [HttpGet("get-by-id/{id}")]
         public async Task<IActionResult> GetSingleAsync(int id)
         {
             try
             {
-                Material? material = await _context.ST_MATERIALS
-                    .FirstOrDefaultAsync(iBusca => iBusca.Id == id);
+                Area? area = await _context.ST_AREAS
+                    .FirstOrDefaultAsync(a => a.Id == id);
 
-                if (material == null)
+                if (area == null)
                 {
                     return NotFound();
                 }
 
-                return Ok(material);
+                return Ok(area);
             }
             catch (Exception ex)
             {
@@ -44,7 +44,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                List<Material> list = await _context.ST_MATERIALS.ToListAsync();
+                List<Area> list = await _context.ST_AREAS.ToListAsync();
                 return Ok(list);
             }
             catch (Exception ex)
@@ -54,14 +54,14 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> AddAsync(Material newMaterial)
+        public async Task<IActionResult> AddAsync(Area newArea)
         {
             try
             {
-                await _context.ST_MATERIALS.AddAsync(newMaterial);
+                await _context.ST_AREAS.AddAsync(newArea);
                 await _context.SaveChangesAsync();
 
-                return Ok(newMaterial);
+                return Ok(newArea);
             }
             catch (Exception ex)
             {

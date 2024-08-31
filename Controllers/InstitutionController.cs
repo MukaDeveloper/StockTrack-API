@@ -9,29 +9,32 @@ namespace StockTrack_API.Controllers
     [Authorize]
     [ApiController]
     [Route("[Controller]")]
-    public class MaterialsController : ControllerBase
+    public class InstitutionController : ControllerBase
     {
         private readonly DataContext _context;
 
-        public MaterialsController(DataContext context)
+        public InstitutionController(DataContext context)
         {
             _context = context;
         }
 
-        [HttpGet("get-by-id/{id}")] //Buscar pelo id
+        /*
+        * GET BY ID
+        */
+        [HttpGet("get-by-id/{id}")]
         public async Task<IActionResult> GetSingleAsync(int id)
         {
             try
             {
-                Material? material = await _context.ST_MATERIALS
-                    .FirstOrDefaultAsync(iBusca => iBusca.Id == id);
+                Institution? institution = await _context.ST_INSTITUTIONS
+                    .FirstOrDefaultAsync(a => a.Id == id);
 
-                if (material == null)
+                if (institution == null)
                 {
                     return NotFound();
                 }
 
-                return Ok(material);
+                return Ok(institution);
             }
             catch (Exception ex)
             {
@@ -44,7 +47,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                List<Material> list = await _context.ST_MATERIALS.ToListAsync();
+                List<Institution> list = await _context.ST_INSTITUTIONS.ToListAsync();
                 return Ok(list);
             }
             catch (Exception ex)
@@ -54,20 +57,19 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> AddAsync(Material newMaterial)
+        public async Task<IActionResult> AddAsync(Institution newInstitution)
         {
             try
             {
-                await _context.ST_MATERIALS.AddAsync(newMaterial);
+                await _context.ST_INSTITUTIONS.AddAsync(newInstitution);
                 await _context.SaveChangesAsync();
 
-                return Ok(newMaterial);
+                return Ok(newInstitution);
             }
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message});
             }
         }
-
     }
 }

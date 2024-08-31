@@ -7,10 +7,8 @@ namespace StockTrack_API.Data
 {
     public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options)
-        {
-
-        }
+        public DataContext(DbContextOptions<DataContext> options)
+            : base(options) { }
 
         public DbSet<Area> ST_AREAS { get; set; }
         public DbSet<Institution> ST_INSTITUTIONS { get; set; }
@@ -18,6 +16,7 @@ namespace StockTrack_API.Data
         public DbSet<Movimentation> ST_MOVIMENTATIONS { get; set; }
         public DbSet<User> ST_USERS { get; set; }
         public DbSet<Warehouse> ST_WAREHOUSES { get; set; }
+        public DbSet<UserInstitution> ST_USER_INSTITUTIONS { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,33 +27,53 @@ namespace StockTrack_API.Data
             modelBuilder.Entity<User>().ToTable("ST_USERS");
             modelBuilder.Entity<Warehouse>().ToTable("ST_WAREHOUSES");
 
-            modelBuilder.Entity<Institution>().HasData(
-                new Institution()
-                {
-                    Id = 1,
-                    Name = "Horácio Augusto da Silveira",
-                    Nickname = "ETEC Prof. Horácio",
-                    StreetName = "Rua Alcantara",
-                    StreetNumber = "113",
-                    Complement = "",
-                    Neightboor = "Vila Guilherme",
-                    City = "Sao Paulo",
-                    State = "SP",
-                    CEP = "02110010"
-                }
-            );
+            modelBuilder
+                .Entity<Institution>()
+                .HasData(
+                    new Institution()
+                    {
+                        Id = 1,
+                        Name = "Servidor de testes",
+                        Nickname = "Testes",
+                        StreetName = "Rua Alcantara",
+                        StreetNumber = "113",
+                        Complement = "",
+                        Neightboor = "Vila Guilherme",
+                        City = "Sao Paulo",
+                        State = "SP",
+                        CEP = "02110010",
+                    },
+                    new Institution()
+                    {
+                        Id = 064,
+                        Name = "Horácio Augusto da Silveira",
+                        Nickname = "ETEC Prof. Horácio",
+                        StreetName = "Rua Alcantara",
+                        StreetNumber = "113",
+                        Complement = "",
+                        Neightboor = "Vila Guilherme",
+                        City = "Sao Paulo",
+                        State = "SP",
+                        CEP = "02110010",
+                    }
+                );
 
-            User user = new User();
             Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
-            user.Id = 1;
-            user.Name = "Admin";
-            user.Email = "admin@stocktrack.com";
-            user.InstitutionId = 1;
-            user.UserType = UserType.ADMIN;
-            user.PasswordString = string.Empty;
-            user.PasswordHash = hash;
-            user.PasswordSalt = salt;
-            modelBuilder.Entity<User>().HasData(user);
+            modelBuilder
+                .Entity<User>()
+                .HasData(
+                    new User()
+                    {
+                        Id = 1,
+                        Name = "Admin",
+                        Email = "admin@stocktrack.com",
+                        PhotoUrl = "https://imgur.com/mOXzZLE.png",
+                        UserType = UserType.SUPPORT,
+                        PasswordString = string.Empty,
+                        PasswordHash = hash,
+                        PasswordSalt = salt,
+                    }
+                );
 
             modelBuilder.Entity<User>().Property(u => u.UserType).HasDefaultValue(UserType.USER);
 
@@ -64,26 +83,43 @@ namespace StockTrack_API.Data
             modelBuilder.Entity<Movimentation>().HasKey(m => m.Id);
             modelBuilder.Entity<User>().HasKey(u => u.Id);
             modelBuilder.Entity<Warehouse>().HasKey(w => w.Id);
+            modelBuilder
+                .Entity<UserInstitution>()
+                .HasKey(ui => new { ui.UserId, ui.InstitutionId });
 
-            modelBuilder.Entity<Institution>()
+            modelBuilder
+                .Entity<Institution>()
                 .HasMany(a => a.Areas)
                 .WithOne(a => a.Institution)
                 .HasForeignKey(a => a.InstitutionId);
 
-            modelBuilder.Entity<Area>()
+            modelBuilder
+                .Entity<Area>()
                 .HasMany(w => w.Warehouses)
                 .WithOne(w => w.Area)
                 .HasForeignKey(w => w.AreaId);
 
-            modelBuilder.Entity<Warehouse>()
+            modelBuilder
+                .Entity<Warehouse>()
                 .HasMany(w => w.Materials)
                 .WithOne(w => w.Warehouse)
                 .HasForeignKey(w => w.WarehouseId);
+
+            modelBuilder
+                .Entity<UserInstitution>()
+                .HasOne(ui => ui.User)
+                .WithMany(u => u.UserInstitutions)
+                .HasForeignKey(ui => ui.UserId);
+
+            modelBuilder
+                .Entity<UserInstitution>()
+                .HasOne(ui => ui.Institution)
+                .WithMany(u => u.UserInstitutions)
+                .HasForeignKey(ui => ui.UserId);
         }
 
-        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-        {
-
-        }
+        protected override void ConfigureConventions(
+            ModelConfigurationBuilder configurationBuilder
+        ) { }
     }
 }
