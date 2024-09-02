@@ -32,7 +32,7 @@ namespace StockTrack_API.Data
                 .HasData(
                     new Institution()
                     {
-                        Id = 1,
+                        Id = 00,
                         Name = "Servidor de testes",
                         Nickname = "Testes",
                         StreetName = "Rua Alcantara",

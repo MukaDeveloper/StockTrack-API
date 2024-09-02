@@ -89,7 +89,7 @@ namespace StockTrack_API.Controllers
 
                 user.PasswordHash = null;
                 user.PasswordSalt = null;
-                user.InstitutionId = 1;
+                user.InstitutionId = credentials.InstitutionId;
                 user.Token = CreateToken(user);
 
                 return Ok(user);
@@ -136,6 +136,7 @@ namespace StockTrack_API.Controllers
                 new Claim("name", user.Name),
                 new Claim("email", user.Email),
                 new Claim("photoUrl", user.PhotoUrl),
+                new Claim("institutionId", user.InstitutionId.ToString()),
             };
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,15 @@ namespace StockTrack_API.Controllers
     public class AreasController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AreasController(DataContext context)
+        public AreasController(
+            DataContext context,
+IHttpContextAccessor httpContextAccessor
+        )
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet("get-by-id/{id}")]
@@ -35,7 +41,7 @@ namespace StockTrack_API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message});
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -44,12 +50,20 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                List<Area> list = await _context.ST_AREAS.ToListAsync();
+                int institutionId = int.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId")!);
+
+                if (institutionId == 0) {
+                    throw new Exception("Identificação da instituição não localizada.");
+                }
+
+                List<Area> list = await _context.ST_AREAS
+                .Where(area => area.InstitutionId == institutionId)
+                .ToListAsync();
                 return Ok(list);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message});
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -65,7 +79,7 @@ namespace StockTrack_API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message});
+                return BadRequest(new { message = ex.Message });
             }
         }
 
