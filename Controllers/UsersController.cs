@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
-using StockTrack_API.Models;
+using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Enums;
 using StockTrack_API.Utils;
 
@@ -56,10 +56,12 @@ namespace StockTrack_API.Controllers
         {
             try
             {
+                int? institutionId = credentials.InstitutionId;
+
                 if (
                     credentials.Email.IsNullOrEmpty()
                     || credentials.PasswordString.IsNullOrEmpty()
-                    || credentials.InstitutionId <= 0
+                    || (institutionId.HasValue && institutionId.Value > 0)
                 )
                 {
                     throw new Exception("Todos os campos são obrigatórios.");
@@ -81,7 +83,15 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Usuário ou senha incorreto(s).");
                 }
 
-                // TODO: Verificar na tabela UserInstitution se o usuário pertence a instituição
+                bool hasInstitution = await _context.ST_USER_INSTITUTIONS.AnyAsync(ui =>
+                    ui.UserId == user.Id &&
+                    ui.InstitutionId == institutionId
+                );
+
+                if (!hasInstitution)
+                {
+                    throw new Exception("Usuário não pertence à instituição especificada.");
+                }
 
                 user.AccessDate = DateTime.Now;
                 _context.ST_USERS.Update(user);
@@ -89,7 +99,7 @@ namespace StockTrack_API.Controllers
 
                 user.PasswordHash = null;
                 user.PasswordSalt = null;
-                user.InstitutionId = credentials.InstitutionId;
+                user.InstitutionId = institutionId ?? credentials.InstitutionId;
                 user.Token = CreateToken(user);
 
                 return Ok(user);

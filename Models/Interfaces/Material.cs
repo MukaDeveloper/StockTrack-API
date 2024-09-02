@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using StockTrack_API.Models.Enums;
 
-namespace StockTrack_API.Models
+namespace StockTrack_API.Models.Interfaces
 {
     public class Material
     {

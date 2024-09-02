@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using StockTrack_API.Models;
+using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Enums;
 using StockTrack_API.Utils;
 
@@ -32,7 +32,7 @@ namespace StockTrack_API.Data
                 .HasData(
                     new Institution()
                     {
-                        Id = 00,
+                        Id = 001,
                         Name = "Servidor de testes",
                         Nickname = "Testes",
                         StreetName = "Rua Alcantara",
@@ -74,6 +74,12 @@ namespace StockTrack_API.Data
                         PasswordSalt = salt,
                     }
                 );
+            modelBuilder.Entity<UserInstitution>().HasData(
+                new UserInstitution() {
+                    UserId = 1,
+                    InstitutionId = 001
+                }
+            );
 
             modelBuilder.Entity<User>().Property(u => u.UserType).HasDefaultValue(UserType.USER);
 

@@ -2,7 +2,7 @@ using StockTrack_API.Models.Enums;
 using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace StockTrack_API.Models
+namespace StockTrack_API.Models.Interfaces
 {
     public class User
     {
@@ -14,6 +14,8 @@ namespace StockTrack_API.Models
         public byte[]? PasswordSalt { get; set; } 
         public string PhotoUrl { get; set; } = string.Empty;
         public DateTime? AccessDate { get; set; }
+
+        [JsonIgnore]
         public List<UserInstitution>? UserInstitutions { get; set; }
 
         [NotMapped]

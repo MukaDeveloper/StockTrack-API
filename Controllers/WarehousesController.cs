@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
-using StockTrack_API.Models;
+using StockTrack_API.Models.Interfaces;
 
 namespace StockTrack_API.Controllers
 {

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace StockTrack_API.Models
+namespace StockTrack_API.Models.Interfaces
 {
     public class Warehouse
     {
