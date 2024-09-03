@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,33 +13,40 @@ namespace StockTrack_API.Controllers
     public class InstitutionController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public InstitutionController(DataContext context)
+        public InstitutionController(
+            DataContext context,
+            IHttpContextAccessor httpContextAccessor
+        )
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         /*
         * GET BY ID
         */
-        [HttpGet("get-by-id/{id}")]
-        public async Task<IActionResult> GetSingleAsync(int id)
+        [HttpGet("get-current")]
+        public async Task<IActionResult> GetSingleAsync()
         {
             try
             {
+                int institutionId = int.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"));
+
                 Institution? institution = await _context.ST_INSTITUTIONS
-                    .FirstOrDefaultAsync(a => a.Id == id);
+                    .FirstOrDefaultAsync(a => a.Id == institutionId);
 
                 if (institution == null)
                 {
                     return NotFound();
                 }
 
-                return Ok(institution);
+                return Ok(EnvelopeFactory.factoryEnvelope(institution));
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message});
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -52,7 +60,7 @@ namespace StockTrack_API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message});
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -68,7 +76,7 @@ namespace StockTrack_API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message});
+                return BadRequest(new { message = ex.Message });
             }
         }
     }

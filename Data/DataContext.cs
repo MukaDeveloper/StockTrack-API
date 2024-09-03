@@ -78,6 +78,10 @@ namespace StockTrack_API.Data
                 new UserInstitution() {
                     UserId = 1,
                     InstitutionId = 001
+                },
+                new UserInstitution() {
+                    UserId = 1,
+                    InstitutionId = 064
                 }
             );
 

@@ -9,6 +9,7 @@ using StockTrack_API.Data;
 using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Enums;
 using StockTrack_API.Utils;
+using StockTrack_API.Models.Request.User;
 
 namespace StockTrack_API.Controllers
 {
@@ -52,7 +53,7 @@ namespace StockTrack_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("auth")]
-        public async Task<IActionResult> AuthenticateAsync(User credentials)
+        public async Task<IActionResult> AuthenticateAsync(AuthReq credentials)
         {
             try
             {
@@ -61,7 +62,7 @@ namespace StockTrack_API.Controllers
                 if (
                     credentials.Email.IsNullOrEmpty()
                     || credentials.PasswordString.IsNullOrEmpty()
-                    || (institutionId.HasValue && institutionId.Value > 0)
+                    || (!institutionId.HasValue && institutionId.Value <= 0)
                 )
                 {
                     throw new Exception("Todos os campos são obrigatórios.");
@@ -100,9 +101,9 @@ namespace StockTrack_API.Controllers
                 user.PasswordHash = null;
                 user.PasswordSalt = null;
                 user.InstitutionId = institutionId ?? credentials.InstitutionId;
-                user.Token = CreateToken(user);
+                string Token = CreateToken(user);
 
-                return Ok(user);
+                return Ok(EnvelopeFactory.factoryEnvelope(Token));
             }
             catch (Exception ex)
             {

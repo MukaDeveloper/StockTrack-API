@@ -1,3 +1,23 @@
 {
-    "dotnet.defaultSolution": "StockTrack-API.sln"
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#690B23",
+    "activityBar.activeBorder": "#ee90bb",
+    "activityBar.background": "#690B23",
+    "activityBar.foreground": "#FFF",
+    "activityBar.inactiveForeground": "#FFF",
+    "activityBarBadge.background": "#00bfbf",
+    "activityBarBadge.foreground": "#FFF",
+    "sash.hoverBorder": "#690B23",
+    "statusBar.background": "#7A263B",
+    "statusBar.foreground": "#FFF",
+    "statusBarItem.hoverBackground": "#3A0614",
+    "statusBarItem.remoteBackground": "#7A263B",
+    "statusBarItem.remoteForeground": "#FFF",
+    "titleBar.activeBackground": "#7A263B",
+    "titleBar.activeForeground": "#FFF",
+    "titleBar.inactiveBackground": "#FFF",
+    "titleBar.inactiveForeground": "#FFF",
+    "commandCenter.border": "#FFF"
+  },
+  "dotnet.defaultSolution": "StockTrack-API.sln"
 }

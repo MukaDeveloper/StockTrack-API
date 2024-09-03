@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StockTrack_API.Models.Request.User
 {
-    public class Auth
+    public class AuthReq
     {
         public string Email { get; set; } = string.Empty;
         [NotMapped]
