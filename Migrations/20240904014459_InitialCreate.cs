@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace StockTrack_API.Migrations
 {
     /// <inheritdoc />
-    public partial class AuthCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -45,6 +47,25 @@ namespace StockTrack_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ST_USERS",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserType = table.Column<int>(type: "int", nullable: true, defaultValue: 1),
+                    PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccessDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ST_USERS", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ST_AREAS",
                 columns: table => new
                 {
@@ -66,28 +87,25 @@ namespace StockTrack_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ST_USERS",
+                name: "ST_USER_INSTITUTIONS",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserType = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccessDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    InstitutionId = table.Column<int>(type: "int", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    InstitutionId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ST_USERS", x => x.Id);
+                    table.PrimaryKey("PK_ST_USER_INSTITUTIONS", x => new { x.UserId, x.InstitutionId });
                     table.ForeignKey(
-                        name: "FK_ST_USERS_ST_INSTITUTIONS_InstitutionId",
-                        column: x => x.InstitutionId,
+                        name: "FK_ST_USER_INSTITUTIONS_ST_INSTITUTIONS_UserId",
+                        column: x => x.UserId,
                         principalTable: "ST_INSTITUTIONS",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ST_USER_INSTITUTIONS_ST_USERS_UserId",
+                        column: x => x.UserId,
+                        principalTable: "ST_USERS",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -141,12 +159,40 @@ namespace StockTrack_API.Migrations
             migrationBuilder.InsertData(
                 table: "ST_INSTITUTIONS",
                 columns: new[] { "Id", "CEP", "City", "Complement", "Name", "Neightboor", "Nickname", "State", "StreetName", "StreetNumber" },
-                values: new object[] { 1, "02110010", "Sao Paulo", "", "Horácio Augusto da Silveira", "Vila Guilherme", "ETEC Prof. Horácio", "SP", "Rua Alcantara", "113" });
+                values: new object[,]
+                {
+                    { 1, "02110010", "Sao Paulo", "", "Servidor de testes", "Vila Guilherme", "Testes", "SP", "Rua Alcantara", "113" },
+                    { 64, "02110010", "Sao Paulo", "", "Horácio Augusto da Silveira", "Vila Guilherme", "ETEC Prof. Horácio", "SP", "Rua Alcantara", "113" }
+                });
 
             migrationBuilder.InsertData(
                 table: "ST_USERS",
-                columns: new[] { "Id", "AccessDate", "Email", "InstitutionId", "Name", "PasswordHash", "PasswordSalt", "PhotoUrl", "Token", "UserType" },
-                values: new object[] { 1, null, "admin@stocktrack.com", 1, "Admin", new byte[] { 34, 35, 199, 89, 240, 163, 116, 55, 67, 203, 123, 95, 236, 2, 169, 69, 234, 181, 244, 36, 105, 78, 254, 156, 33, 185, 159, 10, 188, 53, 34, 68, 70, 162, 238, 211, 187, 31, 102, 43, 65, 100, 104, 56, 108, 41, 228, 247, 177, 158, 142, 171, 105, 223, 232, 244, 252, 33, 165, 232, 100, 87, 118, 232 }, new byte[] { 239, 181, 65, 145, 113, 59, 94, 249, 1, 63, 148, 65, 196, 132, 8, 0, 115, 62, 205, 253, 156, 87, 242, 31, 160, 60, 76, 93, 231, 242, 122, 56, 178, 81, 20, 91, 40, 160, 38, 145, 173, 75, 140, 113, 56, 186, 34, 255, 221, 39, 177, 146, 163, 34, 210, 254, 43, 72, 100, 106, 140, 187, 254, 95, 204, 57, 133, 157, 192, 150, 202, 101, 246, 252, 67, 251, 159, 95, 240, 192, 104, 30, 20, 181, 2, 189, 16, 205, 240, 49, 113, 173, 234, 44, 20, 109, 124, 97, 10, 88, 101, 15, 42, 108, 98, 226, 151, 76, 189, 90, 199, 182, 155, 196, 91, 151, 74, 88, 16, 5, 13, 188, 229, 136, 180, 81, 18, 5 }, "", "", 1 });
+                columns: new[] { "Id", "AccessDate", "Email", "Name", "PasswordHash", "PasswordSalt", "PhotoUrl", "UserType" },
+                values: new object[] { 1, null, "admin@stocktrack.com", "Admin", new byte[] { 227, 137, 245, 69, 184, 199, 106, 151, 92, 104, 223, 131, 41, 39, 77, 217, 62, 236, 48, 63, 190, 248, 196, 65, 77, 151, 169, 213, 41, 58, 214, 170, 170, 94, 155, 190, 63, 30, 173, 214, 171, 128, 74, 47, 129, 220, 194, 84, 222, 246, 164, 193, 220, 162, 8, 231, 63, 54, 118, 48, 11, 104, 3, 58 }, new byte[] { 252, 223, 167, 168, 229, 240, 149, 235, 49, 90, 99, 27, 15, 253, 200, 219, 252, 192, 213, 220, 223, 69, 189, 83, 243, 103, 81, 154, 44, 110, 162, 241, 50, 174, 9, 17, 138, 24, 6, 37, 169, 136, 202, 109, 244, 137, 170, 195, 15, 60, 236, 56, 198, 183, 21, 38, 85, 191, 171, 23, 115, 21, 194, 255, 217, 249, 142, 26, 197, 224, 249, 125, 181, 9, 251, 231, 90, 48, 157, 227, 19, 82, 231, 9, 199, 130, 147, 144, 251, 135, 28, 159, 191, 9, 77, 179, 21, 130, 83, 73, 15, 24, 108, 194, 152, 238, 242, 68, 149, 90, 19, 202, 93, 27, 118, 134, 72, 158, 117, 226, 93, 69, 246, 103, 226, 215, 0, 195 }, "https://imgur.com/mOXzZLE.png", 4 });
+
+            migrationBuilder.InsertData(
+                table: "ST_AREAS",
+                columns: new[] { "Id", "Description", "InstitutionId", "Name" },
+                values: new object[] { 1, "Área de Testes", 1, "Teste" });
+
+            migrationBuilder.InsertData(
+                table: "ST_USER_INSTITUTIONS",
+                columns: new[] { "InstitutionId", "UserId" },
+                values: new object[,]
+                {
+                    { 1, 1 },
+                    { 64, 1 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ST_WAREHOUSES",
+                columns: new[] { "Id", "AreaId", "Description", "Name" },
+                values: new object[] { 1, 1, "Almoxarifado de informática", "Informática" });
+
+            migrationBuilder.InsertData(
+                table: "ST_MATERIALS",
+                columns: new[] { "Id", "Description", "ImageURL", "Manufacturer", "MaterialType", "Name", "RecordNumber", "WarehouseId" },
+                values: new object[] { 1, "Notebook ThinkPad", "", "ThinkPad", 0, "Notebook", 123456, 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ST_AREAS_InstitutionId",
@@ -157,11 +203,6 @@ namespace StockTrack_API.Migrations
                 name: "IX_ST_MATERIALS_WarehouseId",
                 table: "ST_MATERIALS",
                 column: "WarehouseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ST_USERS_InstitutionId",
-                table: "ST_USERS",
-                column: "InstitutionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ST_WAREHOUSES_AreaId",
@@ -179,10 +220,13 @@ namespace StockTrack_API.Migrations
                 name: "ST_MOVIMENTATIONS");
 
             migrationBuilder.DropTable(
-                name: "ST_USERS");
+                name: "ST_USER_INSTITUTIONS");
 
             migrationBuilder.DropTable(
                 name: "ST_WAREHOUSES");
+
+            migrationBuilder.DropTable(
+                name: "ST_USERS");
 
             migrationBuilder.DropTable(
                 name: "ST_AREAS");

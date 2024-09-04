@@ -14,7 +14,6 @@ namespace StockTrack_API.Models.Interfaces
         public MaterialType MaterialType { get; set; }
 
         public int WarehouseId { get; set; }
-
         [JsonIgnore]
         public Warehouse? Warehouse { get; set; }
 

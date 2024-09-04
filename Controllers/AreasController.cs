@@ -17,7 +17,7 @@ namespace StockTrack_API.Controllers
 
         public AreasController(
             DataContext context,
-IHttpContextAccessor httpContextAccessor
+            IHttpContextAccessor httpContextAccessor
         )
         {
             _context = context;

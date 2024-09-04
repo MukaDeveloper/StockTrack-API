@@ -46,6 +46,15 @@ namespace StockTrack_API.Migrations
                     b.HasIndex("InstitutionId");
 
                     b.ToTable("ST_AREAS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Área de Testes",
+                            InstitutionId = 1,
+                            Name = "Teste"
+                        });
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Institution", b =>
@@ -163,6 +172,19 @@ namespace StockTrack_API.Migrations
                     b.HasIndex("WarehouseId");
 
                     b.ToTable("ST_MATERIALS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Notebook ThinkPad",
+                            ImageURL = "",
+                            Manufacturer = "ThinkPad",
+                            MaterialType = 0,
+                            Name = "Notebook",
+                            RecordNumber = 123456,
+                            WarehouseId = 1
+                        });
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Movimentation", b =>
@@ -222,8 +244,8 @@ namespace StockTrack_API.Migrations
                             Id = 1,
                             Email = "admin@stocktrack.com",
                             Name = "Admin",
-                            PasswordHash = new byte[] { 12, 255, 16, 57, 22, 148, 72, 242, 178, 179, 181, 193, 163, 112, 10, 97, 245, 23, 29, 5, 250, 15, 169, 27, 219, 103, 142, 20, 40, 231, 171, 222, 183, 39, 186, 162, 157, 67, 157, 187, 43, 100, 116, 238, 132, 187, 162, 170, 188, 136, 150, 238, 36, 132, 78, 133, 243, 25, 136, 26, 101, 213, 173, 204 },
-                            PasswordSalt = new byte[] { 241, 234, 227, 162, 226, 150, 78, 46, 77, 230, 241, 189, 70, 184, 244, 191, 183, 252, 211, 126, 2, 41, 213, 79, 185, 162, 66, 205, 72, 202, 87, 100, 189, 87, 226, 60, 248, 90, 116, 244, 6, 212, 210, 106, 1, 61, 148, 101, 252, 55, 206, 45, 56, 176, 10, 92, 63, 36, 207, 186, 195, 34, 204, 160, 56, 243, 11, 222, 246, 59, 41, 191, 113, 47, 238, 71, 127, 156, 13, 189, 97, 66, 135, 219, 176, 223, 193, 224, 117, 30, 162, 200, 168, 108, 27, 252, 243, 157, 77, 112, 175, 253, 215, 145, 196, 67, 170, 38, 97, 99, 10, 165, 125, 172, 54, 167, 92, 171, 60, 113, 99, 246, 133, 65, 177, 43, 203, 104 },
+                            PasswordHash = new byte[] { 227, 137, 245, 69, 184, 199, 106, 151, 92, 104, 223, 131, 41, 39, 77, 217, 62, 236, 48, 63, 190, 248, 196, 65, 77, 151, 169, 213, 41, 58, 214, 170, 170, 94, 155, 190, 63, 30, 173, 214, 171, 128, 74, 47, 129, 220, 194, 84, 222, 246, 164, 193, 220, 162, 8, 231, 63, 54, 118, 48, 11, 104, 3, 58 },
+                            PasswordSalt = new byte[] { 252, 223, 167, 168, 229, 240, 149, 235, 49, 90, 99, 27, 15, 253, 200, 219, 252, 192, 213, 220, 223, 69, 189, 83, 243, 103, 81, 154, 44, 110, 162, 241, 50, 174, 9, 17, 138, 24, 6, 37, 169, 136, 202, 109, 244, 137, 170, 195, 15, 60, 236, 56, 198, 183, 21, 38, 85, 191, 171, 23, 115, 21, 194, 255, 217, 249, 142, 26, 197, 224, 249, 125, 181, 9, 251, 231, 90, 48, 157, 227, 19, 82, 231, 9, 199, 130, 147, 144, 251, 135, 28, 159, 191, 9, 77, 179, 21, 130, 83, 73, 15, 24, 108, 194, 152, 238, 242, 68, 149, 90, 19, 202, 93, 27, 118, 134, 72, 158, 117, 226, 93, 69, 246, 103, 226, 215, 0, 195 },
                             PhotoUrl = "https://imgur.com/mOXzZLE.png",
                             UserType = 4
                         });
@@ -278,6 +300,15 @@ namespace StockTrack_API.Migrations
                     b.HasIndex("AreaId");
 
                     b.ToTable("ST_WAREHOUSES", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AreaId = 1,
+                            Description = "Almoxarifado de informática",
+                            Name = "Informática"
+                        });
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Area", b =>

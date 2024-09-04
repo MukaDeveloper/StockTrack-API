@@ -27,6 +27,57 @@ namespace StockTrack_API.Data
             modelBuilder.Entity<User>().ToTable("ST_USERS");
             modelBuilder.Entity<Warehouse>().ToTable("ST_WAREHOUSES");
 
+            modelBuilder.Entity<User>().Property(u => u.UserType).HasDefaultValue(UserType.USER);
+
+            modelBuilder
+                .Entity<UserInstitution>()
+                .HasKey(ui => new { ui.UserId, ui.InstitutionId });
+
+            modelBuilder
+                .Entity<UserInstitution>()
+                .HasOne(ui => ui.User)
+                .WithMany(u => u.UserInstitutions)
+                .HasForeignKey(ui => ui.UserId);
+
+            modelBuilder
+                .Entity<UserInstitution>()
+                .HasOne(ui => ui.Institution)
+                .WithMany(u => u.UserInstitutions)
+                .HasForeignKey(ui => ui.UserId);
+
+            modelBuilder.Entity<Area>()
+                .HasOne(a => a.Institution)
+                .WithMany(i => i.Areas)
+                .HasForeignKey(a => a.InstitutionId);
+
+            modelBuilder.Entity<Warehouse>()
+                .HasOne(a => a.Area)
+                .WithMany(w => w.Warehouses)
+                .HasForeignKey(w => w.AreaId);
+
+            modelBuilder.Entity<Material>()
+                .HasOne(a => a.Warehouse)
+                .WithMany(m => m.Materials)
+                .HasForeignKey(w => w.WarehouseId);
+
+
+            Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
+            modelBuilder
+                .Entity<User>()
+                .HasData(
+                    new User()
+                    {
+                        Id = 1,
+                        Name = "Admin",
+                        Email = "admin@stocktrack.com",
+                        PhotoUrl = "https://imgur.com/mOXzZLE.png",
+                        UserType = UserType.SUPPORT,
+                        PasswordString = string.Empty,
+                        PasswordHash = hash,
+                        PasswordSalt = salt,
+                    }
+                );
+
             modelBuilder
                 .Entity<Institution>()
                 .HasData(
@@ -58,78 +109,55 @@ namespace StockTrack_API.Data
                     }
                 );
 
-            Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
-            modelBuilder
-                .Entity<User>()
-                .HasData(
-                    new User()
-                    {
-                        Id = 1,
-                        Name = "Admin",
-                        Email = "admin@stocktrack.com",
-                        PhotoUrl = "https://imgur.com/mOXzZLE.png",
-                        UserType = UserType.SUPPORT,
-                        PasswordString = string.Empty,
-                        PasswordHash = hash,
-                        PasswordSalt = salt,
-                    }
-                );
             modelBuilder.Entity<UserInstitution>().HasData(
-                new UserInstitution() {
+                new UserInstitution()
+                {
                     UserId = 1,
                     InstitutionId = 001
                 },
-                new UserInstitution() {
+                new UserInstitution()
+                {
                     UserId = 1,
                     InstitutionId = 064
                 }
             );
 
-            modelBuilder.Entity<User>().Property(u => u.UserType).HasDefaultValue(UserType.USER);
+            modelBuilder.Entity<Area>().HasData(
+                new Area()
+                {
+                    Id = 1,
+                    Name = "Teste",
+                    Description = "Área de Testes",
+                    InstitutionId = 001
+                }
+            );
 
-            modelBuilder.Entity<Area>().HasKey(a => a.Id);
-            modelBuilder.Entity<Institution>().HasKey(i => i.Id);
-            modelBuilder.Entity<Material>().HasKey(m => m.Id);
-            modelBuilder.Entity<Movimentation>().HasKey(m => m.Id);
-            modelBuilder.Entity<User>().HasKey(u => u.Id);
-            modelBuilder.Entity<Warehouse>().HasKey(w => w.Id);
-            modelBuilder
-                .Entity<UserInstitution>()
-                .HasKey(ui => new { ui.UserId, ui.InstitutionId });
+            modelBuilder.Entity<Warehouse>().HasData(
+                new Warehouse()
+                {
+                    Id = 1,
+                    Name = "Informática",
+                    Description = "Almoxarifado de informática",
+                    AreaId = 1,
+                }
+            );
 
-            modelBuilder
-                .Entity<Institution>()
-                .HasMany(a => a.Areas)
-                .WithOne(a => a.Institution)
-                .HasForeignKey(a => a.InstitutionId);
-
-            modelBuilder
-                .Entity<Area>()
-                .HasMany(w => w.Warehouses)
-                .WithOne(w => w.Area)
-                .HasForeignKey(w => w.AreaId);
-
-            modelBuilder
-                .Entity<Warehouse>()
-                .HasMany(w => w.Materials)
-                .WithOne(w => w.Warehouse)
-                .HasForeignKey(w => w.WarehouseId);
-
-            modelBuilder
-                .Entity<UserInstitution>()
-                .HasOne(ui => ui.User)
-                .WithMany(u => u.UserInstitutions)
-                .HasForeignKey(ui => ui.UserId);
-
-            modelBuilder
-                .Entity<UserInstitution>()
-                .HasOne(ui => ui.Institution)
-                .WithMany(u => u.UserInstitutions)
-                .HasForeignKey(ui => ui.UserId);
+            modelBuilder.Entity<Material>().HasData(
+                new Material() 
+                {
+                    Id = 1,
+                    Name = "Notebook",
+                    Description = "Notebook ThinkPad",
+                    Manufacturer = "ThinkPad",
+                    RecordNumber = 123456,
+                    WarehouseId = 1,
+                }
+            );
         }
 
         protected override void ConfigureConventions(
             ModelConfigurationBuilder configurationBuilder
-        ) { }
+        )
+        { }
     }
 }

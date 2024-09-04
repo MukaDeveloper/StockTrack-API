@@ -12,8 +12,8 @@ using StockTrack_API.Data;
 namespace StockTrack_API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240902234421_UserInstitution")]
-    partial class UserInstitution
+    [Migration("20240904014459_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,15 @@ namespace StockTrack_API.Migrations
                     b.HasIndex("InstitutionId");
 
                     b.ToTable("ST_AREAS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Área de Testes",
+                            InstitutionId = 1,
+                            Name = "Teste"
+                        });
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Institution", b =>
@@ -166,6 +175,19 @@ namespace StockTrack_API.Migrations
                     b.HasIndex("WarehouseId");
 
                     b.ToTable("ST_MATERIALS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Notebook ThinkPad",
+                            ImageURL = "",
+                            Manufacturer = "ThinkPad",
+                            MaterialType = 0,
+                            Name = "Notebook",
+                            RecordNumber = 123456,
+                            WarehouseId = 1
+                        });
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Movimentation", b =>
@@ -225,8 +247,8 @@ namespace StockTrack_API.Migrations
                             Id = 1,
                             Email = "admin@stocktrack.com",
                             Name = "Admin",
-                            PasswordHash = new byte[] { 24, 228, 244, 52, 129, 184, 199, 138, 204, 157, 180, 245, 194, 156, 181, 226, 56, 181, 202, 46, 83, 107, 231, 80, 173, 170, 246, 179, 185, 11, 218, 32, 10, 54, 50, 66, 130, 215, 54, 230, 18, 118, 126, 10, 117, 66, 30, 10, 62, 222, 214, 96, 167, 33, 163, 192, 12, 22, 167, 6, 208, 63, 42, 0 },
-                            PasswordSalt = new byte[] { 170, 76, 43, 217, 88, 165, 138, 27, 193, 156, 114, 200, 203, 207, 52, 239, 93, 7, 199, 131, 61, 225, 201, 206, 84, 92, 58, 82, 82, 239, 47, 86, 16, 150, 43, 220, 151, 127, 83, 95, 48, 17, 6, 245, 78, 231, 245, 163, 92, 34, 13, 2, 216, 71, 35, 39, 200, 230, 152, 234, 67, 12, 187, 205, 89, 156, 163, 36, 133, 105, 1, 201, 114, 29, 56, 41, 72, 66, 71, 81, 219, 43, 108, 193, 96, 122, 139, 117, 89, 52, 173, 143, 10, 225, 200, 30, 187, 225, 48, 212, 227, 120, 189, 32, 122, 44, 151, 147, 141, 138, 171, 127, 200, 23, 57, 11, 196, 232, 214, 119, 149, 238, 45, 107, 252, 151, 20, 153 },
+                            PasswordHash = new byte[] { 227, 137, 245, 69, 184, 199, 106, 151, 92, 104, 223, 131, 41, 39, 77, 217, 62, 236, 48, 63, 190, 248, 196, 65, 77, 151, 169, 213, 41, 58, 214, 170, 170, 94, 155, 190, 63, 30, 173, 214, 171, 128, 74, 47, 129, 220, 194, 84, 222, 246, 164, 193, 220, 162, 8, 231, 63, 54, 118, 48, 11, 104, 3, 58 },
+                            PasswordSalt = new byte[] { 252, 223, 167, 168, 229, 240, 149, 235, 49, 90, 99, 27, 15, 253, 200, 219, 252, 192, 213, 220, 223, 69, 189, 83, 243, 103, 81, 154, 44, 110, 162, 241, 50, 174, 9, 17, 138, 24, 6, 37, 169, 136, 202, 109, 244, 137, 170, 195, 15, 60, 236, 56, 198, 183, 21, 38, 85, 191, 171, 23, 115, 21, 194, 255, 217, 249, 142, 26, 197, 224, 249, 125, 181, 9, 251, 231, 90, 48, 157, 227, 19, 82, 231, 9, 199, 130, 147, 144, 251, 135, 28, 159, 191, 9, 77, 179, 21, 130, 83, 73, 15, 24, 108, 194, 152, 238, 242, 68, 149, 90, 19, 202, 93, 27, 118, 134, 72, 158, 117, 226, 93, 69, 246, 103, 226, 215, 0, 195 },
                             PhotoUrl = "https://imgur.com/mOXzZLE.png",
                             UserType = 4
                         });
@@ -249,6 +271,11 @@ namespace StockTrack_API.Migrations
                         {
                             UserId = 1,
                             InstitutionId = 1
+                        },
+                        new
+                        {
+                            UserId = 1,
+                            InstitutionId = 64
                         });
                 });
 
@@ -276,6 +303,15 @@ namespace StockTrack_API.Migrations
                     b.HasIndex("AreaId");
 
                     b.ToTable("ST_WAREHOUSES", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AreaId = 1,
+                            Description = "Almoxarifado de informática",
+                            Name = "Informática"
+                        });
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Area", b =>
