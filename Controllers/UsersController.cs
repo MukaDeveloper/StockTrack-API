@@ -43,7 +43,7 @@ namespace StockTrack_API.Controllers
                 {
                     throw new Exception("Usuário não encontrado.");
                 }
-                return Ok(user);
+                return Ok(EnvelopeFactory.factoryEnvelope(user));
             }
             catch (Exception ex)
             {
@@ -130,7 +130,7 @@ namespace StockTrack_API.Controllers
                 await _context.ST_USERS.AddAsync(user);
                 await _context.SaveChangesAsync();
 
-                return Ok(user.Id);
+                return Ok(EnvelopeFactory.factoryEnvelope(user.Id));
             }
             catch (Exception ex)
             {
@@ -187,13 +187,12 @@ namespace StockTrack_API.Controllers
             );
         }
 
-        private async Task<bool> VerifySupport()
+        public async Task<UserInstitution?> GetUserInstitutionAsync(int userId, int institutionId)
         {
-            if (await _context.ST_USERS.AnyAsync(x => x.UserType == UserType.SUPPORT))
-            {
-                return true;
-            }
-            return false;
+            UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
+                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+
+            return userInstitution;
         }
     }
 }

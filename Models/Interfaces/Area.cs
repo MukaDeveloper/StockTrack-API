@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace StockTrack_API.Models.Interfaces
 {
-    public class Area
+    public class Area : BaseModel
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

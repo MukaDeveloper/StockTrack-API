@@ -3,7 +3,7 @@ using StockTrack_API.Models.Enums;
 
 namespace StockTrack_API.Models.Interfaces
 {
-    public class Material
+    public class Material : BaseModel
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

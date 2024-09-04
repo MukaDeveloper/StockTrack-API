@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
+using StockTrack_API.Models.Enums;
 using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Models.Request.Area;
 
 namespace StockTrack_API.Controllers
 {
@@ -50,16 +52,18 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = int.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId")!);
+                string contextAcessor = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+                int? institutionId = int.Parse(contextAcessor);
 
-                if (institutionId == 0) {
+                if (!institutionId.HasValue)
+                {
                     throw new Exception("Identificação da instituição não localizada.");
                 }
 
                 List<Area> list = await _context.ST_AREAS
                 .Where(area => area.InstitutionId == institutionId)
                 .ToListAsync();
-                return Ok(list);
+                return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
             catch (Exception ex)
             {
@@ -67,11 +71,38 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        [HttpPost("create")]
-        public async Task<IActionResult> AddAsync(Area newArea)
+        [HttpPost("add-new")]
+        public async Task<IActionResult> AddAsync(AddNewReq data)
         {
             try
             {
+                int userId = int.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue("id"));
+                int institutionId = int.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"));
+
+                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
+                UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
+                                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+
+                if (user == null || userInstitution == null)
+                {
+                    throw new Exception("Usuário não encontrado");
+                }
+
+                if (userInstitution.UserType == UserType.USER)
+                {
+                    throw new Exception("Sem autorização.");
+                }
+
+                Area newArea = new Area
+                {
+                    Active = true,
+                    Name = data.Name,
+                    Description = data.Description,
+                    InstitutionId = data.InstitutionId,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = user.Name
+                };
+
                 await _context.ST_AREAS.AddAsync(newArea);
                 await _context.SaveChangesAsync();
 

@@ -27,8 +27,6 @@ namespace StockTrack_API.Data
             modelBuilder.Entity<User>().ToTable("ST_USERS");
             modelBuilder.Entity<Warehouse>().ToTable("ST_WAREHOUSES");
 
-            modelBuilder.Entity<User>().Property(u => u.UserType).HasDefaultValue(UserType.USER);
-
             modelBuilder
                 .Entity<UserInstitution>()
                 .HasKey(ui => new { ui.UserId, ui.InstitutionId });
@@ -67,11 +65,11 @@ namespace StockTrack_API.Data
                 .HasData(
                     new User()
                     {
+                        Active = true,
                         Id = 1,
                         Name = "Admin",
                         Email = "admin@stocktrack.com",
                         PhotoUrl = "https://imgur.com/mOXzZLE.png",
-                        UserType = UserType.SUPPORT,
                         PasswordString = string.Empty,
                         PasswordHash = hash,
                         PasswordSalt = salt,
@@ -113,18 +111,21 @@ namespace StockTrack_API.Data
                 new UserInstitution()
                 {
                     UserId = 1,
-                    InstitutionId = 001
+                    InstitutionId = 001,
+                    UserType = UserType.SUPPORT,
                 },
                 new UserInstitution()
                 {
                     UserId = 1,
-                    InstitutionId = 064
+                    InstitutionId = 064,
+                    UserType = UserType.COORDINATOR,
                 }
             );
 
             modelBuilder.Entity<Area>().HasData(
                 new Area()
                 {
+                    Active = true,
                     Id = 1,
                     Name = "Teste",
                     Description = "Área de Testes",
@@ -135,6 +136,7 @@ namespace StockTrack_API.Data
             modelBuilder.Entity<Warehouse>().HasData(
                 new Warehouse()
                 {
+                    Active = true,
                     Id = 1,
                     Name = "Informática",
                     Description = "Almoxarifado de informática",
@@ -145,6 +147,7 @@ namespace StockTrack_API.Data
             modelBuilder.Entity<Material>().HasData(
                 new Material() 
                 {
+                    Active = true,
                     Id = 1,
                     Name = "Notebook",
                     Description = "Notebook ThinkPad",
