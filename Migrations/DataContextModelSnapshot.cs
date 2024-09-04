@@ -47,6 +47,10 @@ namespace StockTrack_API.Migrations
                     b.Property<int>("InstitutionId")
                         .HasColumnType("int");
 
+                    b.Property<string>("InstitutionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -68,10 +72,11 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 9, 4, 20, 58, 22, 753, DateTimeKind.Utc).AddTicks(7625),
+                            CreatedAt = new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6900),
                             CreatedBy = "",
                             Description = "Área de Testes",
                             InstitutionId = 1,
+                            InstitutionName = "Servidor de testes",
                             Name = "Teste"
                         });
                 });
@@ -164,6 +169,13 @@ namespace StockTrack_API.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
+                    b.Property<int>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AreaName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -176,6 +188,13 @@ namespace StockTrack_API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InstitutionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InstitutionName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -202,6 +221,10 @@ namespace StockTrack_API.Migrations
                     b.Property<int>("WarehouseId")
                         .HasColumnType("int");
 
+                    b.Property<string>("WarehouseName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("WarehouseId");
@@ -213,15 +236,20 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 9, 4, 20, 58, 22, 753, DateTimeKind.Utc).AddTicks(7706),
+                            AreaId = 1,
+                            AreaName = "Teste",
+                            CreatedAt = new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6931),
                             CreatedBy = "",
                             Description = "Notebook ThinkPad",
                             ImageURL = "",
+                            InstitutionId = 1,
+                            InstitutionName = "Servidor de testes",
                             Manufacturer = "ThinkPad",
                             MaterialType = 0,
                             Name = "Notebook",
                             RecordNumber = 123456,
-                            WarehouseId = 1
+                            WarehouseId = 1,
+                            WarehouseName = "Informática"
                         });
                 });
 
@@ -281,8 +309,8 @@ namespace StockTrack_API.Migrations
                             Active = true,
                             Email = "admin@stocktrack.com",
                             Name = "Admin",
-                            PasswordHash = new byte[] { 42, 254, 147, 239, 45, 224, 112, 97, 104, 9, 205, 95, 55, 183, 243, 1, 16, 41, 247, 98, 218, 210, 43, 162, 53, 226, 80, 111, 163, 93, 196, 226, 131, 54, 223, 113, 186, 95, 221, 193, 156, 90, 68, 151, 12, 114, 176, 226, 183, 118, 11, 26, 210, 219, 242, 13, 232, 122, 19, 84, 228, 161, 254, 122 },
-                            PasswordSalt = new byte[] { 190, 145, 33, 66, 143, 151, 182, 220, 137, 197, 242, 79, 229, 153, 101, 184, 115, 182, 157, 51, 131, 150, 166, 73, 179, 62, 226, 101, 159, 27, 111, 72, 159, 53, 95, 107, 120, 81, 223, 89, 109, 57, 18, 121, 178, 100, 64, 248, 207, 92, 97, 254, 116, 239, 236, 45, 109, 155, 192, 39, 2, 25, 196, 245, 205, 27, 221, 231, 174, 106, 150, 67, 63, 179, 228, 110, 68, 5, 35, 241, 92, 102, 175, 52, 243, 139, 209, 223, 92, 43, 28, 210, 120, 77, 224, 109, 97, 139, 175, 101, 221, 11, 204, 150, 12, 50, 83, 98, 250, 26, 91, 138, 142, 230, 206, 204, 8, 78, 39, 150, 234, 88, 169, 181, 156, 227, 153, 175 },
+                            PasswordHash = new byte[] { 250, 205, 250, 114, 75, 65, 123, 172, 104, 219, 219, 124, 123, 5, 50, 203, 139, 187, 85, 65, 49, 223, 153, 211, 34, 134, 8, 11, 254, 94, 21, 230, 168, 117, 147, 255, 151, 83, 33, 224, 35, 136, 206, 21, 193, 72, 218, 202, 240, 82, 162, 179, 252, 10, 130, 62, 215, 113, 210, 42, 36, 185, 129, 72 },
+                            PasswordSalt = new byte[] { 211, 226, 18, 248, 186, 109, 17, 231, 25, 25, 105, 65, 247, 238, 135, 208, 64, 53, 91, 215, 232, 56, 167, 60, 120, 143, 221, 61, 222, 232, 2, 178, 33, 193, 59, 29, 176, 101, 13, 142, 93, 108, 253, 227, 236, 0, 218, 210, 34, 93, 75, 52, 44, 8, 174, 207, 181, 162, 147, 36, 185, 2, 7, 123, 19, 194, 92, 184, 35, 252, 138, 138, 14, 13, 159, 37, 203, 80, 192, 113, 157, 7, 101, 123, 186, 158, 102, 28, 63, 3, 23, 202, 153, 207, 239, 82, 211, 31, 234, 96, 187, 203, 247, 128, 175, 69, 132, 56, 94, 46, 125, 141, 40, 168, 12, 79, 95, 245, 92, 145, 218, 195, 21, 125, 69, 222, 147, 207 },
                             PhotoUrl = "https://imgur.com/mOXzZLE.png"
                         });
                 });
@@ -294,6 +322,14 @@ namespace StockTrack_API.Migrations
 
                     b.Property<int>("InstitutionId")
                         .HasColumnType("int");
+
+                    b.Property<string>("InstitutionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("UserType")
                         .HasColumnType("int");
@@ -307,12 +343,16 @@ namespace StockTrack_API.Migrations
                         {
                             UserId = 1,
                             InstitutionId = 1,
+                            InstitutionName = "Servidor de testes",
+                            UserName = "Admin",
                             UserType = 4
                         },
                         new
                         {
                             UserId = 1,
                             InstitutionId = 64,
+                            InstitutionName = "Horácio Augusto da Silveira",
+                            UserName = "Admin",
                             UserType = 3
                         });
                 });
@@ -331,6 +371,10 @@ namespace StockTrack_API.Migrations
                     b.Property<int>("AreaId")
                         .HasColumnType("int");
 
+                    b.Property<string>("AreaName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -339,6 +383,13 @@ namespace StockTrack_API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InstitutionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InstitutionName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -364,9 +415,12 @@ namespace StockTrack_API.Migrations
                             Id = 1,
                             Active = true,
                             AreaId = 1,
-                            CreatedAt = new DateTime(2024, 9, 4, 20, 58, 22, 753, DateTimeKind.Utc).AddTicks(7670),
+                            AreaName = "Teste",
+                            CreatedAt = new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6918),
                             CreatedBy = "",
                             Description = "Almoxarifado de informática",
+                            InstitutionId = 1,
+                            InstitutionName = "Servidor de testes",
                             Name = "Informática"
                         });
                 });

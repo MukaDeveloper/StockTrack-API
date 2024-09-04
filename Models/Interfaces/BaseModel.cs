@@ -16,5 +16,8 @@ namespace StockTrack_API.Models.Interfaces
 
         [Required]
         public bool Active { get; set; } = true;
+
+        public int InstitutionId { get; set; }
+        public string InstitutionName { get; set; } = string.Empty;
     }
 }

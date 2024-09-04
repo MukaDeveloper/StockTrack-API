@@ -11,6 +11,7 @@ namespace StockTrack_API.Models.Interfaces
         public List<Material> Materials { get; set; } = new List<Material>();
 
         public int AreaId { get; set; }
+        public string AreaName { get; set; } = string.Empty;
         [JsonIgnore]
         public Area? Area { get; set; }
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace StockTrack_API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class RebuildContext : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,9 +52,9 @@ namespace StockTrack_API.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Active = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserType = table.Column<int>(type: "int", nullable: true, defaultValue: 1),
                     PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -73,7 +73,13 @@ namespace StockTrack_API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    InstitutionId = table.Column<int>(type: "int", nullable: false)
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Active = table.Column<bool>(type: "bit", nullable: false),
+                    InstitutionId = table.Column<int>(type: "int", nullable: false),
+                    InstitutionName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,7 +97,10 @@ namespace StockTrack_API.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    InstitutionId = table.Column<int>(type: "int", nullable: false)
+                    InstitutionId = table.Column<int>(type: "int", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InstitutionName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserType = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -118,7 +127,15 @@ namespace StockTrack_API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AreaId = table.Column<int>(type: "int", nullable: false)
+                    AreaId = table.Column<int>(type: "int", nullable: false),
+                    AreaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Active = table.Column<bool>(type: "bit", nullable: false),
+                    InstitutionId = table.Column<int>(type: "int", nullable: false),
+                    InstitutionName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,7 +160,17 @@ namespace StockTrack_API.Migrations
                     Manufacturer = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RecordNumber = table.Column<int>(type: "int", nullable: false),
                     MaterialType = table.Column<int>(type: "int", nullable: false),
-                    WarehouseId = table.Column<int>(type: "int", nullable: false)
+                    AreaId = table.Column<int>(type: "int", nullable: false),
+                    AreaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WarehouseId = table.Column<int>(type: "int", nullable: false),
+                    WarehouseName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Active = table.Column<bool>(type: "bit", nullable: false),
+                    InstitutionId = table.Column<int>(type: "int", nullable: false),
+                    InstitutionName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -167,32 +194,32 @@ namespace StockTrack_API.Migrations
 
             migrationBuilder.InsertData(
                 table: "ST_USERS",
-                columns: new[] { "Id", "AccessDate", "Email", "Name", "PasswordHash", "PasswordSalt", "PhotoUrl", "UserType" },
-                values: new object[] { 1, null, "admin@stocktrack.com", "Admin", new byte[] { 227, 137, 245, 69, 184, 199, 106, 151, 92, 104, 223, 131, 41, 39, 77, 217, 62, 236, 48, 63, 190, 248, 196, 65, 77, 151, 169, 213, 41, 58, 214, 170, 170, 94, 155, 190, 63, 30, 173, 214, 171, 128, 74, 47, 129, 220, 194, 84, 222, 246, 164, 193, 220, 162, 8, 231, 63, 54, 118, 48, 11, 104, 3, 58 }, new byte[] { 252, 223, 167, 168, 229, 240, 149, 235, 49, 90, 99, 27, 15, 253, 200, 219, 252, 192, 213, 220, 223, 69, 189, 83, 243, 103, 81, 154, 44, 110, 162, 241, 50, 174, 9, 17, 138, 24, 6, 37, 169, 136, 202, 109, 244, 137, 170, 195, 15, 60, 236, 56, 198, 183, 21, 38, 85, 191, 171, 23, 115, 21, 194, 255, 217, 249, 142, 26, 197, 224, 249, 125, 181, 9, 251, 231, 90, 48, 157, 227, 19, 82, 231, 9, 199, 130, 147, 144, 251, 135, 28, 159, 191, 9, 77, 179, 21, 130, 83, 73, 15, 24, 108, 194, 152, 238, 242, 68, 149, 90, 19, 202, 93, 27, 118, 134, 72, 158, 117, 226, 93, 69, 246, 103, 226, 215, 0, 195 }, "https://imgur.com/mOXzZLE.png", 4 });
+                columns: new[] { "Id", "AccessDate", "Active", "Email", "Name", "PasswordHash", "PasswordSalt", "PhotoUrl" },
+                values: new object[] { 1, null, true, "admin@stocktrack.com", "Admin", new byte[] { 250, 205, 250, 114, 75, 65, 123, 172, 104, 219, 219, 124, 123, 5, 50, 203, 139, 187, 85, 65, 49, 223, 153, 211, 34, 134, 8, 11, 254, 94, 21, 230, 168, 117, 147, 255, 151, 83, 33, 224, 35, 136, 206, 21, 193, 72, 218, 202, 240, 82, 162, 179, 252, 10, 130, 62, 215, 113, 210, 42, 36, 185, 129, 72 }, new byte[] { 211, 226, 18, 248, 186, 109, 17, 231, 25, 25, 105, 65, 247, 238, 135, 208, 64, 53, 91, 215, 232, 56, 167, 60, 120, 143, 221, 61, 222, 232, 2, 178, 33, 193, 59, 29, 176, 101, 13, 142, 93, 108, 253, 227, 236, 0, 218, 210, 34, 93, 75, 52, 44, 8, 174, 207, 181, 162, 147, 36, 185, 2, 7, 123, 19, 194, 92, 184, 35, 252, 138, 138, 14, 13, 159, 37, 203, 80, 192, 113, 157, 7, 101, 123, 186, 158, 102, 28, 63, 3, 23, 202, 153, 207, 239, 82, 211, 31, 234, 96, 187, 203, 247, 128, 175, 69, 132, 56, 94, 46, 125, 141, 40, 168, 12, 79, 95, 245, 92, 145, 218, 195, 21, 125, 69, 222, 147, 207 }, "https://imgur.com/mOXzZLE.png" });
 
             migrationBuilder.InsertData(
                 table: "ST_AREAS",
-                columns: new[] { "Id", "Description", "InstitutionId", "Name" },
-                values: new object[] { 1, "Área de Testes", 1, "Teste" });
+                columns: new[] { "Id", "Active", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "InstitutionName", "Name", "UpdatedAt", "UpdatedBy" },
+                values: new object[] { 1, true, new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6900), "", "Área de Testes", 1, "Servidor de testes", "Teste", null, null });
 
             migrationBuilder.InsertData(
                 table: "ST_USER_INSTITUTIONS",
-                columns: new[] { "InstitutionId", "UserId" },
+                columns: new[] { "InstitutionId", "UserId", "InstitutionName", "UserName", "UserType" },
                 values: new object[,]
                 {
-                    { 1, 1 },
-                    { 64, 1 }
+                    { 1, 1, "Servidor de testes", "Admin", 4 },
+                    { 64, 1, "Horácio Augusto da Silveira", "Admin", 3 }
                 });
 
             migrationBuilder.InsertData(
                 table: "ST_WAREHOUSES",
-                columns: new[] { "Id", "AreaId", "Description", "Name" },
-                values: new object[] { 1, 1, "Almoxarifado de informática", "Informática" });
+                columns: new[] { "Id", "Active", "AreaId", "AreaName", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "InstitutionName", "Name", "UpdatedAt", "UpdatedBy" },
+                values: new object[] { 1, true, 1, "Teste", new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6918), "", "Almoxarifado de informática", 1, "Servidor de testes", "Informática", null, null });
 
             migrationBuilder.InsertData(
                 table: "ST_MATERIALS",
-                columns: new[] { "Id", "Description", "ImageURL", "Manufacturer", "MaterialType", "Name", "RecordNumber", "WarehouseId" },
-                values: new object[] { 1, "Notebook ThinkPad", "", "ThinkPad", 0, "Notebook", 123456, 1 });
+                columns: new[] { "Id", "Active", "AreaId", "AreaName", "CreatedAt", "CreatedBy", "Description", "ImageURL", "InstitutionId", "InstitutionName", "Manufacturer", "MaterialType", "Name", "RecordNumber", "UpdatedAt", "UpdatedBy", "WarehouseId", "WarehouseName" },
+                values: new object[] { 1, true, 1, "Teste", new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6931), "", "Notebook ThinkPad", "", 1, "Servidor de testes", "ThinkPad", 0, "Notebook", 123456, null, null, 1, "Informática" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ST_AREAS_InstitutionId",

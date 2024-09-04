@@ -32,7 +32,13 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = int.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"));
+                string? contextAcessor = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+
+                if (contextAcessor == null) {
+                    throw new Exception("Requisição inválida.");
+                }
+
+                int institutionId = int.Parse(contextAcessor);
 
                 Institution? institution = await _context.ST_INSTITUTIONS
                     .FirstOrDefaultAsync(a => a.Id == institutionId);

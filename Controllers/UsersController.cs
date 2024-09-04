@@ -186,13 +186,5 @@ namespace StockTrack_API.Controllers
                 _httpContextAccessor.HttpContext?.User.FindFirstValue("id")!
             );
         }
-
-        public async Task<UserInstitution?> GetUserInstitutionAsync(int userId, int institutionId)
-        {
-            UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
-                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
-
-            return userInstitution;
-        }
     }
 }

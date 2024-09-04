@@ -13,7 +13,10 @@ namespace StockTrack_API.Models.Interfaces
         public int RecordNumber { get; set; }
         public MaterialType MaterialType { get; set; }
 
+        public int AreaId { get; set; }
+        public string AreaName { get; set; } = string.Empty;
         public int WarehouseId { get; set; }
+        public string WarehouseName { get; set; } = string.Empty;
         [JsonIgnore]
         public Warehouse? Warehouse { get; set; }
 

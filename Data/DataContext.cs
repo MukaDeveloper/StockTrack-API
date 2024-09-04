@@ -111,13 +111,17 @@ namespace StockTrack_API.Data
                 new UserInstitution()
                 {
                     UserId = 1,
+                    UserName = "Admin",
                     InstitutionId = 001,
+                    InstitutionName = "Servidor de testes",
                     UserType = UserType.SUPPORT,
                 },
                 new UserInstitution()
                 {
                     UserId = 1,
+                    UserName = "Admin",
                     InstitutionId = 064,
+                    InstitutionName = "Horácio Augusto da Silveira",
                     UserType = UserType.COORDINATOR,
                 }
             );
@@ -129,7 +133,8 @@ namespace StockTrack_API.Data
                     Id = 1,
                     Name = "Teste",
                     Description = "Área de Testes",
-                    InstitutionId = 001
+                    InstitutionId = 1,
+                    InstitutionName = "Servidor de testes",
                 }
             );
 
@@ -140,7 +145,10 @@ namespace StockTrack_API.Data
                     Id = 1,
                     Name = "Informática",
                     Description = "Almoxarifado de informática",
+                    InstitutionId = 1,
+                    InstitutionName = "Servidor de testes",
                     AreaId = 1,
+                    AreaName = "Teste",
                 }
             );
 
@@ -153,7 +161,12 @@ namespace StockTrack_API.Data
                     Description = "Notebook ThinkPad",
                     Manufacturer = "ThinkPad",
                     RecordNumber = 123456,
+                    InstitutionId = 1,
+                    InstitutionName = "Servidor de testes",
+                    AreaId = 1,
+                    AreaName = "Teste",
                     WarehouseId = 1,
+                    WarehouseName = "Informática",
                 }
             );
         }
