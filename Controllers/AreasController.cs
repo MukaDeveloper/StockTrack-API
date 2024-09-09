@@ -39,7 +39,7 @@ namespace StockTrack_API.Controllers
                     return NotFound();
                 }
 
-                return Ok(area);
+                return Ok(EnvelopeFactory.factoryEnvelope(area));
             }
             catch (Exception ex)
             {
@@ -105,12 +105,18 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
+                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Name.ToLower() == data.Name.ToLower());
+                if (area != null) {
+                    throw new Exception("Já existe uma área com esse nome");
+                }
+
                 Area newArea = new Area
                 {
                     Active = true,
                     Name = data.Name,
                     Description = data.Description,
-                    InstitutionId = data.InstitutionId,
+                    InstitutionId = userInstitution.InstitutionId,
+                    InstitutionName = userInstitution.InstitutionName,
                     CreatedAt = DateTime.Now,
                     CreatedBy = user.Name
                 };
@@ -118,7 +124,7 @@ namespace StockTrack_API.Controllers
                 await _context.ST_AREAS.AddAsync(newArea);
                 await _context.SaveChangesAsync();
 
-                return Ok(newArea);
+                return Ok(EnvelopeFactory.factoryEnvelope(newArea));
             }
             catch (Exception ex)
             {

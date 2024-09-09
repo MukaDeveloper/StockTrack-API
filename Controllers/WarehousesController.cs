@@ -204,7 +204,7 @@ namespace StockTrack_API.Controllers
                 _context.ST_WAREHOUSES.Update(warehouseToUpdate);
                 await _context.SaveChangesAsync();
 
-                return Ok(warehouseToUpdate);
+                return Ok(EnvelopeFactory.factoryEnvelope(warehouseToUpdate));
             }
             catch (Exception ex)
             {

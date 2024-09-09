@@ -31,7 +31,7 @@ namespace StockTrack_API.Controllers
                     return NotFound();
                 }
 
-                return Ok(material);
+                return Ok(EnvelopeFactory.factoryEnvelope(material));
             }
             catch (Exception ex)
             {
@@ -45,7 +45,7 @@ namespace StockTrack_API.Controllers
             try
             {
                 List<Material> list = await _context.ST_MATERIALS.ToListAsync();
-                return Ok(list);
+                return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace StockTrack_API.Controllers
                 await _context.ST_MATERIALS.AddAsync(newMaterial);
                 await _context.SaveChangesAsync();
 
-                return Ok(newMaterial);
+                return Ok(EnvelopeFactory.factoryEnvelope(newMaterial));
             }
             catch (Exception ex)
             {

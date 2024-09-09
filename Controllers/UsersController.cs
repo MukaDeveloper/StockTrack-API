@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
 using StockTrack_API.Models.Interfaces;
-using StockTrack_API.Models.Enums;
 using StockTrack_API.Utils;
 using StockTrack_API.Models.Request.User;
 
@@ -130,7 +129,7 @@ namespace StockTrack_API.Controllers
                 await _context.ST_USERS.AddAsync(user);
                 await _context.SaveChangesAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelope(user.Id));
+                return Ok(EnvelopeFactory.factoryEnvelope(user));
             }
             catch (Exception ex)
             {

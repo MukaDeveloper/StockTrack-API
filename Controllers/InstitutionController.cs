@@ -62,7 +62,7 @@ namespace StockTrack_API.Controllers
             try
             {
                 List<Institution> list = await _context.ST_INSTITUTIONS.ToListAsync();
-                return Ok(list);
+                return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
             catch (Exception ex)
             {
@@ -78,7 +78,7 @@ namespace StockTrack_API.Controllers
                 await _context.ST_INSTITUTIONS.AddAsync(newInstitution);
                 await _context.SaveChangesAsync();
 
-                return Ok(newInstitution);
+                return Ok(EnvelopeFactory.factoryEnvelope(newInstitution));
             }
             catch (Exception ex)
             {
