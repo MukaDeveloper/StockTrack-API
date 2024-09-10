@@ -148,6 +148,13 @@ namespace StockTrack_API.Controllers
 
                 Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == data.AreaId);
 
+                Warehouse? warehouse = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Name.ToLower() == data.Name.ToLower());
+
+                if (warehouse != null)
+                {
+                    throw new Exception("Nome de armazém já cadastrado.");
+                }
+                
                 if (user == null || userInstitution == null)
                 {
                     throw new Exception("Usuário não encontrado");
@@ -186,12 +193,43 @@ namespace StockTrack_API.Controllers
             }
         }
 
+        // Mudar a interface da requisição pra aceitar AreaIdBefore e AreaIdAfter
         [HttpPatch("update")]
         public async Task<IActionResult> UpdateAsync(Warehouse warehouse)
         {
             try
             {
+                string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
+                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+
+                if (context1 == null || context2 == null) {
+                    throw new Exception("Requisição inválida.");
+                }
+
+                int userId = int.Parse(context1);
+                int institutionId = int.Parse(context2);
+
+                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
+                UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
+                                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+
+                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == warehouse.AreaId);
+
                 Warehouse? warehouseToUpdate = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Id == warehouse.Id);
+
+                if (user == null || userInstitution == null)
+                {
+                    throw new Exception("Usuário não encontrado");
+                }
+
+                if (area?.InstitutionId != institutionId || area.Active == false) {
+                    throw new Exception("Área não encontrada ou inválida");
+                }
+
+                if (userInstitution.UserType == UserType.USER || user.Active == false)
+                {
+                    throw new Exception("Sem autorização.");
+                }
 
                 if (warehouseToUpdate == null)
                 {
@@ -199,12 +237,14 @@ namespace StockTrack_API.Controllers
                 }
 
                 warehouseToUpdate.Name = warehouse.Name;
+                warehouseToUpdate.Description = warehouse.Description;
                 warehouseToUpdate.AreaId = warehouse.AreaId;
+                warehouseToUpdate.UpdatedAt = DateTime.Now;
 
                 _context.ST_WAREHOUSES.Update(warehouseToUpdate);
                 await _context.SaveChangesAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelope(warehouseToUpdate));
+                return Ok(warehouseToUpdate);
             }
             catch (Exception ex)
             {
