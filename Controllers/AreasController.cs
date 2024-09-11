@@ -132,5 +132,64 @@ namespace StockTrack_API.Controllers
             }
         }
 
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateAsync(Area area) {
+            try
+            {
+                string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
+                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+
+                if (context1 == null || context2 == null)
+                {
+                    throw new Exception("Requisição inválida.");
+                }
+
+                int userId = int.Parse(context1);
+                int institutionId = int.Parse(context2);
+
+                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
+                UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
+                                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+
+                if (user == null || userInstitution == null)
+                {
+                    throw new Exception("Usuário não encontrado");
+                }
+
+                if (userInstitution.UserType == UserType.USER || user.Active == false)
+                {
+                    throw new Exception("Sem autorização.");
+                }
+
+                if (area.Name != null) {
+                    Area? areaCheck = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Name.Equals(area.Name, StringComparison.CurrentCultureIgnoreCase));
+                    if (areaCheck != null) {
+                        throw new Exception("Já existe uma área com esse nome!");
+                    }
+                }
+
+                Area? areaToUpdate = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Id == area.Id);
+                
+                if (area.Name != null)
+                {
+                    areaToUpdate.Name = area.Name;
+                }
+                if (area.Description != null)
+                {
+                    areaToUpdate.Description = area.Description;
+                }
+                areaToUpdate.UpdatedAt = DateTime.Now;
+                areaToUpdate.UpdatedBy = user.Name;
+
+                _context.ST_AREAS.Update(areaToUpdate);
+                await _context.SaveChangesAsync();
+
+                return Ok(EnvelopeFactory.factoryEnvelope(areaToUpdate));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
