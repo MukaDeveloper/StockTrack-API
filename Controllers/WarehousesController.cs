@@ -18,10 +18,7 @@ namespace StockTrack_API.Controllers
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public WarehousesController(
-            DataContext context,
-            IHttpContextAccessor httpContextAccessor
-        )
+        public WarehousesController(DataContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
@@ -32,7 +29,9 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor = (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId")) ?? throw new Exception("Requisição inválida.");
+                string? contextAcessor =
+                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
+                    ?? throw new Exception("Requisição inválida.");
                 int? institutionId = int.Parse(contextAcessor);
 
                 if (!institutionId.HasValue)
@@ -40,9 +39,9 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Identificação da instituição não localizada.");
                 }
 
-                List<Warehouse> list = await _context.ST_WAREHOUSES
-                .Where(w => w.InstitutionId == institutionId)
-                .ToListAsync();
+                List<Warehouse> list = await _context
+                    .ST_WAREHOUSES.Where(w => w.InstitutionId == institutionId)
+                    .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
@@ -57,7 +56,9 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor = (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId")) ?? throw new Exception("Requisição inválida.");
+                string? contextAcessor =
+                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
+                    ?? throw new Exception("Requisição inválida.");
                 int? institutionId = int.Parse(contextAcessor);
 
                 if (!institutionId.HasValue)
@@ -65,9 +66,11 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Identificação da instituição não localizada.");
                 }
 
-                List<Warehouse> list = await _context.ST_WAREHOUSES
-                .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId)
-                .ToListAsync();
+                List<Warehouse> list = await _context
+                    .ST_WAREHOUSES.Where(w =>
+                        w.InstitutionId == institutionId && w.AreaId == areaId
+                    )
+                    .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
@@ -82,7 +85,9 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor = (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId")) ?? throw new Exception("Requisição inválida.");
+                string? contextAcessor =
+                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
+                    ?? throw new Exception("Requisição inválida.");
                 int? institutionId = int.Parse(contextAcessor);
 
                 if (!institutionId.HasValue)
@@ -90,9 +95,11 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Identificação da instituição não localizada.");
                 }
 
-                List<Warehouse> list = await _context.ST_WAREHOUSES
-                .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId)
-                .ToListAsync();
+                List<Warehouse> list = await _context
+                    .ST_WAREHOUSES.Where(w =>
+                        w.InstitutionId == institutionId && w.Id == warehouseId
+                    )
+                    .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
@@ -118,7 +125,9 @@ namespace StockTrack_API.Controllers
                 }
 
                 string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue(
+                    "institutionId"
+                );
 
                 if (context1 == null || context2 == null)
                 {
@@ -129,12 +138,16 @@ namespace StockTrack_API.Controllers
                 int institutionId = int.Parse(context2);
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
-                UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
-                                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+                UserInstitution? userInstitution =
+                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                        ui.UserId == userId && ui.InstitutionId == institutionId
+                    );
 
                 Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == data.AreaId);
 
-                Warehouse? warehouse = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Name.Equals(data.Name, StringComparison.CurrentCultureIgnoreCase));
+                Warehouse? warehouse = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x =>
+                    x.Name.ToLower() == data.Name.ToLower()
+                );
 
                 if (warehouse != null)
                 {
@@ -156,18 +169,19 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                Warehouse newWarehouse = new()
-                {
-                    Active = true,
-                    Name = data.Name,
-                    Description = data.Description,
-                    AreaId = data.AreaId,
-                    AreaName = area.Name,
-                    InstitutionId = institutionId,
-                    InstitutionName = userInstitution.InstitutionName,
-                    CreatedAt = DateTime.Now,
-                    CreatedBy = user.Name
-                };
+                Warehouse newWarehouse =
+                    new()
+                    {
+                        Active = true,
+                        Name = data.Name,
+                        Description = data.Description,
+                        AreaId = data.AreaId,
+                        AreaName = area.Name,
+                        InstitutionId = institutionId,
+                        InstitutionName = userInstitution.InstitutionName,
+                        CreatedAt = DateTime.Now,
+                        CreatedBy = user.Name,
+                    };
 
                 await _context.ST_WAREHOUSES.AddAsync(newWarehouse);
                 await _context.SaveChangesAsync();
@@ -187,7 +201,9 @@ namespace StockTrack_API.Controllers
             try
             {
                 string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue(
+                    "institutionId"
+                );
 
                 if (context1 == null || context2 == null)
                 {
@@ -198,8 +214,10 @@ namespace StockTrack_API.Controllers
                 int institutionId = int.Parse(context2);
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
-                UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
-                                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+                UserInstitution? userInstitution =
+                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                        ui.UserId == userId && ui.InstitutionId == institutionId
+                    );
 
                 if (user == null || userInstitution == null)
                 {
@@ -213,24 +231,33 @@ namespace StockTrack_API.Controllers
 
                 if (warehouse.Name != null)
                 {
-                    Warehouse? warehouseCheck = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Name.Equals(warehouse.Name, StringComparison.CurrentCultureIgnoreCase));
+                    Warehouse? warehouseCheck = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(
+                        x =>
+                            x.Name.Equals(warehouse.Name, StringComparison.CurrentCultureIgnoreCase)
+                    );
                     if (warehouseCheck != null)
                     {
                         throw new Exception("Já existe um almoxarifado com esse nome!");
                     }
                 }
 
-                Area? areaBefore = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == warehouse.AreaId);
+                Area? areaBefore = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
+                    x.Id == warehouse.AreaId
+                );
                 if (warehouse.AreaIdAfter != null)
                 {
-                    Area? areaAfter = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == warehouse.AreaIdAfter);
+                    Area? areaAfter = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
+                        x.Id == warehouse.AreaIdAfter
+                    );
                     if (areaAfter?.InstitutionId != institutionId || areaAfter.Active == false)
                     {
                         throw new Exception("Área alvo não encontrada ou inválida");
                     }
                 }
 
-                Warehouse? warehouseToUpdate = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Id == warehouse.Id);
+                Warehouse? warehouseToUpdate = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x =>
+                    x.Id == warehouse.Id
+                );
 
                 if (areaBefore?.InstitutionId != institutionId || areaBefore.Active == false)
                 {
@@ -274,7 +301,9 @@ namespace StockTrack_API.Controllers
             try
             {
                 string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue(
+                    "institutionId"
+                );
 
                 if (context1 == null || context2 == null)
                 {
@@ -285,8 +314,10 @@ namespace StockTrack_API.Controllers
                 int institutionId = int.Parse(context2);
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
-                UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
-                                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+                UserInstitution? userInstitution =
+                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                        ui.UserId == userId && ui.InstitutionId == institutionId
+                    );
 
                 if (user == null || userInstitution == null)
                 {
@@ -298,11 +329,17 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                Warehouse? warehouseToDelete = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Id == warehouseId) ?? throw new Exception("Almoxarifado não encontrado");
-                List<Material>? listMaterial = await _context.ST_MATERIALS.Where(m => m.WarehouseId == warehouseId).ToListAsync();
+                Warehouse? warehouseToDelete =
+                    await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Id == warehouseId)
+                    ?? throw new Exception("Almoxarifado não encontrado");
+                List<Material>? listMaterial = await _context
+                    .ST_MATERIALS.Where(m => m.WarehouseId == warehouseId)
+                    .ToListAsync();
                 if (listMaterial.Count > 0)
                 {
-                    throw new Exception("Almoxarifado não pode ser excluído pois contém materiais vinculados");
+                    throw new Exception(
+                        "Almoxarifado não pode ser excluído pois contém materiais vinculados"
+                    );
                 }
 
                 return Ok();
