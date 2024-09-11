@@ -169,6 +169,10 @@ namespace StockTrack_API.Controllers
                 }
 
                 Area? areaToUpdate = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Id == area.Id);
+
+                if (areaToUpdate == null) {
+                    throw new Exception("Área não encontrada");
+                }
                 
                 if (area.Name != null)
                 {
