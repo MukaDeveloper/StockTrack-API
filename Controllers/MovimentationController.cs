@@ -10,12 +10,15 @@ namespace StockTrack_API.Controllers
     [Authorize]
     [ApiController]
     [Route("[Controller]")]
-    public class MaterialsController : ControllerBase
+    public class MovimentationController : ControllerBase
     {
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public MaterialsController(DataContext context, IHttpContextAccessor httpContextAccessor)
+        public MovimentationController(
+            DataContext context,
+            IHttpContextAccessor httpContextAccessor
+        )
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
@@ -36,16 +39,16 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Identificação da instituição não localizada.");
                 }
 
-                Material? material = await _context.ST_MATERIALS.FirstOrDefaultAsync(iBusca =>
+                Movimentation? mov = await _context.ST_MOVIMENTATIONS.FirstOrDefaultAsync(iBusca =>
                     iBusca.Id == id
                 );
 
-                if (material == null)
+                if (mov == null)
                 {
                     return NotFound();
                 }
 
-                return Ok(EnvelopeFactory.factoryEnvelope(material));
+                return Ok(EnvelopeFactory.factoryEnvelope(mov));
             }
             catch (Exception ex)
             {
@@ -68,26 +71,10 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Identificação da instituição não localizada.");
                 }
 
-                List<Material> list = await _context
-                    .ST_MATERIALS.Where(m => m.InstitutionId == institutionId)
+                List<Movimentation> list = await _context
+                    .ST_MOVIMENTATIONS.Where(m => m.InstitutionId == institutionId)
                     .ToListAsync();
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("create")]
-        public async Task<IActionResult> AddAsync(Material newMaterial)
-        {
-            try
-            {
-                await _context.ST_MATERIALS.AddAsync(newMaterial);
-                await _context.SaveChangesAsync();
-
-                return Ok(EnvelopeFactory.factoryEnvelope(newMaterial));
             }
             catch (Exception ex)
             {

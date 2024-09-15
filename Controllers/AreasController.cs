@@ -6,6 +6,7 @@ using StockTrack_API.Data;
 using StockTrack_API.Models.Enums;
 using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Request.Area;
+using StockTrack_API.Services;
 
 namespace StockTrack_API.Controllers
 {
@@ -15,14 +16,17 @@ namespace StockTrack_API.Controllers
     public class AreasController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly MovimentationService _movimentationService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AreasController(
             DataContext context,
+            MovimentationService movimentationService,
             IHttpContextAccessor httpContextAccessor
         )
         {
             _context = context;
+            _movimentationService = movimentationService;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -31,8 +35,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                Area? area = await _context.ST_AREAS
-                    .FirstOrDefaultAsync(a => a.Id == id);
+                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Id == id);
 
                 if (area == null)
                 {
@@ -52,9 +55,12 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+                string? contextAcessor = _httpContextAccessor.HttpContext?.User.FindFirstValue(
+                    "institutionId"
+                );
 
-                if (contextAcessor == null) {
+                if (contextAcessor == null)
+                {
                     throw new Exception("Requisição inválida.");
                 }
 
@@ -65,9 +71,9 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Identificação da instituição não localizada.");
                 }
 
-                List<Area> list = await _context.ST_AREAS
-                .Where(area => area.InstitutionId == institutionId)
-                .ToListAsync();
+                List<Area> list = await _context
+                    .ST_AREAS.Where(area => area.InstitutionId == institutionId)
+                    .ToListAsync();
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
             catch (Exception ex)
@@ -82,9 +88,12 @@ namespace StockTrack_API.Controllers
             try
             {
                 string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue(
+                    "institutionId"
+                );
 
-                if (context1 == null || context2 == null) {
+                if (context1 == null || context2 == null)
+                {
                     throw new Exception("Requisição inválida.");
                 }
 
@@ -92,8 +101,10 @@ namespace StockTrack_API.Controllers
                 int institutionId = int.Parse(context2);
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
-                UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
-                                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+                UserInstitution? userInstitution =
+                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                        ui.UserId == userId && ui.InstitutionId == institutionId
+                    );
 
                 if (user == null || userInstitution == null)
                 {
@@ -105,8 +116,11 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Name.ToLower() == data.Name.ToLower());
-                if (area != null) {
+                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(a =>
+                    a.Name.ToLower() == data.Name.ToLower()
+                );
+                if (area != null)
+                {
                     throw new Exception("Já existe uma área com esse nome");
                 }
 
@@ -118,12 +132,13 @@ namespace StockTrack_API.Controllers
                     InstitutionId = userInstitution.InstitutionId,
                     InstitutionName = userInstitution.InstitutionName,
                     CreatedAt = DateTime.Now,
-                    CreatedBy = user.Name
+                    CreatedBy = user.Name,
                 };
 
                 await _context.ST_AREAS.AddAsync(newArea);
                 await _context.SaveChangesAsync();
 
+                await _movimentationService.AddArea(institutionId, newArea.Id, user.Id);
                 return Ok(EnvelopeFactory.factoryEnvelope(newArea));
             }
             catch (Exception ex)
@@ -133,11 +148,14 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateAsync(Area area) {
+        public async Task<IActionResult> UpdateAsync(Area area)
+        {
             try
             {
                 string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue(
+                    "institutionId"
+                );
 
                 if (context1 == null || context2 == null)
                 {
@@ -148,8 +166,10 @@ namespace StockTrack_API.Controllers
                 int institutionId = int.Parse(context2);
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
-                UserInstitution? userInstitution = await _context.ST_USER_INSTITUTIONS
-                                .FirstOrDefaultAsync(ui => ui.UserId == userId && ui.InstitutionId == institutionId);
+                UserInstitution? userInstitution =
+                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                        ui.UserId == userId && ui.InstitutionId == institutionId
+                    );
 
                 if (user == null || userInstitution == null)
                 {
@@ -161,19 +181,26 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                if (area.Name != null) {
-                    Area? areaCheck = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Name.Equals(area.Name, StringComparison.CurrentCultureIgnoreCase));
-                    if (areaCheck != null) {
+                if (area.Name != null)
+                {
+                    Area? areaCheck = await _context.ST_AREAS.FirstOrDefaultAsync(a =>
+                        a.Name.Equals(area.Name, StringComparison.CurrentCultureIgnoreCase)
+                    );
+                    if (areaCheck != null)
+                    {
                         throw new Exception("Já existe uma área com esse nome!");
                     }
                 }
 
-                Area? areaToUpdate = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Id == area.Id);
+                Area? areaToUpdate = await _context.ST_AREAS.FirstOrDefaultAsync(a =>
+                    a.Id == area.Id
+                );
 
-                if (areaToUpdate == null) {
+                if (areaToUpdate == null)
+                {
                     throw new Exception("Área não encontrada");
                 }
-                
+
                 if (area.Name != null)
                 {
                     areaToUpdate.Name = area.Name;
