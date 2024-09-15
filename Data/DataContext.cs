@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Models.Entities;
 using StockTrack_API.Models.Enums;
+using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Utils;
 
 namespace StockTrack_API.Data
@@ -43,21 +44,23 @@ namespace StockTrack_API.Data
                 .WithMany(u => u.UserInstitutions)
                 .HasForeignKey(ui => ui.UserId);
 
-            modelBuilder.Entity<Area>()
+            modelBuilder
+                .Entity<Area>()
                 .HasOne(a => a.Institution)
                 .WithMany(i => i.Areas)
                 .HasForeignKey(a => a.InstitutionId);
 
-            modelBuilder.Entity<Warehouse>()
+            modelBuilder
+                .Entity<Warehouse>()
                 .HasOne(a => a.Area)
                 .WithMany(w => w.Warehouses)
                 .HasForeignKey(w => w.AreaId);
 
-            modelBuilder.Entity<Material>()
+            modelBuilder
+                .Entity<Material>()
                 .HasOne(a => a.Warehouse)
                 .WithMany(m => m.Materials)
                 .HasForeignKey(w => w.WarehouseId);
-
 
             Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
             modelBuilder
@@ -107,73 +110,112 @@ namespace StockTrack_API.Data
                     }
                 );
 
-            modelBuilder.Entity<UserInstitution>().HasData(
-                new UserInstitution()
-                {
-                    UserId = 1,
-                    UserName = "Admin",
-                    InstitutionId = 001,
-                    InstitutionName = "Servidor de testes",
-                    UserType = UserType.SUPPORT,
-                },
-                new UserInstitution()
-                {
-                    UserId = 1,
-                    UserName = "Admin",
-                    InstitutionId = 064,
-                    InstitutionName = "Horácio Augusto da Silveira",
-                    UserType = UserType.COORDINATOR,
-                }
-            );
+            modelBuilder
+                .Entity<UserInstitution>()
+                .HasData(
+                    new UserInstitution()
+                    {
+                        UserId = 1,
+                        UserName = "Admin",
+                        InstitutionId = 001,
+                        InstitutionName = "Servidor de testes",
+                        UserType = UserType.SUPPORT,
+                    },
+                    new UserInstitution()
+                    {
+                        UserId = 1,
+                        UserName = "Admin",
+                        InstitutionId = 064,
+                        InstitutionName = "Horácio Augusto da Silveira",
+                        UserType = UserType.COORDINATOR,
+                    }
+                );
 
-            modelBuilder.Entity<Area>().HasData(
-                new Area()
-                {
-                    Active = true,
-                    Id = 1,
-                    Name = "Teste",
-                    Description = "Área de Testes",
-                    InstitutionId = 1,
-                    InstitutionName = "Servidor de testes",
-                }
-            );
+            modelBuilder
+                .Entity<Area>()
+                .HasData(
+                    new Area()
+                    {
+                        Active = true,
+                        Id = 1,
+                        Name = "Teste",
+                        Description = "Área de Testes",
+                        InstitutionId = 1,
+                        InstitutionName = "Servidor de testes",
+                    }
+                );
 
-            modelBuilder.Entity<Warehouse>().HasData(
-                new Warehouse()
-                {
-                    Active = true,
-                    Id = 1,
-                    Name = "Informática",
-                    Description = "Almoxarifado de informática",
-                    InstitutionId = 1,
-                    InstitutionName = "Servidor de testes",
-                    AreaId = 1,
-                    AreaName = "Teste",
-                }
-            );
+            modelBuilder
+                .Entity<Warehouse>()
+                .HasData(
+                    new Warehouse()
+                    {
+                        Active = true,
+                        Id = 1,
+                        Name = "Informática",
+                        Description = "Almoxarifado de informática",
+                        InstitutionId = 1,
+                        InstitutionName = "Servidor de testes",
+                        AreaId = 1,
+                        AreaName = "Teste",
+                    }
+                );
 
-            modelBuilder.Entity<Material>().HasData(
-                new Material() 
-                {
-                    Active = true,
-                    Id = 1,
-                    Name = "Notebook",
-                    Description = "Notebook ThinkPad",
-                    Manufacturer = "ThinkPad",
-                    RecordNumber = 123456,
-                    InstitutionId = 1,
-                    InstitutionName = "Servidor de testes",
-                    AreaId = 1,
-                    AreaName = "Teste",
-                    WarehouseId = 1,
-                    WarehouseName = "Informática",
-                }
-            );
+            modelBuilder
+                .Entity<Material>()
+                .HasData(
+                    new Material()
+                    {
+                        Active = true,
+                        Id = 1,
+                        Name = "Notebook",
+                        Description = "Notebook ThinkPad",
+                        Manufacturer = "ThinkPad",
+                        RecordNumber = 123456,
+                        InstitutionId = 1,
+                        InstitutionName = "Servidor de testes",
+                        AreaId = 1,
+                        AreaName = "Teste",
+                        WarehouseId = 1,
+                        WarehouseName = "Informática",
+                    }
+                );
+
+            modelBuilder
+                .Entity<Movimentation>()
+                .HasData(
+                    new Movimentation()
+                    {
+                        Id = 1,
+                        InstitutionId = 1,
+                        AreaId = 1,
+                        UserId = 1,
+                        Description = "Adição de área \"Teste\"",
+                        Date = DateTime.Now,
+                        Type = Models.MovimentationType.Entry,
+                        Reason = Models.MovimentationReason.Insertion,
+                    }
+                );
+
+            modelBuilder
+                .Entity<UserTypeEntity>()
+                .HasData(
+                    new UserTypeEntity { Id = 1, Name = "USER" },
+                    new UserTypeEntity { Id = 2, Name = "WAREHOUSEMAN" },
+                    new UserTypeEntity { Id = 3, Name = "COORDINATOR" },
+                    new UserTypeEntity { Id = 4, Name = "SUPPORT" }
+                );
+
+            modelBuilder
+                .Entity<MovimentationTypeEntity>()
+                .HasData(
+                    new MovimentationTypeEntity { Id = 1, Name = "ENTRY" },
+                    new MovimentationTypeEntity { Id = 2, Name = "EXIT" }
+                );
         }
 
         protected override void ConfigureConventions(
             ModelConfigurationBuilder configurationBuilder
-        )
-        { }
+        ) { }
     }
 }
