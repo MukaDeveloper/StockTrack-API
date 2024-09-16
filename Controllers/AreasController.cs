@@ -7,6 +7,7 @@ using StockTrack_API.Models.Enums;
 using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Request.Area;
 using StockTrack_API.Services;
+using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
 {
@@ -17,16 +18,19 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
         private readonly MovimentationService _movimentationService;
+        private readonly InstitutionValidationService _instituionService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AreasController(
             DataContext context,
             MovimentationService movimentationService,
+            InstitutionValidationService instituionService,
             IHttpContextAccessor httpContextAccessor
         )
         {
             _context = context;
             _movimentationService = movimentationService;
+            _instituionService = instituionService;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -35,7 +39,11 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(a => a.Id == id);
+                int institutionId = _instituionService.GetInstitutionId();
+
+                Area? area = await _context
+                    .ST_AREAS.Where(a => a.InstitutionId == institutionId)
+                    .FirstOrDefaultAsync(a => a.Id == id);
 
                 if (area == null)
                 {
@@ -55,21 +63,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor = _httpContextAccessor.HttpContext?.User.FindFirstValue(
-                    "institutionId"
-                );
-
-                if (contextAcessor == null)
-                {
-                    throw new Exception("Requisição inválida.");
-                }
-
-                int? institutionId = int.Parse(contextAcessor);
-
-                if (!institutionId.HasValue)
-                {
-                    throw new Exception("Identificação da instituição não localizada.");
-                }
+                int institutionId = _instituionService.GetInstitutionId();
 
                 List<Area> list = await _context
                     .ST_AREAS.Where(area => area.InstitutionId == institutionId)
@@ -88,17 +82,14 @@ namespace StockTrack_API.Controllers
             try
             {
                 string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue(
-                    "institutionId"
-                );
 
-                if (context1 == null || context2 == null)
+                if (context1 == null)
                 {
                     throw new Exception("Requisição inválida.");
                 }
 
                 int userId = int.Parse(context1);
-                int institutionId = int.Parse(context2);
+                int institutionId = _instituionService.GetInstitutionId();
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
                 UserInstitution? userInstitution =
@@ -138,7 +129,7 @@ namespace StockTrack_API.Controllers
                 await _context.ST_AREAS.AddAsync(newArea);
                 await _context.SaveChangesAsync();
 
-                await _movimentationService.AddArea(institutionId, newArea.Id, user.Id);
+                await _movimentationService.AddArea(institutionId, newArea.Id, user.Id, newArea.Name);
                 return Ok(EnvelopeFactory.factoryEnvelope(newArea));
             }
             catch (Exception ex)
@@ -153,17 +144,14 @@ namespace StockTrack_API.Controllers
             try
             {
                 string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue(
-                    "institutionId"
-                );
 
-                if (context1 == null || context2 == null)
+                if (context1 == null)
                 {
                     throw new Exception("Requisição inválida.");
                 }
 
                 int userId = int.Parse(context1);
-                int institutionId = int.Parse(context2);
+                int institutionId = _instituionService.GetInstitutionId();
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
                 UserInstitution? userInstitution =

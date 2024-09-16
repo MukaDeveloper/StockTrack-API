@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using StockTrack_API.Models;
 using StockTrack_API.Models.Entities;
 using StockTrack_API.Models.Enums;
 using StockTrack_API.Models.Interfaces;
@@ -63,38 +64,37 @@ namespace StockTrack_API.Data
                 .HasForeignKey(w => w.WarehouseId);
 
             Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
-            modelBuilder
-                .Entity<User>()
-                .HasData(
-                    new User()
-                    {
-                        Active = true,
-                        Id = 1,
-                        Name = "Admin",
-                        Email = "admin@stocktrack.com",
-                        PhotoUrl = "https://imgur.com/mOXzZLE.png",
-                        PasswordString = string.Empty,
-                        PasswordHash = hash,
-                        PasswordSalt = salt,
-                    }
-                );
+            User admin = new User()
+            {
+                Active = true,
+                Id = 1,
+                Name = "Admin",
+                Email = "admin@stocktrack.com",
+                PhotoUrl = "https://imgur.com/mOXzZLE.png",
+                PasswordString = string.Empty,
+                PasswordHash = hash,
+                PasswordSalt = salt,
+            };
+            modelBuilder.Entity<User>().HasData(admin);
 
+            Institution institutionTest =
+                new()
+                {
+                    Id = 001,
+                    Name = "Servidor de testes",
+                    Nickname = "Testes",
+                    StreetName = "Rua Alcantara",
+                    StreetNumber = "113",
+                    Complement = "",
+                    Neightboor = "Vila Guilherme",
+                    City = "Sao Paulo",
+                    State = "SP",
+                    CEP = "02110010",
+                };
             modelBuilder
                 .Entity<Institution>()
                 .HasData(
-                    new Institution()
-                    {
-                        Id = 001,
-                        Name = "Servidor de testes",
-                        Nickname = "Testes",
-                        StreetName = "Rua Alcantara",
-                        StreetNumber = "113",
-                        Complement = "",
-                        Neightboor = "Vila Guilherme",
-                        City = "Sao Paulo",
-                        State = "SP",
-                        CEP = "02110010",
-                    },
+                    institutionTest,
                     new Institution()
                     {
                         Id = 064,
@@ -116,50 +116,47 @@ namespace StockTrack_API.Data
                     new UserInstitution()
                     {
                         UserId = 1,
-                        UserName = "Admin",
-                        InstitutionId = 001,
-                        InstitutionName = "Servidor de testes",
+                        UserName = admin.Name,
+                        InstitutionId = institutionTest.Id,
+                        InstitutionName = institutionTest.Name,
                         UserType = UserType.SUPPORT,
                     },
                     new UserInstitution()
                     {
                         UserId = 1,
-                        UserName = "Admin",
+                        UserName = admin.Name,
                         InstitutionId = 064,
                         InstitutionName = "Horácio Augusto da Silveira",
                         UserType = UserType.COORDINATOR,
                     }
                 );
 
-            modelBuilder
-                .Entity<Area>()
-                .HasData(
-                    new Area()
-                    {
-                        Active = true,
-                        Id = 1,
-                        Name = "Teste",
-                        Description = "Área de Testes",
-                        InstitutionId = 1,
-                        InstitutionName = "Servidor de testes",
-                    }
-                );
+            Area area =
+                new()
+                {
+                    Active = true,
+                    Id = 1,
+                    Name = "Teste",
+                    Description = "Área de Testes",
+                    InstitutionId = institutionTest.Id,
+                    InstitutionName = institutionTest.Name,
+                    CreatedBy = admin.Name,
+                };
+            modelBuilder.Entity<Area>().HasData(area);
 
-            modelBuilder
-                .Entity<Warehouse>()
-                .HasData(
-                    new Warehouse()
-                    {
-                        Active = true,
-                        Id = 1,
-                        Name = "Informática",
-                        Description = "Almoxarifado de informática",
-                        InstitutionId = 1,
-                        InstitutionName = "Servidor de testes",
-                        AreaId = 1,
-                        AreaName = "Teste",
-                    }
-                );
+            Warehouse warehouse =
+                new()
+                {
+                    Active = true,
+                    Id = 1,
+                    Name = "Informática",
+                    Description = "Almoxarifado de informática",
+                    InstitutionId = institutionTest.Id,
+                    InstitutionName = institutionTest.Name,
+                    AreaId = area.Id,
+                    AreaName = area.Name,
+                };
+            modelBuilder.Entity<Warehouse>().HasData(warehouse);
 
             modelBuilder
                 .Entity<Material>()
@@ -172,12 +169,12 @@ namespace StockTrack_API.Data
                         Description = "Notebook ThinkPad",
                         Manufacturer = "ThinkPad",
                         RecordNumber = 123456,
-                        InstitutionId = 1,
-                        InstitutionName = "Servidor de testes",
-                        AreaId = 1,
-                        AreaName = "Teste",
-                        WarehouseId = 1,
-                        WarehouseName = "Informática",
+                        InstitutionId = institutionTest.Id,
+                        InstitutionName = institutionTest.Name,
+                        AreaId = area.Id,
+                        AreaName = area.Name,
+                        WarehouseId = warehouse.Id,
+                        WarehouseName = warehouse.Name,
                     }
                 );
 
@@ -187,16 +184,21 @@ namespace StockTrack_API.Data
                     new Movimentation()
                     {
                         Id = 1,
+                        Name = "Área Teste",
                         InstitutionId = 1,
                         AreaId = 1,
-                        UserId = 1,
+                        UserId = admin.Id,
                         Description = "Adição de área \"Teste\"",
                         Date = DateTime.Now,
-                        Type = Models.MovimentationType.Entry,
-                        Reason = Models.MovimentationReason.Insertion,
+                        Type = MovimentationType.Entry,
+                        Reason = MovimentationReason.Insertion,
+                        Quantity = 1,
                     }
                 );
 
+            /*
+            * Definindo tabelas de referência
+            */
             modelBuilder
                 .Entity<UserTypeEntity>()
                 .HasData(
@@ -209,8 +211,22 @@ namespace StockTrack_API.Data
             modelBuilder
                 .Entity<MovimentationTypeEntity>()
                 .HasData(
-                    new MovimentationTypeEntity { Id = 1, Name = "ENTRY" },
-                    new MovimentationTypeEntity { Id = 2, Name = "EXIT" }
+                    new MovimentationTypeEntity { Id = 1, Type = "ENTRY" },
+                    new MovimentationTypeEntity { Id = 2, Type = "EXIT" }
+                );
+
+            modelBuilder
+                .Entity<MovimentationReasonEntity>()
+                .HasData(
+                    new MovimentationReasonEntity { Id = 1, Reason = "Insertion" },
+                    new MovimentationReasonEntity { Id = 2, Reason = "Edit" },
+                    new MovimentationReasonEntity { Id = 3, Reason = "ReturnFromLoan" },
+                    new MovimentationReasonEntity { Id = 4, Reason = "ReturnFromMaintenance" },
+                    new MovimentationReasonEntity { Id = 5, Reason = "Disposal" },
+                    new MovimentationReasonEntity { Id = 6, Reason = "Loan" },
+                    new MovimentationReasonEntity { Id = 7, Reason = "SentToMaintenance" },
+                    new MovimentationReasonEntity { Id = 8, Reason = "Removed" },
+                    new MovimentationReasonEntity { Id = 9, Reason = "Other" }
                 );
         }
 

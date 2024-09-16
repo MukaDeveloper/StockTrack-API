@@ -4,6 +4,8 @@ namespace StockTrack_API.Models.Interfaces
     {
         public int Id { get; set; }
         public int InstitutionId { get; set; }
+
+        public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
         public int? MaterialId { get; set; }
@@ -21,6 +23,8 @@ namespace StockTrack_API.Models.Interfaces
 
         public MovimentationType Type { get; set; }
         public MovimentationReason Reason { get; set; }
+
+        public decimal Quantity { get; set; }
         public DateTime Date { get; set; }
     }
 }

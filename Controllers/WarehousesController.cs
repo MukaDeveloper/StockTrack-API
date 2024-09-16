@@ -7,6 +7,8 @@ using StockTrack_API.Data;
 using StockTrack_API.Models.Enums;
 using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Request.Warehouse;
+using StockTrack_API.Services;
+using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
 {
@@ -17,11 +19,20 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly InstitutionValidationService _instituionService;
+        private readonly MovimentationService _movimentationService;
 
-        public WarehousesController(DataContext context, IHttpContextAccessor httpContextAccessor)
+        public WarehousesController(
+            DataContext context,
+            IHttpContextAccessor httpContextAccessor,
+            InstitutionValidationService instituionService,
+            MovimentationService movimentationService
+        )
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _instituionService = instituionService;
+            _movimentationService = movimentationService;
         }
 
         [HttpGet("get-all")]
@@ -29,15 +40,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor =
-                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
-                    ?? throw new Exception("Requisição inválida.");
-                int? institutionId = int.Parse(contextAcessor);
-
-                if (!institutionId.HasValue)
-                {
-                    throw new Exception("Identificação da instituição não localizada.");
-                }
+                int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Where(w => w.InstitutionId == institutionId)
@@ -56,15 +59,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor =
-                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
-                    ?? throw new Exception("Requisição inválida.");
-                int? institutionId = int.Parse(contextAcessor);
-
-                if (!institutionId.HasValue)
-                {
-                    throw new Exception("Identificação da instituição não localizada.");
-                }
+                int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Where(w =>
@@ -85,15 +80,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor =
-                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
-                    ?? throw new Exception("Requisição inválida.");
-                int? institutionId = int.Parse(contextAcessor);
-
-                if (!institutionId.HasValue)
-                {
-                    throw new Exception("Identificação da instituição não localizada.");
-                }
+                int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Where(w =>
@@ -125,17 +112,14 @@ namespace StockTrack_API.Controllers
                 }
 
                 string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-                string? context2 = _httpContextAccessor.HttpContext?.User.FindFirstValue(
-                    "institutionId"
-                );
 
-                if (context1 == null || context2 == null)
+                if (context1 == null)
                 {
                     throw new Exception("Requisição inválida.");
                 }
 
                 int userId = int.Parse(context1);
-                int institutionId = int.Parse(context2);
+                int institutionId = _instituionService.GetInstitutionId();
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
                 UserInstitution? userInstitution =
@@ -182,7 +166,8 @@ namespace StockTrack_API.Controllers
                         CreatedAt = DateTime.Now,
                         CreatedBy = user.Name,
                     };
-
+                area.Warehouses.Add(newWarehouse);
+                _context.ST_AREAS.Update(area);
                 await _context.ST_WAREHOUSES.AddAsync(newWarehouse);
                 await _context.SaveChangesAsync();
 
@@ -244,11 +229,12 @@ namespace StockTrack_API.Controllers
                 Area? areaBefore = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
                     x.Id == warehouse.AreaId
                 );
-                if (warehouse.AreaIdAfter != null)
+                Area? areaAfter = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
+                    x.Id == warehouse.AreaIdAfter
+                );
+
+                if (warehouse.AreaIdAfter != null && areaAfter != null)
                 {
-                    Area? areaAfter = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
-                        x.Id == warehouse.AreaIdAfter
-                    );
                     if (areaAfter?.InstitutionId != institutionId || areaAfter.Active == false)
                     {
                         throw new Exception("Área alvo não encontrada ou inválida");
@@ -277,9 +263,11 @@ namespace StockTrack_API.Controllers
                 {
                     warehouseToUpdate.Description = warehouse.Description;
                 }
-                if (warehouse.AreaIdAfter != null)
+                if (warehouse.AreaIdAfter != null && areaAfter != null)
                 {
                     warehouseToUpdate.AreaId = (int)warehouse.AreaIdAfter;
+                    warehouseToUpdate.Area = areaAfter;
+                    areaBefore.Warehouses.Remove(warehouseToUpdate);
                 }
                 warehouseToUpdate.UpdatedAt = DateTime.Now;
                 warehouseToUpdate.UpdatedBy = user.Name;

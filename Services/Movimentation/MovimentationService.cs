@@ -17,12 +17,14 @@ namespace StockTrack_API.Services
             int institutionId,
             int areaId,
             int userId,
-            string description = "Área adicionada"
+            string name,
+            string description = "Adição de área"
         )
         {
             Movimentation mov =
                 new()
                 {
+                    Name = name ?? "Nova área",
                     InstitutionId = institutionId,
                     AreaId = areaId,
                     Type = MovimentationType.Entry,
@@ -30,6 +32,7 @@ namespace StockTrack_API.Services
                     Date = DateTime.Now,
                     UserId = userId,
                     Description = description,
+                    Quantity = 1
                 };
 
             _context.ST_MOVIMENTATIONS.Add(mov);

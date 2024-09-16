@@ -4,24 +4,28 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
 using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
 {
     [Authorize]
     [ApiController]
     [Route("[Controller]")]
-    public class MovimentationController : ControllerBase
+    public class MovimentationsController : ControllerBase
     {
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly InstitutionValidationService _instituionService;
 
-        public MovimentationController(
+        public MovimentationsController(
             DataContext context,
-            IHttpContextAccessor httpContextAccessor
+            IHttpContextAccessor httpContextAccessor,
+            InstitutionValidationService instituionService
         )
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _instituionService = instituionService;
         }
 
         [HttpGet("get-by-id/{id}")] //Buscar pelo id
@@ -29,15 +33,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor =
-                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
-                    ?? throw new Exception("Requisição inválida.");
-                int? institutionId = int.Parse(contextAcessor);
-
-                if (!institutionId.HasValue)
-                {
-                    throw new Exception("Identificação da instituição não localizada.");
-                }
+                int institutionId = _instituionService.GetInstitutionId();
 
                 Movimentation? mov = await _context.ST_MOVIMENTATIONS.FirstOrDefaultAsync(iBusca =>
                     iBusca.Id == id
@@ -61,15 +57,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor =
-                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
-                    ?? throw new Exception("Requisição inválida.");
-                int? institutionId = int.Parse(contextAcessor);
-
-                if (!institutionId.HasValue)
-                {
-                    throw new Exception("Identificação da instituição não localizada.");
-                }
+                int institutionId = _instituionService.GetInstitutionId();
 
                 List<Movimentation> list = await _context
                     .ST_MOVIMENTATIONS.Where(m => m.InstitutionId == institutionId)

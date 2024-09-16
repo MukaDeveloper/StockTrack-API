@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
 using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
 {
@@ -14,11 +15,17 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly InstitutionValidationService _instituionService;
 
-        public MaterialsController(DataContext context, IHttpContextAccessor httpContextAccessor)
+        public MaterialsController(
+            DataContext context,
+            IHttpContextAccessor httpContextAccessor,
+            InstitutionValidationService institutionService
+        )
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _instituionService = institutionService;
         }
 
         [HttpGet("get-by-id/{id}")] //Buscar pelo id
@@ -26,15 +33,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor =
-                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
-                    ?? throw new Exception("Requisição inválida.");
-                int? institutionId = int.Parse(contextAcessor);
-
-                if (!institutionId.HasValue)
-                {
-                    throw new Exception("Identificação da instituição não localizada.");
-                }
+                int institutionId = _instituionService.GetInstitutionId();
 
                 Material? material = await _context.ST_MATERIALS.FirstOrDefaultAsync(iBusca =>
                     iBusca.Id == id
@@ -58,15 +57,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor =
-                    (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
-                    ?? throw new Exception("Requisição inválida.");
-                int? institutionId = int.Parse(contextAcessor);
-
-                if (!institutionId.HasValue)
-                {
-                    throw new Exception("Identificação da instituição não localizada.");
-                }
+                int institutionId = _instituionService.GetInstitutionId();
 
                 List<Material> list = await _context
                     .ST_MATERIALS.Where(m => m.InstitutionId == institutionId)
@@ -84,6 +75,8 @@ namespace StockTrack_API.Controllers
         {
             try
             {
+                int institutionId = _instituionService.GetInstitutionId();
+
                 await _context.ST_MATERIALS.AddAsync(newMaterial);
                 await _context.SaveChangesAsync();
 

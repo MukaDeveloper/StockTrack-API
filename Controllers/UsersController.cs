@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
 using StockTrack_API.Models.Interfaces;
-using StockTrack_API.Utils;
 using StockTrack_API.Models.Request.User;
+using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
 {
@@ -52,19 +52,23 @@ namespace StockTrack_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("auth")]
-        public async Task<IActionResult> AuthenticateAsync(AuthReq credentials)
+        public async Task<IActionResult> AuthenticateAsync(
+            AuthReq credentials,
+            bool noInstitution = false
+        )
         {
             try
             {
                 int? institutionId = credentials.InstitutionId;
 
-                if (
-                    credentials.Email.IsNullOrEmpty()
-                    || credentials.PasswordString.IsNullOrEmpty()
-                    || (!institutionId.HasValue && institutionId.Value <= 0)
-                )
+                if (credentials.Email.IsNullOrEmpty() || credentials.PasswordString.IsNullOrEmpty())
                 {
                     throw new Exception("Todos os campos são obrigatórios.");
+                }
+
+                if (institutionId == null && noInstitution == false)
+                {
+                    throw new Exception("Instituição não informada.");
                 }
 
                 User? user = await _context.ST_USERS.FirstOrDefaultAsync(x =>
@@ -83,14 +87,18 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Usuário ou senha incorreto(s).");
                 }
 
-                bool hasInstitution = await _context.ST_USER_INSTITUTIONS.AnyAsync(ui =>
-                    ui.UserId == user.Id &&
-                    ui.InstitutionId == institutionId
-                );
-
-                if (!hasInstitution)
+                if (!noInstitution && institutionId != null)
                 {
-                    throw new Exception("Usuário não pertence à instituição especificada.");
+                    bool hasInstitution = await _context.ST_USER_INSTITUTIONS.AnyAsync(ui =>
+                        ui.UserId == user.Id && ui.InstitutionId == institutionId
+                    );
+
+                    if (!hasInstitution)
+                    {
+                        throw new Exception("Usuário não pertence à instituição especificada.");
+                    }
+
+                    user.InstitutionId = institutionId ?? credentials.InstitutionId;
                 }
 
                 user.AccessDate = DateTime.Now;
@@ -99,7 +107,7 @@ namespace StockTrack_API.Controllers
 
                 user.PasswordHash = null;
                 user.PasswordSalt = null;
-                user.InstitutionId = institutionId ?? credentials.InstitutionId;
+                ;
                 string Token = CreateToken(user);
 
                 return Ok(EnvelopeFactory.factoryEnvelope(Token));
@@ -136,7 +144,6 @@ namespace StockTrack_API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
 
         private string CreateToken(User user)
         {
@@ -181,9 +188,7 @@ namespace StockTrack_API.Controllers
 
         private int GetUserId()
         {
-            return int.Parse(
-                _httpContextAccessor.HttpContext?.User.FindFirstValue("id")!
-            );
+            return int.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue("id")!);
         }
     }
 }

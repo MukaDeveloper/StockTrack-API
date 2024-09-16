@@ -8,11 +8,37 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace StockTrack_API.Migrations
 {
     /// <inheritdoc />
-    public partial class RebuildContext : Migration
+    public partial class MiddleCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "MovimentationReasonEntity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MovimentationReasonEntity", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MovimentationTypeEntity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MovimentationTypeEntity", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "ST_INSTITUTIONS",
                 columns: table => new
@@ -35,18 +61,6 @@ namespace StockTrack_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ST_MOVIMENTATIONS",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ST_MOVIMENTATIONS", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ST_USERS",
                 columns: table => new
                 {
@@ -63,6 +77,19 @@ namespace StockTrack_API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ST_USERS", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserTypeEntity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserTypeEntity", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -183,6 +210,74 @@ namespace StockTrack_API.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ST_MOVIMENTATIONS",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InstitutionId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MaterialId = table.Column<int>(type: "int", nullable: true),
+                    WarehouseId = table.Column<int>(type: "int", nullable: true),
+                    AreaId = table.Column<int>(type: "int", nullable: true),
+                    UserId = table.Column<int>(type: "int", nullable: true),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Reason = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ST_MOVIMENTATIONS", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ST_MOVIMENTATIONS_ST_AREAS_AreaId",
+                        column: x => x.AreaId,
+                        principalTable: "ST_AREAS",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ST_MOVIMENTATIONS_ST_MATERIALS_MaterialId",
+                        column: x => x.MaterialId,
+                        principalTable: "ST_MATERIALS",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ST_MOVIMENTATIONS_ST_USERS_UserId",
+                        column: x => x.UserId,
+                        principalTable: "ST_USERS",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ST_MOVIMENTATIONS_ST_WAREHOUSES_WarehouseId",
+                        column: x => x.WarehouseId,
+                        principalTable: "ST_WAREHOUSES",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.InsertData(
+                table: "MovimentationReasonEntity",
+                columns: new[] { "Id", "Reason" },
+                values: new object[,]
+                {
+                    { 1, "Insertion" },
+                    { 2, "Edit" },
+                    { 3, "ReturnFromLoan" },
+                    { 4, "ReturnFromMaintenance" },
+                    { 5, "Disposal" },
+                    { 6, "Loan" },
+                    { 7, "SentToMaintenance" },
+                    { 8, "Removed" },
+                    { 9, "Other" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "MovimentationTypeEntity",
+                columns: new[] { "Id", "Type" },
+                values: new object[,]
+                {
+                    { 1, "ENTRY" },
+                    { 2, "EXIT" }
+                });
+
             migrationBuilder.InsertData(
                 table: "ST_INSTITUTIONS",
                 columns: new[] { "Id", "CEP", "City", "Complement", "Name", "Neightboor", "Nickname", "State", "StreetName", "StreetNumber" },
@@ -195,12 +290,23 @@ namespace StockTrack_API.Migrations
             migrationBuilder.InsertData(
                 table: "ST_USERS",
                 columns: new[] { "Id", "AccessDate", "Active", "Email", "Name", "PasswordHash", "PasswordSalt", "PhotoUrl" },
-                values: new object[] { 1, null, true, "admin@stocktrack.com", "Admin", new byte[] { 250, 205, 250, 114, 75, 65, 123, 172, 104, 219, 219, 124, 123, 5, 50, 203, 139, 187, 85, 65, 49, 223, 153, 211, 34, 134, 8, 11, 254, 94, 21, 230, 168, 117, 147, 255, 151, 83, 33, 224, 35, 136, 206, 21, 193, 72, 218, 202, 240, 82, 162, 179, 252, 10, 130, 62, 215, 113, 210, 42, 36, 185, 129, 72 }, new byte[] { 211, 226, 18, 248, 186, 109, 17, 231, 25, 25, 105, 65, 247, 238, 135, 208, 64, 53, 91, 215, 232, 56, 167, 60, 120, 143, 221, 61, 222, 232, 2, 178, 33, 193, 59, 29, 176, 101, 13, 142, 93, 108, 253, 227, 236, 0, 218, 210, 34, 93, 75, 52, 44, 8, 174, 207, 181, 162, 147, 36, 185, 2, 7, 123, 19, 194, 92, 184, 35, 252, 138, 138, 14, 13, 159, 37, 203, 80, 192, 113, 157, 7, 101, 123, 186, 158, 102, 28, 63, 3, 23, 202, 153, 207, 239, 82, 211, 31, 234, 96, 187, 203, 247, 128, 175, 69, 132, 56, 94, 46, 125, 141, 40, 168, 12, 79, 95, 245, 92, 145, 218, 195, 21, 125, 69, 222, 147, 207 }, "https://imgur.com/mOXzZLE.png" });
+                values: new object[] { 1, null, true, "admin@stocktrack.com", "Admin", new byte[] { 117, 169, 51, 200, 118, 19, 7, 244, 120, 100, 67, 53, 105, 9, 143, 4, 158, 108, 52, 146, 214, 202, 243, 90, 174, 127, 121, 182, 59, 192, 203, 98, 149, 205, 218, 179, 220, 190, 157, 18, 72, 93, 47, 168, 102, 61, 26, 244, 222, 248, 16, 51, 222, 116, 41, 232, 198, 83, 26, 149, 77, 125, 55, 85 }, new byte[] { 94, 195, 71, 4, 208, 214, 244, 36, 31, 245, 65, 231, 10, 99, 133, 135, 76, 199, 49, 115, 4, 160, 235, 116, 239, 84, 93, 129, 174, 2, 201, 65, 134, 162, 28, 160, 64, 198, 5, 127, 143, 52, 209, 153, 41, 66, 37, 107, 86, 203, 10, 221, 229, 48, 1, 99, 221, 164, 72, 206, 252, 70, 106, 219, 0, 227, 131, 176, 227, 236, 165, 9, 215, 105, 187, 133, 211, 245, 41, 52, 224, 122, 213, 62, 104, 225, 94, 41, 176, 142, 24, 174, 201, 145, 177, 210, 220, 51, 107, 159, 106, 98, 52, 54, 53, 45, 199, 34, 101, 59, 38, 6, 181, 251, 164, 87, 249, 181, 87, 6, 50, 38, 115, 187, 1, 54, 183, 177 }, "https://imgur.com/mOXzZLE.png" });
+
+            migrationBuilder.InsertData(
+                table: "UserTypeEntity",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "USER" },
+                    { 2, "WAREHOUSEMAN" },
+                    { 3, "COORDINATOR" },
+                    { 4, "SUPPORT" }
+                });
 
             migrationBuilder.InsertData(
                 table: "ST_AREAS",
                 columns: new[] { "Id", "Active", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "InstitutionName", "Name", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1, true, new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6900), "", "Área de Testes", 1, "Servidor de testes", "Teste", null, null });
+                values: new object[] { 1, true, new DateTime(2024, 9, 16, 2, 30, 58, 934, DateTimeKind.Utc).AddTicks(8554), "Admin", "Área de Testes", 1, "Servidor de testes", "Teste", null, null });
 
             migrationBuilder.InsertData(
                 table: "ST_USER_INSTITUTIONS",
@@ -212,14 +318,19 @@ namespace StockTrack_API.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "ST_MOVIMENTATIONS",
+                columns: new[] { "Id", "AreaId", "Date", "Description", "InstitutionId", "MaterialId", "Name", "Quantity", "Reason", "Type", "UserId", "WarehouseId" },
+                values: new object[] { 1, 1, new DateTime(2024, 9, 15, 23, 30, 58, 934, DateTimeKind.Local).AddTicks(8645), "Adição de área \"Teste\"", 1, null, "Área Teste", 1m, 1, 1, 1, null });
+
+            migrationBuilder.InsertData(
                 table: "ST_WAREHOUSES",
                 columns: new[] { "Id", "Active", "AreaId", "AreaName", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "InstitutionName", "Name", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1, true, 1, "Teste", new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6918), "", "Almoxarifado de informática", 1, "Servidor de testes", "Informática", null, null });
+                values: new object[] { 1, true, 1, "Teste", new DateTime(2024, 9, 16, 2, 30, 58, 934, DateTimeKind.Utc).AddTicks(8579), "", "Almoxarifado de informática", 1, "Servidor de testes", "Informática", null, null });
 
             migrationBuilder.InsertData(
                 table: "ST_MATERIALS",
                 columns: new[] { "Id", "Active", "AreaId", "AreaName", "CreatedAt", "CreatedBy", "Description", "ImageURL", "InstitutionId", "InstitutionName", "Manufacturer", "MaterialType", "Name", "RecordNumber", "UpdatedAt", "UpdatedBy", "WarehouseId", "WarehouseName" },
-                values: new object[] { 1, true, 1, "Teste", new DateTime(2024, 9, 4, 23, 46, 21, 834, DateTimeKind.Utc).AddTicks(6931), "", "Notebook ThinkPad", "", 1, "Servidor de testes", "ThinkPad", 0, "Notebook", 123456, null, null, 1, "Informática" });
+                values: new object[] { 1, true, 1, "Teste", new DateTime(2024, 9, 16, 2, 30, 58, 934, DateTimeKind.Utc).AddTicks(8616), "", "Notebook ThinkPad", "", 1, "Servidor de testes", "ThinkPad", 0, "Notebook", 123456, null, null, 1, "Informática" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ST_AREAS_InstitutionId",
@@ -232,6 +343,26 @@ namespace StockTrack_API.Migrations
                 column: "WarehouseId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ST_MOVIMENTATIONS_AreaId",
+                table: "ST_MOVIMENTATIONS",
+                column: "AreaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ST_MOVIMENTATIONS_MaterialId",
+                table: "ST_MOVIMENTATIONS",
+                column: "MaterialId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ST_MOVIMENTATIONS_UserId",
+                table: "ST_MOVIMENTATIONS",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ST_MOVIMENTATIONS_WarehouseId",
+                table: "ST_MOVIMENTATIONS",
+                column: "WarehouseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ST_WAREHOUSES_AreaId",
                 table: "ST_WAREHOUSES",
                 column: "AreaId");
@@ -241,7 +372,10 @@ namespace StockTrack_API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ST_MATERIALS");
+                name: "MovimentationReasonEntity");
+
+            migrationBuilder.DropTable(
+                name: "MovimentationTypeEntity");
 
             migrationBuilder.DropTable(
                 name: "ST_MOVIMENTATIONS");
@@ -250,10 +384,16 @@ namespace StockTrack_API.Migrations
                 name: "ST_USER_INSTITUTIONS");
 
             migrationBuilder.DropTable(
-                name: "ST_WAREHOUSES");
+                name: "UserTypeEntity");
+
+            migrationBuilder.DropTable(
+                name: "ST_MATERIALS");
 
             migrationBuilder.DropTable(
                 name: "ST_USERS");
+
+            migrationBuilder.DropTable(
+                name: "ST_WAREHOUSES");
 
             migrationBuilder.DropTable(
                 name: "ST_AREAS");

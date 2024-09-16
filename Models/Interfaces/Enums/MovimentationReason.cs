@@ -12,6 +12,9 @@ namespace StockTrack_API.Models
         Disposal = 5,
         Loan = 6,
         SentToMaintenance = 7,
-        Other = 8,
+        Removed = 8,
+        
+        // Other reason
+        Other = 9,
     }
 }
