@@ -118,7 +118,7 @@ namespace StockTrack_API.Controllers
                 await _movimentationService.AddArea(
                     institutionId,
                     newArea.Id,
-                    user.Id,
+                    user.Name,
                     newArea.Name
                 );
                 return Ok(EnvelopeFactory.factoryEnvelope(newArea));
@@ -180,6 +180,12 @@ namespace StockTrack_API.Controllers
                 _context.ST_AREAS.Update(areaToUpdate);
                 await _context.SaveChangesAsync();
 
+                await _movimentationService.UpdateArea(
+                    institutionId,
+                    areaToUpdate.Id,
+                    user.Name,
+                    areaToUpdate.Name
+                );
                 return Ok(EnvelopeFactory.factoryEnvelope(areaToUpdate));
             }
             catch (Exception ex)

@@ -7,11 +7,11 @@ namespace StockTrack_API.Models.Interfaces
 
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string MovimentationBy { get; set; } = string.Empty;
 
         public int? MaterialId { get; set; }
         public Material? Material { get; set; }
 
-        // Foreign key to Warehouse or Area (optional)
         public int? WarehouseId { get; set; }
         public Warehouse? Warehouse { get; set; }
 
@@ -21,6 +21,7 @@ namespace StockTrack_API.Models.Interfaces
         public int? UserId { get; set; }
         public User? User { get; set; }
 
+        public MovimentationEvent Event { get; set; }
         public MovimentationType Type { get; set; }
         public MovimentationReason Reason { get; set; }
 

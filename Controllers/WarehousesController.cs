@@ -155,7 +155,7 @@ namespace StockTrack_API.Controllers
                 await _movimentationService.AddWarehouse(
                     institutionId,
                     newWarehouse.Id,
-                    user.Id,
+                    user.Name,
                     newWarehouse.Name
                 );
                 return Ok(EnvelopeFactory.factoryEnvelope(newWarehouse));
@@ -238,6 +238,12 @@ namespace StockTrack_API.Controllers
                 _context.ST_WAREHOUSES.Update(warehouseToUpdate);
                 await _context.SaveChangesAsync();
 
+                await _movimentationService.UpdateWarehouse(
+                    institutionId,
+                    warehouseToUpdate.Id,
+                    user.Name,
+                    warehouseToUpdate.Name
+                );
                 return Ok(EnvelopeFactory.factoryEnvelope(warehouseToUpdate));
             }
             catch (Exception ex)

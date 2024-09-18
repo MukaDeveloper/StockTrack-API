@@ -185,11 +185,12 @@ namespace StockTrack_API.Data
                     {
                         Id = 1,
                         Name = "Área Teste",
+                        Description = "Adição de área \"Teste\"",
+                        MovimentationBy = admin.Name,
                         InstitutionId = 1,
                         AreaId = 1,
-                        UserId = admin.Id,
-                        Description = "Adição de área \"Teste\"",
                         Date = DateTime.Now,
+                        Event = MovimentationEvent.Area,
                         Type = MovimentationType.Entry,
                         Reason = MovimentationReason.Insertion,
                         Quantity = 1,
@@ -213,6 +214,17 @@ namespace StockTrack_API.Data
                 .HasData(
                     new MovimentationTypeEntity { Id = 1, Type = "ENTRY" },
                     new MovimentationTypeEntity { Id = 2, Type = "EXIT" }
+                );
+
+            modelBuilder
+                .Entity<MovimentationEventEntity>()
+                .HasData(
+                    new MovimentationEventEntity { Id = 1, Event = "Area" },
+                    new MovimentationEventEntity { Id = 2, Event = "Warehouse" },
+                    new MovimentationEventEntity { Id = 3, Event = "Material" },
+                    new MovimentationEventEntity { Id = 4, Event = "Loan" },
+                    new MovimentationEventEntity { Id = 5, Event = "Maintenance" },
+                    new MovimentationEventEntity { Id = 6, Event = "General" }
                 );
 
             modelBuilder
