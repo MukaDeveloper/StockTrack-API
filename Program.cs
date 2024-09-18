@@ -18,7 +18,8 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<MovimentationService>();
-builder.Services.AddScoped<InstitutionValidationService>();
+builder.Services.AddScoped<InstitutionService>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

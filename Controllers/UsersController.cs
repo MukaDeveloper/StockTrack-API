@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
 using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Request.User;
+using StockTrack_API.Services;
 using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
@@ -17,18 +18,12 @@ namespace StockTrack_API.Controllers
     public class UsersController : Controller
     {
         private readonly DataContext _context;
-        private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserService _userService;
 
-        public UsersController(
-            DataContext context,
-            IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor
-        )
+        public UsersController(DataContext context, UserService userService)
         {
             _context = context;
-            _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
         }
 
         [HttpGet("get-by-uid/{userId}")]
@@ -52,10 +47,7 @@ namespace StockTrack_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("auth")]
-        public async Task<IActionResult> AuthenticateAsync(
-            AuthReq credentials,
-            bool noInstitution = false
-        )
+        public async Task<IActionResult> AuthenticateAsync(UserAuthReq credentials)
         {
             try
             {
@@ -66,7 +58,7 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Todos os campos são obrigatórios.");
                 }
 
-                if (institutionId == null && noInstitution == false)
+                if (institutionId == null)
                 {
                     throw new Exception("Instituição não informada.");
                 }
@@ -87,28 +79,23 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Usuário ou senha incorreto(s).");
                 }
 
-                if (!noInstitution && institutionId != null)
+                bool hasInstitution = await _context.ST_USER_INSTITUTIONS.AnyAsync(ui =>
+                    ui.UserId == user.Id && ui.InstitutionId == institutionId
+                );
+
+                if (!hasInstitution)
                 {
-                    bool hasInstitution = await _context.ST_USER_INSTITUTIONS.AnyAsync(ui =>
-                        ui.UserId == user.Id && ui.InstitutionId == institutionId
-                    );
-
-                    if (!hasInstitution)
-                    {
-                        throw new Exception("Usuário não pertence à instituição especificada.");
-                    }
-
-                    user.InstitutionId = institutionId ?? credentials.InstitutionId;
+                    throw new Exception("Usuário não pertence à instituição especificada.");
                 }
 
                 user.AccessDate = DateTime.Now;
+                user.InstitutionId = institutionId ?? credentials.InstitutionId;
                 _context.ST_USERS.Update(user);
                 await _context.SaveChangesAsync();
 
                 user.PasswordHash = null;
                 user.PasswordSalt = null;
-                ;
-                string Token = CreateToken(user);
+                string Token = _userService.CreateToken(user);
 
                 return Ok(EnvelopeFactory.factoryEnvelope(Token));
             }
@@ -123,7 +110,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                if (await ExistUser(user.Email))
+                if (await _userService.ExistUser(user.Email))
                     throw new Exception("Usuário já existente.");
 
                 Cryptography.CreatePasswordHash(
@@ -143,52 +130,6 @@ namespace StockTrack_API.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private string CreateToken(User user)
-        {
-            List<Claim> claims = new List<Claim>()
-            {
-                new Claim("id", user.Id.ToString()),
-                new Claim("name", user.Name),
-                new Claim("email", user.Email),
-                new Claim("photoUrl", user.PhotoUrl),
-                new Claim("institutionId", user.InstitutionId.ToString()),
-            };
-
-            SymmetricSecurityKey key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration.GetSection("TokenConfiguration:Key").Value!)
-            );
-
-            SigningCredentials creds = new SigningCredentials(
-                key,
-                SecurityAlgorithms.HmacSha512Signature
-            );
-
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(30),
-                SigningCredentials = creds,
-            };
-
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-
-        private async Task<bool> ExistUser(string email)
-        {
-            if (await _context.ST_USERS.AnyAsync(x => x.Email.ToLower() == email.ToLower()))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private int GetUserId()
-        {
-            return int.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue("id")!);
         }
     }
 }

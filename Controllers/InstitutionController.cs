@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
 using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Services;
+using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
 {
@@ -13,15 +15,18 @@ namespace StockTrack_API.Controllers
     public class InstitutionController : ControllerBase
     {
         private readonly DataContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserService _userService;
+        private readonly InstitutionService _institutionService;
 
         public InstitutionController(
             DataContext context,
-            IHttpContextAccessor httpContextAccessor
+            UserService userService,
+            InstitutionService institutionService
         )
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
+            _institutionService = institutionService;
         }
 
         /*
@@ -32,16 +37,11 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? contextAcessor = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+                int institutionId = _institutionService.GetInstitutionId();
 
-                if (contextAcessor == null) {
-                    throw new Exception("Requisição inválida.");
-                }
-
-                int institutionId = int.Parse(contextAcessor);
-
-                Institution? institution = await _context.ST_INSTITUTIONS
-                    .FirstOrDefaultAsync(a => a.Id == institutionId);
+                Institution? institution = await _context.ST_INSTITUTIONS.FirstOrDefaultAsync(a =>
+                    a.Id == institutionId
+                );
 
                 if (institution == null)
                 {
@@ -56,12 +56,32 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllAsync()
+        [HttpGet("get-all-by-user")]
+        public async Task<IActionResult> GetAllByUserAsync()
         {
             try
             {
-                List<Institution> list = await _context.ST_INSTITUTIONS.ToListAsync();
+                User user = _userService.GetUser();
+
+                List<int> institutionIds = await _context
+                    .ST_USER_INSTITUTIONS.Where(ui => ui.UserId == user.Id)
+                    .Select(ui => ui.InstitutionId)
+                    .ToListAsync();
+
+                if (institutionIds.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                List<Institution> list = await _context
+                    .ST_INSTITUTIONS.Where(i => institutionIds.Contains(i.Id))
+                    .ToListAsync();
+
+                if (list.Count == 0)
+                {
+                    return NotFound();
+                }
+
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
             catch (Exception ex)
@@ -69,7 +89,7 @@ namespace StockTrack_API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
+        
         [HttpPost("create")]
         public async Task<IActionResult> AddAsync(Institution newInstitution)
         {

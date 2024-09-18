@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
+using StockTrack_API.Models.Enums;
 using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Services;
 using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
@@ -14,18 +16,18 @@ namespace StockTrack_API.Controllers
     public class MaterialsController : ControllerBase
     {
         private readonly DataContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly InstitutionValidationService _instituionService;
+        private readonly InstitutionService _instituionService;
+        private readonly UserService _userService;
 
         public MaterialsController(
             DataContext context,
-            IHttpContextAccessor httpContextAccessor,
-            InstitutionValidationService institutionService
+            InstitutionService institutionService,
+            UserService userService
         )
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
             _instituionService = institutionService;
+            _userService = userService;
         }
 
         [HttpGet("get-by-id/{id}")] //Buscar pelo id
@@ -70,12 +72,18 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        [HttpPost("create")]
+        [HttpPost("add-new")]
         public async Task<IActionResult> AddAsync(Material newMaterial)
         {
             try
             {
                 int institutionId = _instituionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+
+                if (userInstitution.UserType == UserType.USER || user.Active == false)
+                {
+                    throw new Exception("Sem autorização.");
+                }
 
                 await _context.ST_MATERIALS.AddAsync(newMaterial);
                 await _context.SaveChangesAsync();

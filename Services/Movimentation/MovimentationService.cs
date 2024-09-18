@@ -40,5 +40,33 @@ namespace StockTrack_API.Services
 
             return mov;
         }
+
+        public async Task<Movimentation> AddWarehouse(
+            int institutionId,
+            int warehouseId,
+            int userId,
+            string name,
+            string description = "Adição de almoxarifado"
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Novo almoxarifado",
+                    InstitutionId = institutionId,
+                    WarehouseId = warehouseId,
+                    Type = MovimentationType.Entry,
+                    Reason = MovimentationReason.Insertion,
+                    Date = DateTime.Now,
+                    UserId = userId,
+                    Description = description,
+                    Quantity = 1
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
     }
 }

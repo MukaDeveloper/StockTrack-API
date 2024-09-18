@@ -15,12 +15,12 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly InstitutionValidationService _instituionService;
+        private readonly InstitutionService _instituionService;
 
         public MovimentationsController(
             DataContext context,
             IHttpContextAccessor httpContextAccessor,
-            InstitutionValidationService instituionService
+            InstitutionService instituionService
         )
         {
             _context = context;

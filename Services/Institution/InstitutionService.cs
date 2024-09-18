@@ -2,11 +2,11 @@ using System.Security.Claims;
 
 namespace StockTrack_API.Utils
 {
-    public class InstitutionValidationService
+    public class InstitutionService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public InstitutionValidationService(IHttpContextAccessor httpContextAccessor)
+        public InstitutionService(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }

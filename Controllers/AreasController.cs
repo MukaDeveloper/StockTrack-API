@@ -18,20 +18,20 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
         private readonly MovimentationService _movimentationService;
-        private readonly InstitutionValidationService _instituionService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly InstitutionService _instituionService;
+        private readonly UserService _userService;
 
         public AreasController(
             DataContext context,
             MovimentationService movimentationService,
-            InstitutionValidationService instituionService,
-            IHttpContextAccessor httpContextAccessor
+            InstitutionService instituionService,
+            UserService userService
         )
         {
             _context = context;
             _movimentationService = movimentationService;
             _instituionService = instituionService;
-            _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
         }
 
         [HttpGet("get-by-id/{id}")]
@@ -77,32 +77,18 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPost("add-new")]
-        public async Task<IActionResult> AddAsync(AddNewReq data)
+        public async Task<IActionResult> AddAsync(AddNewAreaReq data)
         {
             try
             {
-                string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-
-                if (context1 == null)
-                {
-                    throw new Exception("Requisição inválida.");
-                }
-
-                int userId = int.Parse(context1);
                 int institutionId = _instituionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
-                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
-                UserInstitution? userInstitution =
-                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
-                        ui.UserId == userId && ui.InstitutionId == institutionId
-                    );
-
-                if (user == null || userInstitution == null)
-                {
-                    throw new Exception("Usuário não encontrado");
-                }
-
-                if (userInstitution.UserType == UserType.USER)
+                if (
+                    userInstitution.UserType == UserType.USER
+                    || userInstitution.UserType == UserType.WAREHOUSEMAN
+                    || user.Active == false
+                )
                 {
                     throw new Exception("Sem autorização.");
                 }
@@ -129,7 +115,12 @@ namespace StockTrack_API.Controllers
                 await _context.ST_AREAS.AddAsync(newArea);
                 await _context.SaveChangesAsync();
 
-                await _movimentationService.AddArea(institutionId, newArea.Id, user.Id, newArea.Name);
+                await _movimentationService.AddArea(
+                    institutionId,
+                    newArea.Id,
+                    user.Id,
+                    newArea.Name
+                );
                 return Ok(EnvelopeFactory.factoryEnvelope(newArea));
             }
             catch (Exception ex)
@@ -143,28 +134,14 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                string? context1 = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-
-                if (context1 == null)
-                {
-                    throw new Exception("Requisição inválida.");
-                }
-
-                int userId = int.Parse(context1);
                 int institutionId = _instituionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
-                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == userId);
-                UserInstitution? userInstitution =
-                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
-                        ui.UserId == userId && ui.InstitutionId == institutionId
-                    );
-
-                if (user == null || userInstitution == null)
-                {
-                    throw new Exception("Usuário não encontrado");
-                }
-
-                if (userInstitution.UserType == UserType.USER || user.Active == false)
+                if (
+                    userInstitution.UserType == UserType.USER
+                    || userInstitution.UserType == UserType.WAREHOUSEMAN
+                    || user.Active == false
+                )
                 {
                     throw new Exception("Sem autorização.");
                 }
