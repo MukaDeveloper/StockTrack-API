@@ -205,8 +205,8 @@ namespace StockTrack_API.Data
                         InstitutionId = 1,
                         AreaId = 1,
                         Date = DateTime.Now,
-                        Event = MovimentationEvent.Area,
-                        Type = MovimentationType.Entry,
+                        Event = MovimentationEvent.Entry,
+                        Type = MovimentationType.Area,
                         Reason = MovimentationReason.Insertion,
                         Quantity = 1,
                     }

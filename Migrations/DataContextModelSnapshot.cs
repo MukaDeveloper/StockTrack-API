@@ -190,13 +190,13 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4643),
+                            CreatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(59),
                             CreatedBy = "Admin",
                             Description = "Área de Testes",
                             InstitutionId = 1,
                             InstitutionName = "Servidor de testes",
                             Name = "Teste",
-                            UpdatedAt = new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4645),
+                            UpdatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(65),
                             UpdatedBy = ""
                         });
                 });
@@ -350,7 +350,7 @@ namespace StockTrack_API.Migrations
                             Id = 1,
                             Active = true,
                             AreaId = 1,
-                            CreatedAt = new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4708),
+                            CreatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(197),
                             CreatedBy = "",
                             Description = "Notebook ThinkPad",
                             ImageURL = "",
@@ -360,7 +360,7 @@ namespace StockTrack_API.Migrations
                             MaterialType = 0,
                             Name = "Notebook",
                             RecordNumber = 123456,
-                            UpdatedAt = new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4708),
+                            UpdatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(197),
                             UpdatedBy = "",
                             WarehouseId = 1
                         });
@@ -433,7 +433,7 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             AreaId = 1,
-                            Date = new DateTime(2024, 9, 22, 23, 20, 36, 968, DateTimeKind.Local).AddTicks(4736),
+                            Date = new DateTime(2024, 9, 23, 17, 50, 47, 844, DateTimeKind.Local).AddTicks(253),
                             Description = "Adição de área \"Teste\"",
                             Event = 1,
                             InstitutionId = 1,
@@ -488,8 +488,8 @@ namespace StockTrack_API.Migrations
                             Active = true,
                             Email = "admin@stocktrack.com",
                             Name = "Admin",
-                            PasswordHash = new byte[] { 230, 187, 78, 90, 207, 151, 132, 47, 208, 5, 135, 101, 163, 182, 107, 170, 196, 183, 217, 113, 249, 59, 231, 89, 220, 62, 140, 116, 182, 81, 169, 147, 144, 212, 7, 239, 139, 120, 90, 108, 172, 146, 98, 163, 171, 217, 170, 155, 47, 47, 188, 117, 211, 114, 148, 9, 101, 91, 223, 218, 74, 14, 248, 199 },
-                            PasswordSalt = new byte[] { 120, 219, 80, 49, 254, 145, 226, 199, 189, 12, 82, 18, 2, 145, 17, 50, 136, 231, 130, 183, 99, 48, 200, 112, 159, 100, 157, 32, 175, 24, 216, 180, 97, 120, 121, 243, 206, 35, 52, 49, 44, 49, 125, 72, 35, 32, 64, 110, 236, 199, 124, 250, 207, 164, 93, 37, 80, 49, 98, 7, 149, 247, 171, 233, 86, 101, 41, 185, 30, 146, 249, 17, 16, 236, 116, 81, 107, 100, 229, 74, 196, 62, 17, 158, 6, 34, 21, 166, 13, 80, 239, 229, 149, 165, 117, 163, 41, 179, 233, 159, 196, 193, 157, 52, 55, 84, 110, 147, 236, 11, 246, 207, 16, 185, 171, 240, 16, 26, 187, 164, 52, 30, 198, 50, 63, 168, 143, 38 },
+                            PasswordHash = new byte[] { 27, 123, 7, 251, 51, 189, 77, 206, 29, 106, 21, 81, 97, 79, 145, 78, 52, 176, 249, 231, 170, 241, 219, 55, 47, 23, 126, 57, 35, 214, 166, 172, 30, 25, 26, 80, 95, 92, 243, 188, 36, 234, 230, 84, 189, 109, 234, 106, 251, 143, 44, 128, 171, 158, 54, 224, 224, 59, 22, 237, 176, 188, 132, 96 },
+                            PasswordSalt = new byte[] { 162, 231, 68, 233, 181, 252, 137, 112, 146, 4, 223, 159, 200, 243, 245, 60, 195, 247, 72, 241, 250, 65, 55, 77, 158, 212, 247, 54, 215, 105, 230, 210, 44, 120, 35, 24, 95, 15, 235, 141, 149, 196, 154, 127, 42, 72, 5, 58, 155, 214, 128, 207, 82, 255, 216, 68, 156, 215, 29, 227, 174, 226, 227, 3, 124, 53, 157, 33, 44, 254, 49, 148, 46, 230, 235, 50, 62, 73, 18, 167, 143, 185, 78, 250, 70, 238, 41, 183, 34, 11, 18, 111, 91, 93, 71, 124, 168, 112, 32, 222, 123, 128, 3, 9, 73, 216, 186, 215, 245, 161, 128, 120, 170, 118, 41, 140, 169, 160, 83, 54, 31, 91, 16, 59, 142, 235, 67, 219 },
                             PhotoUrl = "https://imgur.com/mOXzZLE.png"
                         });
                 });
@@ -591,13 +591,13 @@ namespace StockTrack_API.Migrations
                             Id = 1,
                             Active = true,
                             AreaId = 1,
-                            CreatedAt = new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4672),
+                            CreatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(116),
                             CreatedBy = "",
                             Description = "Almoxarifado de informática",
                             InstitutionId = 1,
                             InstitutionName = "Servidor de testes",
                             Name = "Informática",
-                            UpdatedAt = new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4672),
+                            UpdatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(117),
                             UpdatedBy = ""
                         });
                 });
