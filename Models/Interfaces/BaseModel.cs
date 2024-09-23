@@ -4,17 +4,13 @@ namespace StockTrack_API.Models.Interfaces
 {
     public abstract class BaseModel
     {
-        [Required]
         public string CreatedBy { get; set; } = string.Empty;
-
-        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public string? UpdatedBy { get; set; }
+        public string UpdatedBy { get; set; } = string.Empty;
 
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        [Required]
         public bool Active { get; set; } = true;
 
         public int InstitutionId { get; set; }

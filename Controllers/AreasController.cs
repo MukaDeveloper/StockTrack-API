@@ -43,6 +43,7 @@ namespace StockTrack_API.Controllers
 
                 Area? area = await _context
                     .ST_AREAS.Where(a => a.InstitutionId == institutionId)
+                    .Include(a => a.Institution)
                     .FirstOrDefaultAsync(a => a.Id == id);
 
                 if (area == null)
@@ -67,6 +68,7 @@ namespace StockTrack_API.Controllers
 
                 List<Area> list = await _context
                     .ST_AREAS.Where(area => area.InstitutionId == institutionId)
+                    .Include(a => a.Institution)
                     .ToListAsync();
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
@@ -85,8 +87,8 @@ namespace StockTrack_API.Controllers
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
                 if (
-                    userInstitution.UserType == UserType.USER
-                    || userInstitution.UserType == UserType.WAREHOUSEMAN
+                    userInstitution.UserRole == UserRole.USER
+                    || userInstitution.UserRole == UserRole.WAREHOUSEMAN
                     || user.Active == false
                 )
                 {
@@ -121,7 +123,17 @@ namespace StockTrack_API.Controllers
                     user.Name,
                     newArea.Name
                 );
-                return Ok(EnvelopeFactory.factoryEnvelope(newArea));
+
+                Area? areaAdded = await _context
+                    .ST_AREAS.Include(a => a.Institution)
+                    .FirstOrDefaultAsync(a => a.Id == newArea.Id);
+
+                if (areaAdded == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(EnvelopeFactory.factoryEnvelope(areaAdded));
             }
             catch (Exception ex)
             {
@@ -138,8 +150,8 @@ namespace StockTrack_API.Controllers
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
                 if (
-                    userInstitution.UserType == UserType.USER
-                    || userInstitution.UserType == UserType.WAREHOUSEMAN
+                    userInstitution.UserRole == UserRole.USER
+                    || userInstitution.UserRole == UserRole.WAREHOUSEMAN
                     || user.Active == false
                 )
                 {
@@ -149,7 +161,7 @@ namespace StockTrack_API.Controllers
                 if (area.Name != null)
                 {
                     Area? areaCheck = await _context.ST_AREAS.FirstOrDefaultAsync(a =>
-                        a.Name.Equals(area.Name, StringComparison.CurrentCultureIgnoreCase)
+                        a.Name.ToLower() == area.Name.ToLower()
                     );
                     if (areaCheck != null)
                     {
@@ -157,9 +169,9 @@ namespace StockTrack_API.Controllers
                     }
                 }
 
-                Area? areaToUpdate = await _context.ST_AREAS.FirstOrDefaultAsync(a =>
-                    a.Id == area.Id
-                );
+                Area? areaToUpdate = await _context
+                    .ST_AREAS.Include(a => a.Institution)
+                    .FirstOrDefaultAsync(a => a.Id == area.Id);
 
                 if (areaToUpdate == null)
                 {
@@ -187,6 +199,41 @@ namespace StockTrack_API.Controllers
                     areaToUpdate.Name
                 );
                 return Ok(EnvelopeFactory.factoryEnvelope(areaToUpdate));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{areaId}")]
+        public async Task<IActionResult> DeleteAsync(int areaId)
+        {
+            try
+            {
+                int institutionId = _instituionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+
+                if (userInstitution.UserRole == UserRole.USER || user.Active == false)
+                {
+                    throw new Exception("Sem autorização.");
+                }
+
+                Area? areaToDelete =
+                    await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == areaId)
+                    ?? throw new Exception("Área não encontrada");
+
+                List<Warehouse>? listWarehouses = await _context
+                    .ST_WAREHOUSES.Where(wh => wh.AreaId == areaId)
+                    .ToListAsync();
+                if (listWarehouses.Count > 0)
+                {
+                    throw new Exception(
+                        "Essa área não pode ser excluída pois contém almoxarifados vinculados"
+                    );
+                }
+
+                return Ok();
             }
             catch (Exception ex)
             {

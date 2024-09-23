@@ -77,6 +77,7 @@ namespace StockTrack_API.Services
                 new Claim("email", user.Email),
                 new Claim("photoUrl", user.PhotoUrl),
                 new Claim("institutionId", user.InstitutionId.ToString()),
+                new Claim("role", user.Role.ToString()),
             };
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(

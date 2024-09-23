@@ -1,5 +1,6 @@
-using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using StockTrack_API.Models.Enums;
 
 namespace StockTrack_API.Models.Interfaces
 {
@@ -9,8 +10,8 @@ namespace StockTrack_API.Models.Interfaces
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public byte[]? PasswordHash { get; set; } 
-        public byte[]? PasswordSalt { get; set; } 
+        public byte[]? PasswordHash { get; set; }
+        public byte[]? PasswordSalt { get; set; }
         public string PhotoUrl { get; set; } = string.Empty;
         public DateTime? AccessDate { get; set; }
 
@@ -18,9 +19,14 @@ namespace StockTrack_API.Models.Interfaces
         public List<UserInstitution>? UserInstitutions { get; set; }
 
         [NotMapped]
+        public UserRole Role { get; set; }
+
+        [NotMapped]
         public string PasswordString { get; set; } = string.Empty;
+
         [NotMapped]
         public int InstitutionId { get; set; }
+
         [NotMapped]
         public string Token { get; set; } = string.Empty;
     }

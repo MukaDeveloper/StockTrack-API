@@ -1,6 +1,6 @@
 namespace StockTrack_API.Models.Enums
 {
-    public enum UserType
+    public enum UserRole
     {
         USER = 1,
         WAREHOUSEMAN = 2,

@@ -8,11 +8,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace StockTrack_API.Migrations
 {
     /// <inheritdoc />
-    public partial class MiddleCreate : Migration
+    public partial class MiddleEndCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "MovimentationEventEntity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Event = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MovimentationEventEntity", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "MovimentationReasonEntity",
                 columns: table => new
@@ -80,7 +93,7 @@ namespace StockTrack_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserTypeEntity",
+                name: "UserRoleEntity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -89,7 +102,7 @@ namespace StockTrack_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserTypeEntity", x => x.Id);
+                    table.PrimaryKey("PK_UserRoleEntity", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -102,8 +115,8 @@ namespace StockTrack_API.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Active = table.Column<bool>(type: "bit", nullable: false),
                     InstitutionId = table.Column<int>(type: "int", nullable: false),
                     InstitutionName = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -127,7 +140,7 @@ namespace StockTrack_API.Migrations
                     InstitutionId = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     InstitutionName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserType = table.Column<int>(type: "int", nullable: true)
+                    UserRole = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -155,11 +168,10 @@ namespace StockTrack_API.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AreaId = table.Column<int>(type: "int", nullable: false),
-                    AreaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Active = table.Column<bool>(type: "bit", nullable: false),
                     InstitutionId = table.Column<int>(type: "int", nullable: false),
                     InstitutionName = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -188,13 +200,11 @@ namespace StockTrack_API.Migrations
                     RecordNumber = table.Column<int>(type: "int", nullable: false),
                     MaterialType = table.Column<int>(type: "int", nullable: false),
                     AreaId = table.Column<int>(type: "int", nullable: false),
-                    AreaName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WarehouseId = table.Column<int>(type: "int", nullable: false),
-                    WarehouseName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Active = table.Column<bool>(type: "bit", nullable: false),
                     InstitutionId = table.Column<int>(type: "int", nullable: false),
                     InstitutionName = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -219,13 +229,15 @@ namespace StockTrack_API.Migrations
                     InstitutionId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MovimentationBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MaterialId = table.Column<int>(type: "int", nullable: true),
                     WarehouseId = table.Column<int>(type: "int", nullable: true),
                     AreaId = table.Column<int>(type: "int", nullable: true),
                     UserId = table.Column<int>(type: "int", nullable: true),
+                    Event = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     Reason = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Quantity = table.Column<float>(type: "real", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -251,6 +263,19 @@ namespace StockTrack_API.Migrations
                         column: x => x.WarehouseId,
                         principalTable: "ST_WAREHOUSES",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.InsertData(
+                table: "MovimentationEventEntity",
+                columns: new[] { "Id", "Event" },
+                values: new object[,]
+                {
+                    { 1, "Area" },
+                    { 2, "Warehouse" },
+                    { 3, "Material" },
+                    { 4, "Loan" },
+                    { 5, "Maintenance" },
+                    { 6, "General" }
                 });
 
             migrationBuilder.InsertData(
@@ -290,10 +315,10 @@ namespace StockTrack_API.Migrations
             migrationBuilder.InsertData(
                 table: "ST_USERS",
                 columns: new[] { "Id", "AccessDate", "Active", "Email", "Name", "PasswordHash", "PasswordSalt", "PhotoUrl" },
-                values: new object[] { 1, null, true, "admin@stocktrack.com", "Admin", new byte[] { 117, 169, 51, 200, 118, 19, 7, 244, 120, 100, 67, 53, 105, 9, 143, 4, 158, 108, 52, 146, 214, 202, 243, 90, 174, 127, 121, 182, 59, 192, 203, 98, 149, 205, 218, 179, 220, 190, 157, 18, 72, 93, 47, 168, 102, 61, 26, 244, 222, 248, 16, 51, 222, 116, 41, 232, 198, 83, 26, 149, 77, 125, 55, 85 }, new byte[] { 94, 195, 71, 4, 208, 214, 244, 36, 31, 245, 65, 231, 10, 99, 133, 135, 76, 199, 49, 115, 4, 160, 235, 116, 239, 84, 93, 129, 174, 2, 201, 65, 134, 162, 28, 160, 64, 198, 5, 127, 143, 52, 209, 153, 41, 66, 37, 107, 86, 203, 10, 221, 229, 48, 1, 99, 221, 164, 72, 206, 252, 70, 106, 219, 0, 227, 131, 176, 227, 236, 165, 9, 215, 105, 187, 133, 211, 245, 41, 52, 224, 122, 213, 62, 104, 225, 94, 41, 176, 142, 24, 174, 201, 145, 177, 210, 220, 51, 107, 159, 106, 98, 52, 54, 53, 45, 199, 34, 101, 59, 38, 6, 181, 251, 164, 87, 249, 181, 87, 6, 50, 38, 115, 187, 1, 54, 183, 177 }, "https://imgur.com/mOXzZLE.png" });
+                values: new object[] { 1, null, true, "admin@stocktrack.com", "Admin", new byte[] { 230, 187, 78, 90, 207, 151, 132, 47, 208, 5, 135, 101, 163, 182, 107, 170, 196, 183, 217, 113, 249, 59, 231, 89, 220, 62, 140, 116, 182, 81, 169, 147, 144, 212, 7, 239, 139, 120, 90, 108, 172, 146, 98, 163, 171, 217, 170, 155, 47, 47, 188, 117, 211, 114, 148, 9, 101, 91, 223, 218, 74, 14, 248, 199 }, new byte[] { 120, 219, 80, 49, 254, 145, 226, 199, 189, 12, 82, 18, 2, 145, 17, 50, 136, 231, 130, 183, 99, 48, 200, 112, 159, 100, 157, 32, 175, 24, 216, 180, 97, 120, 121, 243, 206, 35, 52, 49, 44, 49, 125, 72, 35, 32, 64, 110, 236, 199, 124, 250, 207, 164, 93, 37, 80, 49, 98, 7, 149, 247, 171, 233, 86, 101, 41, 185, 30, 146, 249, 17, 16, 236, 116, 81, 107, 100, 229, 74, 196, 62, 17, 158, 6, 34, 21, 166, 13, 80, 239, 229, 149, 165, 117, 163, 41, 179, 233, 159, 196, 193, 157, 52, 55, 84, 110, 147, 236, 11, 246, 207, 16, 185, 171, 240, 16, 26, 187, 164, 52, 30, 198, 50, 63, 168, 143, 38 }, "https://imgur.com/mOXzZLE.png" });
 
             migrationBuilder.InsertData(
-                table: "UserTypeEntity",
+                table: "UserRoleEntity",
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
@@ -306,11 +331,11 @@ namespace StockTrack_API.Migrations
             migrationBuilder.InsertData(
                 table: "ST_AREAS",
                 columns: new[] { "Id", "Active", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "InstitutionName", "Name", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1, true, new DateTime(2024, 9, 16, 2, 30, 58, 934, DateTimeKind.Utc).AddTicks(8554), "Admin", "Área de Testes", 1, "Servidor de testes", "Teste", null, null });
+                values: new object[] { 1, true, new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4643), "Admin", "Área de Testes", 1, "Servidor de testes", "Teste", new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4645), "" });
 
             migrationBuilder.InsertData(
                 table: "ST_USER_INSTITUTIONS",
-                columns: new[] { "InstitutionId", "UserId", "InstitutionName", "UserName", "UserType" },
+                columns: new[] { "InstitutionId", "UserId", "InstitutionName", "UserName", "UserRole" },
                 values: new object[,]
                 {
                     { 1, 1, "Servidor de testes", "Admin", 4 },
@@ -319,18 +344,18 @@ namespace StockTrack_API.Migrations
 
             migrationBuilder.InsertData(
                 table: "ST_MOVIMENTATIONS",
-                columns: new[] { "Id", "AreaId", "Date", "Description", "InstitutionId", "MaterialId", "Name", "Quantity", "Reason", "Type", "UserId", "WarehouseId" },
-                values: new object[] { 1, 1, new DateTime(2024, 9, 15, 23, 30, 58, 934, DateTimeKind.Local).AddTicks(8645), "Adição de área \"Teste\"", 1, null, "Área Teste", 1m, 1, 1, 1, null });
+                columns: new[] { "Id", "AreaId", "Date", "Description", "Event", "InstitutionId", "MaterialId", "MovimentationBy", "Name", "Quantity", "Reason", "Type", "UserId", "WarehouseId" },
+                values: new object[] { 1, 1, new DateTime(2024, 9, 22, 23, 20, 36, 968, DateTimeKind.Local).AddTicks(4736), "Adição de área \"Teste\"", 1, 1, null, "Admin", "Área Teste", 1f, 1, 1, null, null });
 
             migrationBuilder.InsertData(
                 table: "ST_WAREHOUSES",
-                columns: new[] { "Id", "Active", "AreaId", "AreaName", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "InstitutionName", "Name", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1, true, 1, "Teste", new DateTime(2024, 9, 16, 2, 30, 58, 934, DateTimeKind.Utc).AddTicks(8579), "", "Almoxarifado de informática", 1, "Servidor de testes", "Informática", null, null });
+                columns: new[] { "Id", "Active", "AreaId", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "InstitutionName", "Name", "UpdatedAt", "UpdatedBy" },
+                values: new object[] { 1, true, 1, new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4672), "", "Almoxarifado de informática", 1, "Servidor de testes", "Informática", new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4672), "" });
 
             migrationBuilder.InsertData(
                 table: "ST_MATERIALS",
-                columns: new[] { "Id", "Active", "AreaId", "AreaName", "CreatedAt", "CreatedBy", "Description", "ImageURL", "InstitutionId", "InstitutionName", "Manufacturer", "MaterialType", "Name", "RecordNumber", "UpdatedAt", "UpdatedBy", "WarehouseId", "WarehouseName" },
-                values: new object[] { 1, true, 1, "Teste", new DateTime(2024, 9, 16, 2, 30, 58, 934, DateTimeKind.Utc).AddTicks(8616), "", "Notebook ThinkPad", "", 1, "Servidor de testes", "ThinkPad", 0, "Notebook", 123456, null, null, 1, "Informática" });
+                columns: new[] { "Id", "Active", "AreaId", "CreatedAt", "CreatedBy", "Description", "ImageURL", "InstitutionId", "InstitutionName", "Manufacturer", "MaterialType", "Name", "RecordNumber", "UpdatedAt", "UpdatedBy", "WarehouseId" },
+                values: new object[] { 1, true, 1, new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4708), "", "Notebook ThinkPad", "", 1, "Servidor de testes", "ThinkPad", 0, "Notebook", 123456, new DateTime(2024, 9, 23, 2, 20, 36, 968, DateTimeKind.Utc).AddTicks(4708), "", 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ST_AREAS_InstitutionId",
@@ -372,6 +397,9 @@ namespace StockTrack_API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "MovimentationEventEntity");
+
+            migrationBuilder.DropTable(
                 name: "MovimentationReasonEntity");
 
             migrationBuilder.DropTable(
@@ -384,7 +412,7 @@ namespace StockTrack_API.Migrations
                 name: "ST_USER_INSTITUTIONS");
 
             migrationBuilder.DropTable(
-                name: "UserTypeEntity");
+                name: "UserRoleEntity");
 
             migrationBuilder.DropTable(
                 name: "ST_MATERIALS");

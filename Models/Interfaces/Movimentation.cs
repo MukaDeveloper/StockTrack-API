@@ -25,7 +25,7 @@ namespace StockTrack_API.Models.Interfaces
         public MovimentationType Type { get; set; }
         public MovimentationReason Reason { get; set; }
 
-        public decimal Quantity { get; set; }
+        public float Quantity { get; set; }
         public DateTime Date { get; set; }
     }
 }

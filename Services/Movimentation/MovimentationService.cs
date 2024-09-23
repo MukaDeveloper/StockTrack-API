@@ -21,19 +21,20 @@ namespace StockTrack_API.Services
             string description = "Adição de área"
         )
         {
-            Movimentation mov = new()
-            {
-                Name = name ?? "Nova área",
-                InstitutionId = institutionId,
-                MovimentationBy = userName,
-                AreaId = areaId,
-                Event = MovimentationEvent.Area,
-                Type = MovimentationType.Entry,
-                Reason = MovimentationReason.Insertion, // Inserção de nova área
-                Date = DateTime.Now,
-                Description = description,
-                Quantity = 1
-            };
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Nova área",
+                    InstitutionId = institutionId,
+                    MovimentationBy = userName,
+                    AreaId = areaId,
+                    Event = MovimentationEvent.Area,
+                    Type = MovimentationType.Entry,
+                    Reason = MovimentationReason.Insertion, // Inserção de nova área
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = 1,
+                };
 
             _context.ST_MOVIMENTATIONS.Add(mov);
             await _context.SaveChangesAsync();
@@ -49,19 +50,20 @@ namespace StockTrack_API.Services
             string description = "Edição de área"
         )
         {
-            Movimentation mov = new()
-            {
-                Name = name ?? "Área editada",
-                InstitutionId = institutionId,
-                MovimentationBy = userName,
-                AreaId = areaId,
-                Event = MovimentationEvent.Area,
-                Type = MovimentationType.Entry,
-                Reason = MovimentationReason.Edit,
-                Date = DateTime.Now,
-                Description = description,
-                Quantity = 1,
-            };
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Área editada",
+                    InstitutionId = institutionId,
+                    MovimentationBy = userName,
+                    AreaId = areaId,
+                    Event = MovimentationEvent.Area,
+                    Type = MovimentationType.Entry,
+                    Reason = MovimentationReason.Edit,
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = 1,
+                };
 
             _context.ST_MOVIMENTATIONS.Add(mov);
             await _context.SaveChangesAsync();
@@ -70,26 +72,26 @@ namespace StockTrack_API.Services
         }
 
         public async Task<Movimentation> AddWarehouse(
-            int institutionId,
-            int warehouseId,
+            Warehouse wh,
             string userName,
-            string name,
             string description = "Adição de almoxarifado"
         )
         {
-            Movimentation mov = new()
-            {
-                Name = name ?? "Novo almoxarifado",
-                InstitutionId = institutionId,
-                MovimentationBy = userName,
-                WarehouseId = warehouseId,
-                Event = MovimentationEvent.Warehouse,
-                Type = MovimentationType.Entry,
-                Reason = MovimentationReason.Insertion,
-                Date = DateTime.Now,
-                Description = description,
-                Quantity = 1
-            };
+            Movimentation mov =
+                new()
+                {
+                    Name = wh.Name ?? "Novo almoxarifado",
+                    InstitutionId = wh.InstitutionId,
+                    MovimentationBy = userName,
+                    WarehouseId = wh.Id,
+                    Warehouse = wh,
+                    Event = MovimentationEvent.Warehouse,
+                    Type = MovimentationType.Entry,
+                    Reason = MovimentationReason.Insertion,
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = 1,
+                };
 
             _context.ST_MOVIMENTATIONS.Add(mov);
             await _context.SaveChangesAsync();
@@ -105,19 +107,20 @@ namespace StockTrack_API.Services
             string description = "Edição de almoxarifado"
         )
         {
-            Movimentation mov = new()
-            {
-                Name = name ?? "Almoxarifado editado",
-                InstitutionId = institutionId,
-                MovimentationBy = userName,
-                WarehouseId = warehouseId,
-                Event = MovimentationEvent.Warehouse,
-                Type = MovimentationType.Entry,
-                Reason = MovimentationReason.Edit,
-                Date = DateTime.Now,
-                Description = description,
-                Quantity = 1
-            };
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Almoxarifado editado",
+                    InstitutionId = institutionId,
+                    MovimentationBy = userName,
+                    WarehouseId = warehouseId,
+                    Event = MovimentationEvent.Warehouse,
+                    Type = MovimentationType.Entry,
+                    Reason = MovimentationReason.Edit,
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = 1,
+                };
 
             _context.ST_MOVIMENTATIONS.Add(mov);
             await _context.SaveChangesAsync();
@@ -131,22 +134,23 @@ namespace StockTrack_API.Services
             string userName,
             string name,
             string description = "Adição de material",
-            decimal quantity = 1
+            float quantity = 1
         )
         {
-            Movimentation mov = new()
-            {
-                Name = name ?? "Adição de material",
-                InstitutionId = institutionId,
-                MovimentationBy = userName,
-                MaterialId = materialId,
-                Event = MovimentationEvent.Material,
-                Type = MovimentationType.Entry,
-                Reason = MovimentationReason.Insertion,
-                Date = DateTime.Now,
-                Description = description,
-                Quantity = quantity
-            };
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Adição de material",
+                    InstitutionId = institutionId,
+                    MovimentationBy = userName,
+                    MaterialId = materialId,
+                    Event = MovimentationEvent.Material,
+                    Type = MovimentationType.Entry,
+                    Reason = MovimentationReason.Insertion,
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = quantity,
+                };
 
             _context.ST_MOVIMENTATIONS.Add(mov);
             await _context.SaveChangesAsync();
@@ -160,22 +164,23 @@ namespace StockTrack_API.Services
             string userName,
             string name,
             string description = "Edição de material",
-            decimal quantity = 1
+            float quantity = 1
         )
         {
-            Movimentation mov = new()
-            {
-                Name = name ?? "Edição de material",
-                InstitutionId = institutionId,
-                MovimentationBy = userName,
-                MaterialId = materialId,
-                Event = MovimentationEvent.Material,
-                Type = MovimentationType.Entry,
-                Reason = MovimentationReason.Edit,
-                Date = DateTime.Now,
-                Description = description,
-                Quantity = quantity
-            };
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Edição de material",
+                    InstitutionId = institutionId,
+                    MovimentationBy = userName,
+                    MaterialId = materialId,
+                    Event = MovimentationEvent.Material,
+                    Type = MovimentationType.Entry,
+                    Reason = MovimentationReason.Edit,
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = quantity,
+                };
 
             _context.ST_MOVIMENTATIONS.Add(mov);
             await _context.SaveChangesAsync();

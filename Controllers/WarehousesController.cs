@@ -43,7 +43,8 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Where(w => w.InstitutionId == institutionId)
+                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .Where(w => w.InstitutionId == institutionId)
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -62,9 +63,8 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Where(w =>
-                        w.InstitutionId == institutionId && w.AreaId == areaId
-                    )
+                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId)
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -83,9 +83,8 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Where(w =>
-                        w.InstitutionId == institutionId && w.Id == warehouseId
-                    )
+                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId)
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -114,7 +113,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
-                if (userInstitution.UserType == UserType.USER || user.Active == false)
+                if (userInstitution.UserRole == UserRole.USER || user.Active == false)
                 {
                     throw new Exception("Sem autorização.");
                 }
@@ -141,7 +140,6 @@ namespace StockTrack_API.Controllers
                         Name = data.Name,
                         Description = data.Description,
                         AreaId = data.AreaId,
-                        AreaName = area.Name,
                         InstitutionId = institutionId,
                         InstitutionName = userInstitution.InstitutionName,
                         CreatedAt = DateTime.Now,
@@ -152,13 +150,18 @@ namespace StockTrack_API.Controllers
                 await _context.ST_WAREHOUSES.AddAsync(newWarehouse);
                 await _context.SaveChangesAsync();
 
-                await _movimentationService.AddWarehouse(
-                    institutionId,
-                    newWarehouse.Id,
-                    user.Name,
-                    newWarehouse.Name
-                );
-                return Ok(EnvelopeFactory.factoryEnvelope(newWarehouse));
+                await _movimentationService.AddWarehouse(newWarehouse, user.Name);
+
+                Warehouse? warehouseAdded = await _context
+                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .FirstOrDefaultAsync(w => w.Id == newWarehouse.Id);
+
+                if (warehouseAdded == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(EnvelopeFactory.factoryEnvelope(warehouseAdded));
             }
             catch (Exception ex)
             {
@@ -175,7 +178,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
-                if (userInstitution.UserType == UserType.USER || user.Active == false)
+                if (userInstitution.UserRole == UserRole.USER || user.Active == false)
                 {
                     throw new Exception("Sem autorização.");
                 }
@@ -183,8 +186,7 @@ namespace StockTrack_API.Controllers
                 if (warehouse.Name != null)
                 {
                     Warehouse? warehouseCheck = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(
-                        x =>
-                            x.Name.Equals(warehouse.Name, StringComparison.CurrentCultureIgnoreCase)
+                        x => x.Name.ToLower() == warehouse.Name.ToLower()
                     );
                     if (warehouseCheck != null)
                     {
@@ -199,9 +201,9 @@ namespace StockTrack_API.Controllers
                     x.Id == warehouse.AreaIdAfter
                 );
 
-                Warehouse? warehouseToUpdate = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x =>
-                    x.Id == warehouse.Id
-                );
+                Warehouse? warehouseToUpdate = await _context
+                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .FirstOrDefaultAsync(x => x.Id == warehouse.Id);
 
                 if (areaBefore?.InstitutionId != institutionId || areaBefore.Active == false)
                 {
@@ -260,7 +262,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
-                if (userInstitution.UserType == UserType.USER || user.Active == false)
+                if (userInstitution.UserRole == UserRole.USER || user.Active == false)
                 {
                     throw new Exception("Sem autorização.");
                 }

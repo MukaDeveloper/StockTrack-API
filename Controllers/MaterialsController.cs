@@ -80,7 +80,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
-                if (userInstitution.UserType == UserType.USER || user.Active == false)
+                if (userInstitution.UserRole == UserRole.USER || user.Active == false)
                 {
                     throw new Exception("Sem autorização.");
                 }

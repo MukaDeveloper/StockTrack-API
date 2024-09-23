@@ -63,6 +63,24 @@ namespace StockTrack_API.Data
                 .WithMany(m => m.Materials)
                 .HasForeignKey(w => w.WarehouseId);
 
+            modelBuilder
+                .Entity<Movimentation>()
+                .HasOne(m => m.Area)
+                .WithMany()
+                .HasForeignKey(m => m.AreaId);
+
+            modelBuilder
+                .Entity<Movimentation>()
+                .HasOne(m => m.Warehouse)
+                .WithMany()
+                .HasForeignKey(m => m.WarehouseId);
+
+            modelBuilder
+                .Entity<Movimentation>()
+                .HasOne(m => m.Material)
+                .WithMany()
+                .HasForeignKey(m => m.MaterialId);
+
             Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
             User admin = new User()
             {
@@ -119,7 +137,7 @@ namespace StockTrack_API.Data
                         UserName = admin.Name,
                         InstitutionId = institutionTest.Id,
                         InstitutionName = institutionTest.Name,
-                        UserType = UserType.SUPPORT,
+                        UserRole = UserRole.SUPPORT,
                     },
                     new UserInstitution()
                     {
@@ -127,7 +145,7 @@ namespace StockTrack_API.Data
                         UserName = admin.Name,
                         InstitutionId = 064,
                         InstitutionName = "Horácio Augusto da Silveira",
-                        UserType = UserType.COORDINATOR,
+                        UserRole = UserRole.COORDINATOR,
                     }
                 );
 
@@ -154,7 +172,6 @@ namespace StockTrack_API.Data
                     InstitutionId = institutionTest.Id,
                     InstitutionName = institutionTest.Name,
                     AreaId = area.Id,
-                    AreaName = area.Name,
                 };
             modelBuilder.Entity<Warehouse>().HasData(warehouse);
 
@@ -172,9 +189,7 @@ namespace StockTrack_API.Data
                         InstitutionId = institutionTest.Id,
                         InstitutionName = institutionTest.Name,
                         AreaId = area.Id,
-                        AreaName = area.Name,
                         WarehouseId = warehouse.Id,
-                        WarehouseName = warehouse.Name,
                     }
                 );
 
@@ -201,12 +216,12 @@ namespace StockTrack_API.Data
             * Definindo tabelas de referência
             */
             modelBuilder
-                .Entity<UserTypeEntity>()
+                .Entity<UserRoleEntity>()
                 .HasData(
-                    new UserTypeEntity { Id = 1, Name = "USER" },
-                    new UserTypeEntity { Id = 2, Name = "WAREHOUSEMAN" },
-                    new UserTypeEntity { Id = 3, Name = "COORDINATOR" },
-                    new UserTypeEntity { Id = 4, Name = "SUPPORT" }
+                    new UserRoleEntity { Id = 1, Name = "USER" },
+                    new UserRoleEntity { Id = 2, Name = "WAREHOUSEMAN" },
+                    new UserRoleEntity { Id = 3, Name = "COORDINATOR" },
+                    new UserRoleEntity { Id = 4, Name = "SUPPORT" }
                 );
 
             modelBuilder

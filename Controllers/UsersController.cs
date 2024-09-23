@@ -79,17 +79,19 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Usuário ou senha incorreto(s).");
                 }
 
-                bool hasInstitution = await _context.ST_USER_INSTITUTIONS.AnyAsync(ui =>
-                    ui.UserId == user.Id && ui.InstitutionId == institutionId
-                );
+                UserInstitution? userInstitution =
+                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                        ui.UserId == user.Id && ui.InstitutionId == institutionId
+                    );
 
-                if (!hasInstitution)
+                if (userInstitution == null)
                 {
                     throw new Exception("Usuário não pertence à instituição especificada.");
                 }
 
                 user.AccessDate = DateTime.Now;
                 user.InstitutionId = institutionId ?? credentials.InstitutionId;
+                user.Role = userInstitution.UserRole;
                 _context.ST_USERS.Update(user);
                 await _context.SaveChangesAsync();
 
