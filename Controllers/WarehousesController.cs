@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +42,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
                     .Where(w => w.InstitutionId == institutionId)
                     .ToListAsync();
 
@@ -63,7 +62,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
                     .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId)
                     .ToListAsync();
 
@@ -83,8 +82,28 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
                     .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId)
+                    .ToListAsync();
+
+                return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("search-by-name/{name}")]
+        public async Task<IActionResult> SearchByName(string nameQuery)
+        {
+            try
+            {
+                int institutionId = _instituionService.GetInstitutionId();
+
+                List<Warehouse> list = await _context
+                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
+                    .Where(w => w.InstitutionId == institutionId && EF.Functions.Like(w.Name, "%" + nameQuery + "%"))
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -141,7 +160,6 @@ namespace StockTrack_API.Controllers
                         Description = data.Description,
                         AreaId = data.AreaId,
                         InstitutionId = institutionId,
-                        InstitutionName = userInstitution.InstitutionName,
                         CreatedAt = DateTime.Now,
                         CreatedBy = user.Name,
                     };
@@ -153,7 +171,7 @@ namespace StockTrack_API.Controllers
                 await _movimentationService.AddWarehouse(newWarehouse, user.Name);
 
                 Warehouse? warehouseAdded = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
                     .FirstOrDefaultAsync(w => w.Id == newWarehouse.Id);
 
                 if (warehouseAdded == null)
@@ -202,7 +220,7 @@ namespace StockTrack_API.Controllers
                 );
 
                 Warehouse? warehouseToUpdate = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
                     .FirstOrDefaultAsync(x => x.Id == warehouse.Id);
 
                 if (areaBefore?.InstitutionId != institutionId || areaBefore.Active == false)
@@ -270,13 +288,15 @@ namespace StockTrack_API.Controllers
                 Warehouse? warehouseToDelete =
                     await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Id == warehouseId)
                     ?? throw new Exception("Almoxarifado não encontrado");
-                List<Material>? listMaterial = await _context
-                    .ST_MATERIALS.Where(m => m.WarehouseId == warehouseId)
+
+                List<MaterialWarehouses>? listMaterialWarehouses = await _context
+                    .ST_MATERIAL_WAREHOUSES.Where(m => m.WarehouseId == warehouseId)
                     .ToListAsync();
-                if (listMaterial.Count > 0)
+
+                if (listMaterialWarehouses.Count > 0)
                 {
                     throw new Exception(
-                        "Almoxarifado não pode ser excluído pois contém materiais vinculados"
+                        $"Almoxarifado não pode ser excluído pois contém {listMaterialWarehouses.Count} materiais vinculados"
                     );
                 }
 

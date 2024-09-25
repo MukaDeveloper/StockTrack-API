@@ -12,8 +12,8 @@ using StockTrack_API.Data;
 namespace StockTrack_API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240923205048_MiddleEndCreate")]
-    partial class MiddleEndCreate
+    [Migration("20240925161708_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -167,10 +167,6 @@ namespace StockTrack_API.Migrations
                     b.Property<int>("InstitutionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("InstitutionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -193,13 +189,12 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(59),
+                            CreatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(772),
                             CreatedBy = "Admin",
                             Description = "Área de Testes",
                             InstitutionId = 1,
-                            InstitutionName = "Servidor de testes",
                             Name = "Teste",
-                            UpdatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(65),
+                            UpdatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(774),
                             UpdatedBy = ""
                         });
                 });
@@ -211,6 +206,10 @@ namespace StockTrack_API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccessCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CEP")
                         .IsRequired()
@@ -256,6 +255,7 @@ namespace StockTrack_API.Migrations
                         new
                         {
                             Id = 1,
+                            AccessCode = "000",
                             CEP = "02110010",
                             City = "Sao Paulo",
                             Complement = "",
@@ -268,7 +268,8 @@ namespace StockTrack_API.Migrations
                         },
                         new
                         {
-                            Id = 64,
+                            Id = 2,
+                            AccessCode = "064",
                             CEP = "02110010",
                             City = "Sao Paulo",
                             Complement = "",
@@ -292,9 +293,6 @@ namespace StockTrack_API.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int>("AreaId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -313,10 +311,6 @@ namespace StockTrack_API.Migrations
                     b.Property<int>("InstitutionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("InstitutionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Manufacturer")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -324,9 +318,16 @@ namespace StockTrack_API.Migrations
                     b.Property<int>("MaterialType")
                         .HasColumnType("int");
 
+                    b.Property<string>("Measure")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("Quantity")
+                        .HasColumnType("real");
 
                     b.Property<int>("RecordNumber")
                         .HasColumnType("int");
@@ -338,12 +339,9 @@ namespace StockTrack_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("WarehouseId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("WarehouseId");
+                    b.HasIndex("InstitutionId");
 
                     b.ToTable("ST_MATERIALS", (string)null);
 
@@ -352,20 +350,87 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            AreaId = 1,
-                            CreatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(197),
+                            CreatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(812),
                             CreatedBy = "",
                             Description = "Notebook ThinkPad",
                             ImageURL = "",
                             InstitutionId = 1,
-                            InstitutionName = "Servidor de testes",
                             Manufacturer = "ThinkPad",
                             MaterialType = 0,
+                            Measure = "",
                             Name = "Notebook",
+                            Quantity = 0f,
                             RecordNumber = 123456,
-                            UpdatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(197),
-                            UpdatedBy = "",
-                            WarehouseId = 1
+                            UpdatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(813),
+                            UpdatedBy = ""
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Active = true,
+                            CreatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(815),
+                            CreatedBy = "",
+                            Description = "Multímetro Salcas",
+                            ImageURL = "",
+                            InstitutionId = 1,
+                            Manufacturer = "Salcas",
+                            MaterialType = 0,
+                            Measure = "",
+                            Name = "Multímetro",
+                            Quantity = 0f,
+                            RecordNumber = 1234567,
+                            UpdatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(815),
+                            UpdatedBy = ""
+                        });
+                });
+
+            modelBuilder.Entity("StockTrack_API.Models.Interfaces.MaterialWarehouses", b =>
+                {
+                    b.Property<int>("MaterialId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InstitutionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MaterialId", "WarehouseId");
+
+                    b.HasIndex("InstitutionId");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.ToTable("ST_MATERIAL_WAREHOUSES");
+
+                    b.HasData(
+                        new
+                        {
+                            MaterialId = 1,
+                            WarehouseId = 1,
+                            Active = true,
+                            CreatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(831),
+                            CreatedBy = "",
+                            InstitutionId = 0,
+                            UpdatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(831),
+                            UpdatedBy = ""
                         });
                 });
 
@@ -436,7 +501,7 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             AreaId = 1,
-                            Date = new DateTime(2024, 9, 23, 17, 50, 47, 844, DateTimeKind.Local).AddTicks(253),
+                            Date = new DateTime(2024, 9, 25, 13, 17, 7, 872, DateTimeKind.Local).AddTicks(900),
                             Description = "Adição de área \"Teste\"",
                             Event = 1,
                             InstitutionId = 1,
@@ -491,8 +556,8 @@ namespace StockTrack_API.Migrations
                             Active = true,
                             Email = "admin@stocktrack.com",
                             Name = "Admin",
-                            PasswordHash = new byte[] { 27, 123, 7, 251, 51, 189, 77, 206, 29, 106, 21, 81, 97, 79, 145, 78, 52, 176, 249, 231, 170, 241, 219, 55, 47, 23, 126, 57, 35, 214, 166, 172, 30, 25, 26, 80, 95, 92, 243, 188, 36, 234, 230, 84, 189, 109, 234, 106, 251, 143, 44, 128, 171, 158, 54, 224, 224, 59, 22, 237, 176, 188, 132, 96 },
-                            PasswordSalt = new byte[] { 162, 231, 68, 233, 181, 252, 137, 112, 146, 4, 223, 159, 200, 243, 245, 60, 195, 247, 72, 241, 250, 65, 55, 77, 158, 212, 247, 54, 215, 105, 230, 210, 44, 120, 35, 24, 95, 15, 235, 141, 149, 196, 154, 127, 42, 72, 5, 58, 155, 214, 128, 207, 82, 255, 216, 68, 156, 215, 29, 227, 174, 226, 227, 3, 124, 53, 157, 33, 44, 254, 49, 148, 46, 230, 235, 50, 62, 73, 18, 167, 143, 185, 78, 250, 70, 238, 41, 183, 34, 11, 18, 111, 91, 93, 71, 124, 168, 112, 32, 222, 123, 128, 3, 9, 73, 216, 186, 215, 245, 161, 128, 120, 170, 118, 41, 140, 169, 160, 83, 54, 31, 91, 16, 59, 142, 235, 67, 219 },
+                            PasswordHash = new byte[] { 66, 237, 41, 1, 60, 76, 18, 152, 192, 42, 72, 156, 13, 234, 187, 26, 0, 174, 193, 100, 253, 138, 131, 73, 166, 11, 104, 130, 23, 108, 108, 126, 131, 226, 34, 37, 56, 43, 197, 86, 44, 122, 45, 178, 179, 151, 214, 123, 108, 11, 169, 39, 184, 79, 211, 91, 248, 110, 191, 247, 238, 216, 117, 198 },
+                            PasswordSalt = new byte[] { 142, 18, 128, 29, 192, 63, 120, 194, 205, 231, 217, 155, 24, 209, 17, 20, 18, 134, 199, 2, 238, 203, 58, 169, 174, 35, 11, 182, 128, 213, 97, 163, 244, 165, 21, 141, 155, 182, 234, 97, 206, 21, 157, 92, 126, 220, 160, 99, 90, 3, 210, 113, 85, 212, 23, 138, 228, 79, 104, 114, 4, 153, 110, 139, 158, 226, 78, 50, 8, 184, 221, 91, 91, 1, 139, 127, 233, 134, 198, 36, 52, 6, 190, 85, 109, 229, 164, 51, 6, 120, 18, 169, 132, 58, 33, 226, 34, 246, 192, 24, 89, 44, 97, 31, 201, 212, 63, 183, 187, 96, 120, 67, 183, 67, 222, 183, 172, 209, 195, 161, 185, 169, 76, 185, 79, 197, 221, 20 },
                             PhotoUrl = "https://imgur.com/mOXzZLE.png"
                         });
                 });
@@ -505,18 +570,12 @@ namespace StockTrack_API.Migrations
                     b.Property<int>("InstitutionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("InstitutionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("UserRole")
                         .HasColumnType("int");
 
                     b.HasKey("UserId", "InstitutionId");
+
+                    b.HasIndex("InstitutionId");
 
                     b.ToTable("ST_USER_INSTITUTIONS");
 
@@ -525,16 +584,12 @@ namespace StockTrack_API.Migrations
                         {
                             UserId = 1,
                             InstitutionId = 1,
-                            InstitutionName = "Servidor de testes",
-                            UserName = "Admin",
                             UserRole = 4
                         },
                         new
                         {
                             UserId = 1,
                             InstitutionId = 64,
-                            InstitutionName = "Horácio Augusto da Silveira",
-                            UserName = "Admin",
                             UserRole = 3
                         });
                 });
@@ -567,10 +622,6 @@ namespace StockTrack_API.Migrations
                     b.Property<int>("InstitutionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("InstitutionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -586,6 +637,8 @@ namespace StockTrack_API.Migrations
 
                     b.HasIndex("AreaId");
 
+                    b.HasIndex("InstitutionId");
+
                     b.ToTable("ST_WAREHOUSES", (string)null);
 
                     b.HasData(
@@ -594,13 +647,12 @@ namespace StockTrack_API.Migrations
                             Id = 1,
                             Active = true,
                             AreaId = 1,
-                            CreatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(116),
+                            CreatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(796),
                             CreatedBy = "",
                             Description = "Almoxarifado de informática",
                             InstitutionId = 1,
-                            InstitutionName = "Servidor de testes",
                             Name = "Informática",
-                            UpdatedAt = new DateTime(2024, 9, 23, 20, 50, 47, 844, DateTimeKind.Utc).AddTicks(117),
+                            UpdatedAt = new DateTime(2024, 9, 25, 16, 17, 7, 872, DateTimeKind.Utc).AddTicks(797),
                             UpdatedBy = ""
                         });
                 });
@@ -682,11 +734,38 @@ namespace StockTrack_API.Migrations
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Material", b =>
                 {
-                    b.HasOne("StockTrack_API.Models.Interfaces.Warehouse", "Warehouse")
+                    b.HasOne("StockTrack_API.Models.Interfaces.Institution", "Institution")
                         .WithMany("Materials")
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Institution");
+                });
+
+            modelBuilder.Entity("StockTrack_API.Models.Interfaces.MaterialWarehouses", b =>
+                {
+                    b.HasOne("StockTrack_API.Models.Interfaces.Institution", "Institution")
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StockTrack_API.Models.Interfaces.Material", "Material")
+                        .WithMany("MaterialWarehouses")
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StockTrack_API.Models.Interfaces.Warehouse", "Warehouse")
+                        .WithMany("MaterialWarehouses")
                         .HasForeignKey("WarehouseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Institution");
+
+                    b.Navigation("Material");
 
                     b.Navigation("Warehouse");
                 });
@@ -722,7 +801,7 @@ namespace StockTrack_API.Migrations
                 {
                     b.HasOne("StockTrack_API.Models.Interfaces.Institution", "Institution")
                         .WithMany("UserInstitutions")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -745,7 +824,15 @@ namespace StockTrack_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("StockTrack_API.Models.Interfaces.Institution", "Institution")
+                        .WithMany("Warehouses")
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Area");
+
+                    b.Navigation("Institution");
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Area", b =>
@@ -757,7 +844,16 @@ namespace StockTrack_API.Migrations
                 {
                     b.Navigation("Areas");
 
+                    b.Navigation("Materials");
+
                     b.Navigation("UserInstitutions");
+
+                    b.Navigation("Warehouses");
+                });
+
+            modelBuilder.Entity("StockTrack_API.Models.Interfaces.Material", b =>
+                {
+                    b.Navigation("MaterialWarehouses");
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.User", b =>
@@ -767,7 +863,7 @@ namespace StockTrack_API.Migrations
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Warehouse", b =>
                 {
-                    b.Navigation("Materials");
+                    b.Navigation("MaterialWarehouses");
                 });
 #pragma warning restore 612, 618
         }

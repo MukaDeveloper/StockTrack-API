@@ -15,10 +15,14 @@ namespace StockTrack_API.Controllers
     [Route("[Controller]")]
     public class MaterialsController : ControllerBase
     {
+        // Contexto do banco de dados
         private readonly DataContext _context;
+
+        // Serviços
         private readonly InstitutionService _instituionService;
         private readonly UserService _userService;
 
+        // Construtor
         public MaterialsController(
             DataContext context,
             InstitutionService institutionService,
@@ -30,17 +34,22 @@ namespace StockTrack_API.Controllers
             _userService = userService;
         }
 
-        [HttpGet("get-by-id/{id}")] //Buscar pelo id
+       
+        // Busca pelo ID do Material
+        [HttpGet("get-by-id/{id}")]
         public async Task<IActionResult> GetSingleAsync(int id)
         {
             try
             {
+                // Busca o ID da instituição pelo serviço, pelo httpContextAcessor
                 int institutionId = _instituionService.GetInstitutionId();
 
-                Material? material = await _context.ST_MATERIALS.FirstOrDefaultAsync(iBusca =>
-                    iBusca.Id == id
+                // Busca o material pelo ID e pelo institutionId no banco de dados através do contexto
+                Material? material = await _context.ST_MATERIALS.FirstOrDefaultAsync(m =>
+                    m.Id == id && m.InstitutionId == institutionId
                 );
 
+                // O resultado pode ser null
                 if (material == null)
                 {
                     return NotFound();

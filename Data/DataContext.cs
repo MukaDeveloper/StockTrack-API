@@ -19,6 +19,7 @@ namespace StockTrack_API.Data
         public DbSet<User> ST_USERS { get; set; }
         public DbSet<Warehouse> ST_WAREHOUSES { get; set; }
         public DbSet<UserInstitution> ST_USER_INSTITUTIONS { get; set; }
+        public DbSet<MaterialWarehouses> ST_MATERIAL_WAREHOUSES { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,25 +44,23 @@ namespace StockTrack_API.Data
                 .Entity<UserInstitution>()
                 .HasOne(ui => ui.Institution)
                 .WithMany(u => u.UserInstitutions)
-                .HasForeignKey(ui => ui.UserId);
+                .HasForeignKey(ui => ui.InstitutionId);
 
             modelBuilder
-                .Entity<Area>()
-                .HasOne(a => a.Institution)
-                .WithMany(i => i.Areas)
-                .HasForeignKey(a => a.InstitutionId);
+                .Entity<MaterialWarehouses>()
+                .HasKey(mw => new { mw.MaterialId, mw.WarehouseId });
 
             modelBuilder
-                .Entity<Warehouse>()
-                .HasOne(a => a.Area)
-                .WithMany(w => w.Warehouses)
-                .HasForeignKey(w => w.AreaId);
+                .Entity<MaterialWarehouses>()
+                .HasOne(mw => mw.Material)
+                .WithMany(m => m.MaterialWarehouses)
+                .HasForeignKey(mw => mw.MaterialId);
 
             modelBuilder
-                .Entity<Material>()
-                .HasOne(a => a.Warehouse)
-                .WithMany(m => m.Materials)
-                .HasForeignKey(w => w.WarehouseId);
+                .Entity<MaterialWarehouses>()
+                .HasOne(mw => mw.Warehouse)
+                .WithMany(w => w.MaterialWarehouses)
+                .HasForeignKey(mw => mw.WarehouseId);
 
             modelBuilder
                 .Entity<Movimentation>()
@@ -81,6 +80,30 @@ namespace StockTrack_API.Data
                 .WithMany()
                 .HasForeignKey(m => m.MaterialId);
 
+            modelBuilder
+                .Entity<Area>()
+                .HasOne(a => a.Institution)
+                .WithMany(i => i.Areas)
+                .HasForeignKey(a => a.InstitutionId);
+
+            modelBuilder
+                .Entity<Warehouse>()
+                .HasOne(a => a.Area)
+                .WithMany(w => w.Warehouses)
+                .HasForeignKey(w => w.AreaId);
+
+            modelBuilder
+                .Entity<Warehouse>()
+                .HasOne(a => a.Institution)
+                .WithMany(w => w.Warehouses)
+                .HasForeignKey(w => w.InstitutionId);
+
+            modelBuilder
+                .Entity<Material>()
+                .HasOne(a => a.Institution)
+                .WithMany(w => w.Materials)
+                .HasForeignKey(w => w.InstitutionId);
+
             Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
             User admin = new User()
             {
@@ -98,9 +121,10 @@ namespace StockTrack_API.Data
             Institution institutionTest =
                 new()
                 {
-                    Id = 001,
+                    Id = 1,
                     Name = "Servidor de testes",
                     Nickname = "Testes",
+                    AccessCode = "000",
                     StreetName = "Rua Alcantara",
                     StreetNumber = "113",
                     Complement = "",
@@ -115,9 +139,10 @@ namespace StockTrack_API.Data
                     institutionTest,
                     new Institution()
                     {
-                        Id = 064,
+                        Id = 2,
                         Name = "Horácio Augusto da Silveira",
                         Nickname = "ETEC Prof. Horácio",
+                        AccessCode = "064",
                         StreetName = "Rua Alcantara",
                         StreetNumber = "113",
                         Complement = "",
@@ -134,17 +159,13 @@ namespace StockTrack_API.Data
                     new UserInstitution()
                     {
                         UserId = 1,
-                        UserName = admin.Name,
                         InstitutionId = institutionTest.Id,
-                        InstitutionName = institutionTest.Name,
                         UserRole = UserRole.SUPPORT,
                     },
                     new UserInstitution()
                     {
                         UserId = 1,
-                        UserName = admin.Name,
                         InstitutionId = 064,
-                        InstitutionName = "Horácio Augusto da Silveira",
                         UserRole = UserRole.COORDINATOR,
                     }
                 );
@@ -157,7 +178,6 @@ namespace StockTrack_API.Data
                     Name = "Teste",
                     Description = "Área de Testes",
                     InstitutionId = institutionTest.Id,
-                    InstitutionName = institutionTest.Name,
                     CreatedBy = admin.Name,
                 };
             modelBuilder.Entity<Area>().HasData(area);
@@ -170,28 +190,37 @@ namespace StockTrack_API.Data
                     Name = "Informática",
                     Description = "Almoxarifado de informática",
                     InstitutionId = institutionTest.Id,
-                    InstitutionName = institutionTest.Name,
                     AreaId = area.Id,
                 };
             modelBuilder.Entity<Warehouse>().HasData(warehouse);
 
-            modelBuilder
-                .Entity<Material>()
-                .HasData(
-                    new Material()
-                    {
-                        Active = true,
-                        Id = 1,
-                        Name = "Notebook",
-                        Description = "Notebook ThinkPad",
-                        Manufacturer = "ThinkPad",
-                        RecordNumber = 123456,
-                        InstitutionId = institutionTest.Id,
-                        InstitutionName = institutionTest.Name,
-                        AreaId = area.Id,
-                        WarehouseId = warehouse.Id,
-                    }
-                );
+            Material notebookMaterial =
+                new()
+                {
+                    Active = true,
+                    Id = 1,
+                    Name = "Notebook",
+                    Description = "Notebook ThinkPad",
+                    Manufacturer = "ThinkPad",
+                    RecordNumber = 123456,
+                    InstitutionId = institutionTest.Id,
+                };
+            Material genericMaterial =
+                new()
+                {
+                    Active = true,
+                    Id = 2,
+                    Name = "Multímetro",
+                    Description = "Multímetro Salcas",
+                    Manufacturer = "Salcas",
+                    RecordNumber = 1234567,
+                    InstitutionId = institutionTest.Id,
+                };
+            modelBuilder.Entity<Material>().HasData(notebookMaterial, genericMaterial);
+
+            MaterialWarehouses materialWarehouses =
+                new() { MaterialId = notebookMaterial.Id, WarehouseId = warehouse.Id };
+            modelBuilder.Entity<MaterialWarehouses>().HasData(materialWarehouses);
 
             modelBuilder
                 .Entity<Movimentation>()
@@ -202,7 +231,7 @@ namespace StockTrack_API.Data
                         Name = "Área Teste",
                         Description = "Adição de área \"Teste\"",
                         MovimentationBy = admin.Name,
-                        InstitutionId = 1,
+                        InstitutionId = institutionTest.Id,
                         AreaId = 1,
                         Date = DateTime.Now,
                         Event = MovimentationEvent.Entry,

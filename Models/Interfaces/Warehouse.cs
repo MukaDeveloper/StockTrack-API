@@ -8,11 +8,9 @@ namespace StockTrack_API.Models.Interfaces
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
-        [JsonIgnore]
-        public List<Material> Materials { get; set; } = new List<Material>();
+        public List<MaterialWarehouses>? MaterialWarehouses { get; set; }
 
         public int AreaId { get; set; }
         public Area? Area { get; set; }
-
     }
 }

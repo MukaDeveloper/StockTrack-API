@@ -109,7 +109,6 @@ namespace StockTrack_API.Controllers
                     Name = data.Name,
                     Description = data.Description,
                     InstitutionId = userInstitution.InstitutionId,
-                    InstitutionName = userInstitution.InstitutionName,
                     CreatedAt = DateTime.Now,
                     CreatedBy = user.Name,
                 };

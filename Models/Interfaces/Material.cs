@@ -13,11 +13,9 @@ namespace StockTrack_API.Models.Interfaces
         public int RecordNumber { get; set; }
         public MaterialType MaterialType { get; set; }
 
-        public int AreaId { get; set; }
-        public int WarehouseId { get; set; }
-        [JsonIgnore]
-        public Warehouse? Warehouse { get; set; }
+        public float Quantity { get; set; }
+        public string Measure { get; set; } = string.Empty;
 
-
+        public List<MaterialWarehouses>? MaterialWarehouses { get; set; }
     }
 }

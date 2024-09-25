@@ -4,14 +4,17 @@ namespace StockTrack_API.Models.Interfaces
 {
     public class UserInstitution
     {
+        // Faz a 'ponte' entre usuário e instituição
+        // É a relação de muitos para muitos entre usuários e instituições
+        // Tabela associativa atributiva (keys => UserId, InstitutionId)
         public int UserId { get; set; }
-        public string UserName { get; set; } = string.Empty;
         public User? User { get; set; }
 
         public int InstitutionId { get; set; }
-        public string InstitutionName { get; set; } = string.Empty;
         public Institution? Institution { get; set; }
 
+
+        // Define a permissão do usuário na instituição
         public UserRole UserRole { get; set; }
     }
 }
