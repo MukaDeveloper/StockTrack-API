@@ -42,7 +42,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .Where(w => w.InstitutionId == institutionId)
                     .ToListAsync();
 
@@ -62,7 +62,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId)
                     .ToListAsync();
 
@@ -82,7 +82,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId)
                     .ToListAsync();
 
@@ -102,7 +102,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .Where(w => w.InstitutionId == institutionId && EF.Functions.Like(w.Name, "%" + nameQuery + "%"))
                     .ToListAsync();
 
@@ -168,10 +168,10 @@ namespace StockTrack_API.Controllers
                 await _context.ST_WAREHOUSES.AddAsync(newWarehouse);
                 await _context.SaveChangesAsync();
 
-                await _movimentationService.AddWarehouse(newWarehouse, user.Name);
+                await _movimentationService.AddWarehouse(newWarehouse.Id, newWarehouse.Name, user.Name, institutionId);
 
                 Warehouse? warehouseAdded = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .FirstOrDefaultAsync(w => w.Id == newWarehouse.Id);
 
                 if (warehouseAdded == null)
@@ -220,7 +220,7 @@ namespace StockTrack_API.Controllers
                 );
 
                 Warehouse? warehouseToUpdate = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area).Include(w => w.Institution)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .FirstOrDefaultAsync(x => x.Id == warehouse.Id);
 
                 if (areaBefore?.InstitutionId != institutionId || areaBefore.Active == false)

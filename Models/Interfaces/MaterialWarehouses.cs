@@ -1,6 +1,6 @@
 namespace StockTrack_API.Models.Interfaces
 {
-    public class MaterialWarehouses : BaseModel
+    public class MaterialWarehouses
     {
         public int MaterialId { get; set; }
         public Material? Material { get; set; }

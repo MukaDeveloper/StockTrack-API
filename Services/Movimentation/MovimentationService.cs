@@ -72,19 +72,20 @@ namespace StockTrack_API.Services
         }
 
         public async Task<Movimentation> AddWarehouse(
-            Warehouse wh,
+            int warehouseId,
+            string wareHouseName,
             string userName,
+            int institutionId,
             string description = "Adição de almoxarifado"
         )
         {
             Movimentation mov =
                 new()
                 {
-                    Name = wh.Name ?? "Novo almoxarifado",
-                    InstitutionId = wh.InstitutionId,
+                    Name = wareHouseName ?? "Novo almoxarifado",
+                    InstitutionId = institutionId,
                     MovimentationBy = userName,
-                    WarehouseId = wh.Id,
-                    Warehouse = wh,
+                    WarehouseId = warehouseId,
                     Event = MovimentationEvent.Entry,
                     Type = MovimentationType.Warehouse,
                     Reason = MovimentationReason.Insertion,
