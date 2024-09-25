@@ -226,10 +226,10 @@ namespace StockTrack_API.Data
             modelBuilder
                 .Entity<UserRoleEntity>()
                 .HasData(
-                    new UserRoleEntity { Id = 1, Name = "USER" },
-                    new UserRoleEntity { Id = 2, Name = "WAREHOUSEMAN" },
-                    new UserRoleEntity { Id = 3, Name = "COORDINATOR" },
-                    new UserRoleEntity { Id = 4, Name = "SUPPORT" }
+                    new UserRoleEntity { Id = 1, Role = "USER" },
+                    new UserRoleEntity { Id = 2, Role = "WAREHOUSEMAN" },
+                    new UserRoleEntity { Id = 3, Role = "COORDINATOR" },
+                    new UserRoleEntity { Id = 4, Role = "SUPPORT" }
                 );
 
             modelBuilder

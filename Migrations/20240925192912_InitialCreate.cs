@@ -99,7 +99,7 @@ namespace StockTrack_API.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -345,7 +345,7 @@ namespace StockTrack_API.Migrations
 
             migrationBuilder.InsertData(
                 table: "UserRoleEntity",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "Id", "Role" },
                 values: new object[,]
                 {
                     { 1, "USER" },

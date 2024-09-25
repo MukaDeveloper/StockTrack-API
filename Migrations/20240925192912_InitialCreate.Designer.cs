@@ -111,7 +111,7 @@ namespace StockTrack_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -123,22 +123,22 @@ namespace StockTrack_API.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "USER"
+                            Role = "USER"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "WAREHOUSEMAN"
+                            Role = "WAREHOUSEMAN"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "COORDINATOR"
+                            Role = "COORDINATOR"
                         },
                         new
                         {
                             Id = 4,
-                            Name = "SUPPORT"
+                            Role = "SUPPORT"
                         });
                 });
 

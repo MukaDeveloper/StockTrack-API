@@ -63,7 +63,7 @@ GO
 
 CREATE TABLE [UserRoleEntity] (
     [Id] int NOT NULL IDENTITY,
-    [Name] nvarchar(max) NOT NULL,
+    [Role] nvarchar(max) NOT NULL,
     CONSTRAINT [PK_UserRoleEntity] PRIMARY KEY ([Id])
 );
 GO
@@ -218,14 +218,14 @@ IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Acce
     SET IDENTITY_INSERT [ST_USERS] OFF;
 GO
 
-IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Name') AND [object_id] = OBJECT_ID(N'[UserRoleEntity]'))
+IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Role') AND [object_id] = OBJECT_ID(N'[UserRoleEntity]'))
     SET IDENTITY_INSERT [UserRoleEntity] ON;
-INSERT INTO [UserRoleEntity] ([Id], [Name])
+INSERT INTO [UserRoleEntity] ([Id], [Role])
 VALUES (1, N'USER'),
 (2, N'WAREHOUSEMAN'),
 (3, N'COORDINATOR'),
 (4, N'SUPPORT');
-IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Name') AND [object_id] = OBJECT_ID(N'[UserRoleEntity]'))
+IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Role') AND [object_id] = OBJECT_ID(N'[UserRoleEntity]'))
     SET IDENTITY_INSERT [UserRoleEntity] OFF;
 GO
 
