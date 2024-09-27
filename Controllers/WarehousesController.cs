@@ -94,7 +94,7 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        [HttpGet("search-by-name/{name}")]
+        [HttpGet("search-by-name/{nameQuery}")]
         public async Task<IActionResult> SearchByName(string nameQuery)
         {
             try
@@ -103,7 +103,10 @@ namespace StockTrack_API.Controllers
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
-                    .Where(w => w.InstitutionId == institutionId && EF.Functions.Like(w.Name, "%" + nameQuery + "%"))
+                    .Where(w =>
+                        w.InstitutionId == institutionId
+                        && EF.Functions.Like(w.Name, "%" + nameQuery + "%")
+                    )
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -168,7 +171,12 @@ namespace StockTrack_API.Controllers
                 await _context.ST_WAREHOUSES.AddAsync(newWarehouse);
                 await _context.SaveChangesAsync();
 
-                await _movimentationService.AddWarehouse(newWarehouse.Id, newWarehouse.Name, user.Name, institutionId);
+                await _movimentationService.AddWarehouse(
+                    newWarehouse.Id,
+                    newWarehouse.Name,
+                    user.Name,
+                    institutionId
+                );
 
                 Warehouse? warehouseAdded = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)

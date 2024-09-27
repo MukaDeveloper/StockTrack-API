@@ -34,7 +34,6 @@ namespace StockTrack_API.Controllers
             _userService = userService;
         }
 
-       
         // Busca pelo ID do Material
         [HttpGet("get-by-id/{id}")]
         public async Task<IActionResult> GetSingleAsync(int id)
@@ -64,15 +63,18 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync(int lastDocId = 0, int limit = 20)
         {
             try
             {
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Material> list = await _context
-                    .ST_MATERIALS.Where(m => m.InstitutionId == institutionId)
+                    .ST_MATERIALS.Where(m => m.InstitutionId == institutionId && m.Id > lastDocId)
+                    .OrderBy(m => m.Id)
+                    .Take(limit)
                     .ToListAsync();
+
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
             catch (Exception ex)
@@ -94,6 +96,8 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
+                // VERIFICAR SE JÁ TEM UM MATERIAL COM ESSE NOME, E SE TIVER, 
+                // DAR UM UPDATE ADICIONANDO A QUANTIDADE QUE SERIA INSERIDA
                 await _context.ST_MATERIALS.AddAsync(newMaterial);
                 await _context.SaveChangesAsync();
 

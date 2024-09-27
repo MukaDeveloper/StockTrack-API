@@ -14,6 +14,7 @@ namespace StockTrack_API.Models.Interfaces
         public MaterialType MaterialType { get; set; }
 
         public float Quantity { get; set; }
+        // UN | KG | L
         public string Measure { get; set; } = string.Empty;
 
         public List<MaterialWarehouses>? MaterialWarehouses { get; set; }

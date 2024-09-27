@@ -194,6 +194,8 @@ namespace StockTrack_API.Data
                         Name = "Notebook",
                         Description = "Notebook ThinkPad",
                         Manufacturer = "ThinkPad",
+                        Measure = "UN",
+                        Quantity = 3,
                         RecordNumber = 123456,
                         InstitutionId = institutionTest.Id,
                     }

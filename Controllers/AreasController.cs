@@ -95,9 +95,9 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(a =>
-                    a.Name.ToLower() == data.Name.ToLower()
-                );
+                Area? area = await _context
+                    .ST_AREAS.Where((a) => a.InstitutionId == institutionId)
+                    .FirstOrDefaultAsync(a => a.Name.ToLower() == data.Name.ToLower());
                 if (area != null)
                 {
                     throw new Exception("Já existe uma área com esse nome");
@@ -125,6 +125,7 @@ namespace StockTrack_API.Controllers
 
                 Area? areaAdded = await _context
                     .ST_AREAS.Include(a => a.Institution)
+                    .Where((a) => a.InstitutionId == institutionId)
                     .FirstOrDefaultAsync(a => a.Id == newArea.Id);
 
                 if (areaAdded == null)
@@ -159,9 +160,9 @@ namespace StockTrack_API.Controllers
 
                 if (area.Name != null)
                 {
-                    Area? areaCheck = await _context.ST_AREAS.FirstOrDefaultAsync(a =>
-                        a.Name.ToLower() == area.Name.ToLower()
-                    );
+                    Area? areaCheck = await _context
+                        .ST_AREAS.Where((a) => a.InstitutionId == institutionId)
+                        .FirstOrDefaultAsync(a => a.Name.ToLower() == area.Name.ToLower());
                     if (areaCheck != null)
                     {
                         throw new Exception("Já existe uma área com esse nome!");
@@ -170,6 +171,7 @@ namespace StockTrack_API.Controllers
 
                 Area? areaToUpdate = await _context
                     .ST_AREAS.Include(a => a.Institution)
+                    .Where((a) => a.InstitutionId == institutionId)
                     .FirstOrDefaultAsync(a => a.Id == area.Id);
 
                 if (areaToUpdate == null)
@@ -219,7 +221,9 @@ namespace StockTrack_API.Controllers
                 }
 
                 Area? areaToDelete =
-                    await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == areaId)
+                    await _context
+                        .ST_AREAS.Where((a) => a.InstitutionId == institutionId)
+                        .FirstOrDefaultAsync(x => x.Id == areaId)
                     ?? throw new Exception("Área não encontrada");
 
                 List<Warehouse>? listWarehouses = await _context
