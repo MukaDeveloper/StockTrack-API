@@ -46,7 +46,7 @@ namespace StockTrack_API.Data
                 .Entity<UserInstitution>()
                 .HasOne(ui => ui.Institution)
                 .WithMany(u => u.UserInstitutions)
-                .HasForeignKey(ui => ui.UserId);
+                .HasForeignKey(ui => ui.InstitutionId);
 
             modelBuilder
                 .Entity<Area>()

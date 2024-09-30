@@ -63,9 +63,7 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Instituição não informada.");
                 }
 
-                User? user = await _context.ST_USERS.FirstOrDefaultAsync(x =>
-                    x.Email.ToLower().Equals(credentials.Email.ToLower())
-                );
+                User? user = await _context.ST_USERS.Where(x => x.Email.ToLower() == credentials.Email.ToLower()).FirstOrDefaultAsync();
 
                 if (
                     user == null
