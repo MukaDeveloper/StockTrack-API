@@ -18,13 +18,13 @@ namespace StockTrack_API.Models.Interfaces
         [JsonIgnore]
         public List<UserInstitution>? UserInstitutions { get; set; }
 
-        [NotMapped]
+        [NotMapped, JsonIgnore]
         public UserRole Role { get; set; }
 
-        [NotMapped]
+        [NotMapped, JsonIgnore]
         public string PasswordString { get; set; } = string.Empty;
 
-        [NotMapped]
+        [NotMapped, JsonIgnore]
         public int InstitutionId { get; set; }
 
         [NotMapped]

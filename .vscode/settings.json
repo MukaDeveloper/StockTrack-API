@@ -18,6 +18,5 @@
     "titleBar.inactiveBackground": "#FFF",
     "titleBar.inactiveForeground": "#FFF",
     "commandCenter.border": "#FFF"
-  },
-  "dotnet.defaultSolution": "StockTrack-API.sln"
+  }
 }

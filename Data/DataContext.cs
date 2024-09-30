@@ -113,9 +113,24 @@ namespace StockTrack_API.Data
             Institution institutionTest =
                 new()
                 {
-                    Id = 001,
+                    Id = 1,
+                    AccessCode = "000",
                     Name = "Servidor de testes",
                     Nickname = "Testes",
+                    StreetName = "Rua Alcantara",
+                    StreetNumber = "113",
+                    Complement = "",
+                    Neightboor = "Vila Guilherme",
+                    City = "Sao Paulo",
+                    State = "SP",
+                    CEP = "02110010",
+                };
+            Institution institutionHAS = 
+                new() {
+                    Id = 2,
+                    AccessCode = "064",
+                    Name = "Horácio Augusto da Silveira",
+                    Nickname = "ETEC Prof. Horácio",
                     StreetName = "Rua Alcantara",
                     StreetNumber = "113",
                     Complement = "",
@@ -128,19 +143,7 @@ namespace StockTrack_API.Data
                 .Entity<Institution>()
                 .HasData(
                     institutionTest,
-                    new Institution()
-                    {
-                        Id = 064,
-                        Name = "Horácio Augusto da Silveira",
-                        Nickname = "ETEC Prof. Horácio",
-                        StreetName = "Rua Alcantara",
-                        StreetNumber = "113",
-                        Complement = "",
-                        Neightboor = "Vila Guilherme",
-                        City = "Sao Paulo",
-                        State = "SP",
-                        CEP = "02110010",
-                    }
+                    institutionHAS
                 );
 
             modelBuilder
@@ -148,14 +151,14 @@ namespace StockTrack_API.Data
                 .HasData(
                     new UserInstitution()
                     {
-                        UserId = 1,
+                        UserId = admin.Id,
                         InstitutionId = institutionTest.Id,
                         UserRole = UserRole.SUPPORT,
                     },
                     new UserInstitution()
                     {
-                        UserId = 1,
-                        InstitutionId = 064,
+                        UserId = admin.Id,
+                        InstitutionId = institutionHAS.Id,
                         UserRole = UserRole.COORDINATOR,
                     }
                 );

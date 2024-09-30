@@ -13,7 +13,6 @@ namespace StockTrack_API.Models.Interfaces
         public int InstitutionId { get; set; }
         public Institution? Institution { get; set; }
 
-
         // Define a permissão do usuário na instituição
         public UserRole UserRole { get; set; }
     }
