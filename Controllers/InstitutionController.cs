@@ -39,8 +39,11 @@ namespace StockTrack_API.Controllers
             {
                 int institutionId = _institutionService.GetInstitutionId();
 
-                Institution? institution = await _context.ST_INSTITUTIONS.FirstOrDefaultAsync(a =>
-                    a.Id == institutionId
+                Institution? institution = await _context.ST_INSTITUTIONS
+                .Include(i => i.Users)
+                .ThenInclude(ui => ui.User)
+                .FirstOrDefaultAsync(i =>
+                    i.Id == institutionId
                 );
 
                 if (institution == null)

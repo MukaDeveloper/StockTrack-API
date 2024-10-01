@@ -90,14 +90,13 @@ namespace StockTrack_API.Controllers
                 }
 
                 user.AccessDate = DateTime.Now;
-                user.InstitutionId = institutionId ?? credentials.InstitutionId;
                 user.Role = userInstitution.UserRole;
                 _context.ST_USERS.Update(user);
                 await _context.SaveChangesAsync();
 
                 user.PasswordHash = null;
                 user.PasswordSalt = null;
-                string Token = _userService.CreateToken(user);
+                string Token = _userService.CreateToken(user, institutionId ?? credentials.InstitutionId);
 
                 return Ok(EnvelopeFactory.factoryEnvelope(Token));
             }

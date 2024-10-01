@@ -42,7 +42,10 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES
+                    .Include(w => w.Area)
+                    .Include(w => w.Warehousemans)
+                    .ThenInclude(wu => wu.User)
                     .Where(w => w.InstitutionId == institutionId)
                     .ToListAsync();
 

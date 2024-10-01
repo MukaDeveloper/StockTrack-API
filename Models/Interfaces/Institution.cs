@@ -17,7 +17,7 @@ namespace StockTrack_API.Models.Interfaces
         public string State { get; set; } = string.Empty;
         public string CEP { get; set; } = string.Empty;
 
-        public List<UserInstitution>? UserInstitutions { get; set; }
+        public List<UserInstitution>? Users { get; set; }
 
         [JsonIgnore]
         public List<Area>? Areas { get; set; } = new List<Area>();

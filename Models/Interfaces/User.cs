@@ -27,9 +27,6 @@ namespace StockTrack_API.Models.Interfaces
         [NotMapped, JsonIgnore]
         public string PasswordString { get; set; } = string.Empty;
 
-        [NotMapped, JsonIgnore]
-        public int InstitutionId { get; set; }
-
         [NotMapped]
         public string Token { get; set; } = string.Empty;
     }

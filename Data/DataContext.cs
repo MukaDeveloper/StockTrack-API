@@ -46,7 +46,7 @@ namespace StockTrack_API.Data
             modelBuilder
                 .Entity<UserInstitution>()
                 .HasOne(ui => ui.Institution)
-                .WithMany(u => u.UserInstitutions)
+                .WithMany(u => u.Users)
                 .HasForeignKey(ui => ui.InstitutionId);
 
             modelBuilder
@@ -105,7 +105,7 @@ namespace StockTrack_API.Data
             modelBuilder
                 .Entity<WarehouseUsers>()
                 .HasOne(mw => mw.Warehouse)
-                .WithMany(w => w.WarehouseUsers)
+                .WithMany(w => w.Warehousemans)
                 .HasForeignKey(mw => mw.WarehouseId)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder
