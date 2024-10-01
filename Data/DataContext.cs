@@ -31,6 +31,7 @@ namespace StockTrack_API.Data
             modelBuilder.Entity<User>().ToTable("ST_USERS");
             modelBuilder.Entity<Warehouse>().ToTable("ST_WAREHOUSES");
             modelBuilder.Entity<MaterialWarehouses>().ToTable("ST_MATERIAL_WAREHOUSES");
+            modelBuilder.Entity<WarehouseUsers>().ToTable("ST_WAREHOUSE_USERS");
 
             modelBuilder
                 .Entity<UserInstitution>()
@@ -61,6 +62,7 @@ namespace StockTrack_API.Data
                 .HasForeignKey(w => w.AreaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Movimentations
             modelBuilder
                 .Entity<Movimentation>()
                 .HasOne(m => m.Area)
@@ -94,6 +96,23 @@ namespace StockTrack_API.Data
                 .HasOne(mw => mw.Warehouse)
                 .WithMany(w => w.MaterialWarehouses)
                 .HasForeignKey(mw => mw.WarehouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            // WarehouseUsers
+            modelBuilder
+                .Entity<WarehouseUsers>()
+                .HasKey(mw => new { mw.UserId, mw.WarehouseId });
+            modelBuilder
+                .Entity<WarehouseUsers>()
+                .HasOne(mw => mw.Warehouse)
+                .WithMany(w => w.WarehouseUsers)
+                .HasForeignKey(mw => mw.WarehouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder
+                .Entity<WarehouseUsers>()
+                .HasOne(mw => mw.User)
+                .WithMany(m => m.WarehouseUsers)
+                .HasForeignKey(mw => mw.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
@@ -239,7 +258,8 @@ namespace StockTrack_API.Data
                 .Entity<MovimentationTypeEntity>()
                 .HasData(
                     new MovimentationTypeEntity { Id = 1, Type = "ENTRY" },
-                    new MovimentationTypeEntity { Id = 2, Type = "EXIT" }
+                    new MovimentationTypeEntity { Id = 2, Type = "EDIT" },
+                    new MovimentationTypeEntity { Id = 3, Type = "EXIT" }
                 );
 
             modelBuilder

@@ -96,6 +96,11 @@ namespace StockTrack_API.Migrations
                         new
                         {
                             Id = 2,
+                            Type = "EDIT"
+                        },
+                        new
+                        {
+                            Id = 3,
                             Type = "EXIT"
                         });
                 });
@@ -186,12 +191,12 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 10, 1, 15, 51, 42, 580, DateTimeKind.Utc).AddTicks(1675),
+                            CreatedAt = new DateTime(2024, 10, 1, 18, 45, 8, 385, DateTimeKind.Utc).AddTicks(3671),
                             CreatedBy = "Admin",
                             Description = "Área de Testes",
                             InstitutionId = 1,
                             Name = "Teste",
-                            UpdatedAt = new DateTime(2024, 10, 1, 15, 51, 42, 580, DateTimeKind.Utc).AddTicks(1676),
+                            UpdatedAt = new DateTime(2024, 10, 1, 18, 45, 8, 385, DateTimeKind.Utc).AddTicks(3672),
                             UpdatedBy = ""
                         });
                 });
@@ -347,7 +352,7 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 10, 1, 15, 51, 42, 580, DateTimeKind.Utc).AddTicks(1762),
+                            CreatedAt = new DateTime(2024, 10, 1, 18, 45, 8, 385, DateTimeKind.Utc).AddTicks(3713),
                             CreatedBy = "",
                             Description = "Notebook ThinkPad",
                             ImageURL = "",
@@ -358,7 +363,7 @@ namespace StockTrack_API.Migrations
                             Name = "Notebook",
                             Quantity = 3f,
                             RecordNumber = 123456,
-                            UpdatedAt = new DateTime(2024, 10, 1, 15, 51, 42, 580, DateTimeKind.Utc).AddTicks(1762),
+                            UpdatedAt = new DateTime(2024, 10, 1, 18, 45, 8, 385, DateTimeKind.Utc).AddTicks(3714),
                             UpdatedBy = ""
                         });
                 });
@@ -445,7 +450,7 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             AreaId = 1,
-                            Date = new DateTime(2024, 10, 1, 12, 51, 42, 580, DateTimeKind.Local).AddTicks(1794),
+                            Date = new DateTime(2024, 10, 1, 15, 45, 8, 385, DateTimeKind.Local).AddTicks(3736),
                             Description = "Adição de área \"Teste\"",
                             Event = 1,
                             InstitutionId = 1,
@@ -501,11 +506,11 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 10, 1, 12, 51, 42, 580, DateTimeKind.Local).AddTicks(1310),
+                            CreatedAt = new DateTime(2024, 10, 1, 15, 45, 8, 385, DateTimeKind.Local).AddTicks(3466),
                             Email = "admin@stocktrack.com",
                             Name = "Admin",
-                            PasswordHash = new byte[] { 190, 193, 203, 45, 49, 101, 201, 115, 98, 67, 225, 244, 31, 109, 234, 18, 34, 228, 215, 239, 33, 68, 22, 113, 208, 214, 57, 221, 1, 11, 36, 39, 171, 224, 188, 214, 2, 2, 121, 1, 24, 186, 156, 135, 190, 23, 217, 190, 122, 72, 136, 223, 201, 249, 112, 41, 69, 252, 42, 152, 37, 63, 16, 242 },
-                            PasswordSalt = new byte[] { 192, 105, 119, 96, 251, 105, 168, 73, 170, 164, 192, 78, 169, 61, 250, 13, 18, 211, 250, 229, 158, 118, 241, 198, 92, 203, 94, 140, 63, 106, 21, 238, 168, 43, 220, 185, 230, 188, 45, 69, 46, 117, 140, 188, 1, 168, 15, 212, 244, 148, 213, 80, 141, 121, 170, 4, 200, 196, 116, 37, 9, 146, 93, 127, 49, 186, 212, 85, 233, 90, 86, 163, 186, 143, 19, 200, 59, 39, 190, 174, 122, 163, 206, 217, 233, 237, 205, 146, 166, 159, 227, 171, 227, 31, 113, 241, 191, 26, 15, 4, 177, 64, 163, 180, 168, 34, 247, 57, 59, 71, 191, 115, 231, 214, 168, 57, 162, 131, 30, 10, 238, 61, 154, 89, 131, 170, 148, 99 },
+                            PasswordHash = new byte[] { 227, 146, 207, 225, 136, 153, 44, 27, 230, 115, 198, 188, 159, 42, 84, 162, 57, 42, 56, 45, 0, 153, 55, 73, 219, 133, 170, 55, 105, 214, 208, 1, 146, 176, 179, 161, 51, 138, 187, 133, 157, 54, 188, 20, 27, 209, 254, 253, 0, 204, 242, 213, 144, 175, 158, 51, 71, 223, 247, 165, 206, 173, 149, 70 },
+                            PasswordSalt = new byte[] { 156, 194, 69, 168, 40, 97, 150, 216, 62, 177, 244, 190, 15, 22, 18, 159, 20, 88, 157, 75, 13, 83, 14, 196, 64, 8, 26, 119, 120, 91, 182, 244, 148, 188, 121, 202, 121, 207, 76, 203, 15, 109, 76, 134, 213, 24, 216, 123, 27, 45, 89, 6, 158, 191, 49, 97, 137, 234, 239, 25, 144, 58, 232, 217, 68, 248, 214, 123, 158, 5, 207, 100, 170, 101, 140, 106, 153, 116, 160, 21, 135, 32, 209, 189, 106, 148, 171, 156, 20, 147, 231, 83, 159, 62, 134, 81, 49, 153, 233, 212, 183, 11, 121, 54, 167, 132, 156, 75, 11, 161, 44, 2, 195, 83, 130, 24, 36, 113, 164, 72, 233, 211, 14, 197, 23, 82, 112, 98 },
                             PhotoUrl = "https://imgur.com/mOXzZLE.png"
                         });
                 });
@@ -595,14 +600,29 @@ namespace StockTrack_API.Migrations
                             Id = 1,
                             Active = true,
                             AreaId = 1,
-                            CreatedAt = new DateTime(2024, 10, 1, 15, 51, 42, 580, DateTimeKind.Utc).AddTicks(1718),
+                            CreatedAt = new DateTime(2024, 10, 1, 18, 45, 8, 385, DateTimeKind.Utc).AddTicks(3688),
                             CreatedBy = "",
                             Description = "Almoxarifado de informática",
                             InstitutionId = 1,
                             Name = "Informática",
-                            UpdatedAt = new DateTime(2024, 10, 1, 15, 51, 42, 580, DateTimeKind.Utc).AddTicks(1719),
+                            UpdatedAt = new DateTime(2024, 10, 1, 18, 45, 8, 385, DateTimeKind.Utc).AddTicks(3689),
                             UpdatedBy = ""
                         });
+                });
+
+            modelBuilder.Entity("StockTrack_API.Models.Interfaces.WarehouseUsers", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "WarehouseId");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.ToTable("ST_WAREHOUSE_USERS", (string)null);
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.MovimentationReasonEntity", b =>
@@ -682,11 +702,13 @@ namespace StockTrack_API.Migrations
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Material", b =>
                 {
-                    b.HasOne("StockTrack_API.Models.Interfaces.Institution", null)
-                        .WithMany("Materials")
+                    b.HasOne("StockTrack_API.Models.Interfaces.Institution", "Institution")
+                        .WithMany()
                         .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Institution");
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.MaterialWarehouses", b =>
@@ -762,13 +784,34 @@ namespace StockTrack_API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("StockTrack_API.Models.Interfaces.Institution", null)
-                        .WithMany("Warehouses")
+                    b.HasOne("StockTrack_API.Models.Interfaces.Institution", "Institution")
+                        .WithMany()
                         .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Area");
+
+                    b.Navigation("Institution");
+                });
+
+            modelBuilder.Entity("StockTrack_API.Models.Interfaces.WarehouseUsers", b =>
+                {
+                    b.HasOne("StockTrack_API.Models.Interfaces.User", "User")
+                        .WithMany("WarehouseUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StockTrack_API.Models.Interfaces.Warehouse", "Warehouse")
+                        .WithMany("WarehouseUsers")
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Area", b =>
@@ -780,11 +823,7 @@ namespace StockTrack_API.Migrations
                 {
                     b.Navigation("Areas");
 
-                    b.Navigation("Materials");
-
                     b.Navigation("UserInstitutions");
-
-                    b.Navigation("Warehouses");
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Material", b =>
@@ -795,11 +834,15 @@ namespace StockTrack_API.Migrations
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.User", b =>
                 {
                     b.Navigation("UserInstitutions");
+
+                    b.Navigation("WarehouseUsers");
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Interfaces.Warehouse", b =>
                 {
                     b.Navigation("MaterialWarehouses");
+
+                    b.Navigation("WarehouseUsers");
                 });
 #pragma warning restore 612, 618
         }

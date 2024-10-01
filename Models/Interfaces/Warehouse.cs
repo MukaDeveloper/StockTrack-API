@@ -9,6 +9,7 @@ namespace StockTrack_API.Models.Interfaces
         public string Description { get; set; } = string.Empty;
 
         public List<MaterialWarehouses>? MaterialWarehouses { get; set; }
+        public List<WarehouseUsers>? WarehouseUsers { get; set; }
 
         public int AreaId { get; set; }
         public Area? Area { get; set; }

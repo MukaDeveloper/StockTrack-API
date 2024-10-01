@@ -18,6 +18,8 @@ namespace StockTrack_API.Models.Interfaces
 
         [JsonIgnore]
         public List<UserInstitution>? UserInstitutions { get; set; }
+        [JsonIgnore]
+        public List<WarehouseUsers>? WarehouseUsers { get; set; }
 
         [NotMapped, JsonIgnore]
         public UserRole Role { get; set; }
