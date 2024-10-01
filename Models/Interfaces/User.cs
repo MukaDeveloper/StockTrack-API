@@ -13,10 +13,13 @@ namespace StockTrack_API.Models.Interfaces
         public byte[]? PasswordHash { get; set; }
         public byte[]? PasswordSalt { get; set; }
         public string PhotoUrl { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
         public DateTime? AccessDate { get; set; }
 
         [JsonIgnore]
         public List<UserInstitution>? UserInstitutions { get; set; }
+        [JsonIgnore]
+        public List<WarehouseUsers>? WarehouseUsers { get; set; }
 
         [NotMapped, JsonIgnore]
         public UserRole Role { get; set; }

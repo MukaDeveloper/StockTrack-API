@@ -11,6 +11,7 @@ namespace StockTrack_API.Models.Interfaces
 
         // Associação do vínculo de materiais com almoxarifados
         public List<MaterialWarehouses>? MaterialWarehouses { get; set; }
+        public List<WarehouseUsers>? WarehouseUsers { get; set; }
 
         // Informações da Área que o Almoxarifado pertence
         public int AreaId { get; set; }

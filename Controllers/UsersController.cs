@@ -63,7 +63,9 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Instituição não informada.");
                 }
 
-                User? user = await _context.ST_USERS.Where(x => x.Email.ToLower() == credentials.Email.ToLower()).FirstOrDefaultAsync();
+                User? user = await _context
+                    .ST_USERS.Where(x => x.Email.ToLower() == credentials.Email.ToLower())
+                    .FirstOrDefaultAsync();
 
                 if (
                     user == null
@@ -106,25 +108,49 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync(User user)
+        public async Task<IActionResult> RegisterAsync(UserRegisterReq user)
         {
             try
             {
+                if (user.Name == null || user.Email == null || user.Password == null)
+                    throw new Exception("Todos os campos são obrigatórios.");
+
                 if (await _userService.ExistUser(user.Email))
                     throw new Exception("Usuário já existente.");
 
-                Cryptography.CreatePasswordHash(
-                    user.PasswordString,
-                    out byte[] hash,
-                    out byte[] salt
-                );
-                user.PasswordString = string.Empty;
-                user.PasswordHash = hash;
-                user.PasswordSalt = salt;
-                await _context.ST_USERS.AddAsync(user);
+                Cryptography.CreatePasswordHash(user.Password, out byte[] hash, out byte[] salt);
+
+                if (hash == null || salt == null)
+                    throw new Exception("[ERR500] Erro ao cadastrar usuário.");
+
+                User newUser =
+                    new()
+                    {
+                        Name = user.Name,
+                        Email = user.Email,
+                        Active = true,
+                        PasswordHash = hash,
+                        PasswordSalt = salt,
+                        CreatedAt = DateTime.Now,
+                    };
+
+                if (user.PhotoUrl != null)
+                {
+                    newUser.PhotoUrl = user.PhotoUrl;
+                }
+
+                await _context.ST_USERS.AddAsync(newUser);
                 await _context.SaveChangesAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelope(user));
+                User? returnUser = await _context.ST_USERS.FirstOrDefaultAsync(x =>
+                    x.Id == newUser.Id
+                );
+
+                if (returnUser == null)
+                {
+                    throw new Exception("[ERR501] Erro ao cadastrar usuário.");
+                }
+                return Ok(EnvelopeFactory.factoryEnvelope(returnUser));
             }
             catch (Exception ex)
             {

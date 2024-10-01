@@ -10,8 +10,5 @@ namespace StockTrack_API.Models.Interfaces
 
         [JsonIgnore]
         public List<Warehouse> Warehouses { get; set; } = new List<Warehouse>();
-
-        [JsonIgnore]
-        public Institution? Institution { get; set; }
     }
 }

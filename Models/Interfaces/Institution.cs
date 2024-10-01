@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace StockTrack_API.Models.Interfaces
 {
     public class Institution
@@ -17,8 +19,7 @@ namespace StockTrack_API.Models.Interfaces
 
         public List<UserInstitution>? UserInstitutions { get; set; }
 
+        [JsonIgnore]
         public List<Area>? Areas { get; set; } = new List<Area>();
-        public List<Warehouse>? Warehouses { get; set; } = new List<Warehouse>();
-        public List<Material>? Materials { get; set; } = new List<Material>();
     }
 }
