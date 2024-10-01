@@ -104,6 +104,7 @@ namespace StockTrack_API.Data
                 Name = "Admin",
                 Email = "admin@stocktrack.com",
                 PhotoUrl = "https://imgur.com/mOXzZLE.png",
+                CreatedAt = DateTime.Now,
                 PasswordString = string.Empty,
                 PasswordHash = hash,
                 PasswordSalt = salt,

@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace StockTrack_API.Models.Interfaces
 {
     public abstract class BaseModel
