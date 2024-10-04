@@ -68,7 +68,7 @@ namespace StockTrack_API.Services
             return (user, userInstitution);
         }
 
-        public string CreateToken(User user, int institutionId)
+        public string CreateToken(User user, UserInstitution userInstitution)
         {
             List<Claim> claims = new List<Claim>()
             {
@@ -76,8 +76,8 @@ namespace StockTrack_API.Services
                 new Claim("name", user.Name),
                 new Claim("email", user.Email),
                 new Claim("photoUrl", user.PhotoUrl),
-                new Claim("institutionId", institutionId.ToString()),
-                new Claim("role", user.Role.ToString()),
+                new Claim("institutionId", userInstitution.InstitutionId.ToString()),
+                new Claim("role", userInstitution.UserRole.ToString()),
             };
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(

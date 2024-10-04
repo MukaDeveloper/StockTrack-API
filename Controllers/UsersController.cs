@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
 using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Request.User;
+using StockTrack_API.Models.Response;
 using StockTrack_API.Services;
 using StockTrack_API.Utils;
 
@@ -19,11 +20,82 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
         private readonly UserService _userService;
+        private readonly InstitutionService _institutionService;
 
-        public UsersController(DataContext context, UserService userService)
+        public UsersController(
+            DataContext context,
+            UserService userService,
+            InstitutionService institutionService
+        )
         {
             _context = context;
             _userService = userService;
+            _institutionService = institutionService;
+        }
+
+        [HttpGet("by-institution")]
+        public async Task<IActionResult> GetByInstitutionAsync()
+        {
+            try
+            {
+                int institutionId = _institutionService.GetInstitutionId();
+
+                List<UserInstitution>? userInstitution = await _context.ST_USER_INSTITUTIONS.Where(
+                    ui => ui.InstitutionId == institutionId
+                ).ToListAsync();
+
+                if (userInstitution.Count > 0) {
+                    List<GetMembersRes> members = new();
+                    for (int i = 0; i < userInstitution.Count; i++)
+                    {
+                        User? user = await _context.ST_USERS.FirstOrDefaultAsync(u => 
+                            u.Id == userInstitution[i].UserId);
+                        
+                        if (user != null) {
+                            GetMembersRes member = new()
+                            {
+                                Id = user.Id.ToString(),
+                                Name = user.Name,
+                                Email = user.Email,
+                                PhotoUrl = user.PhotoUrl,
+                                Role = userInstitution[i].UserRole.ToString()
+                            };
+
+                            members.Add(member);
+                        }
+                    }
+                    return Ok(EnvelopeFactory.factoryEnvelopeArray(members));
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("search-by-name/{nameQuery}")]
+        public async Task<IActionResult> SearchByName(string nameQuery)
+        {
+            try
+            {
+                int institutionId = _institutionService.GetInstitutionId();
+
+                List<Warehouse> list = await _context
+                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .Where(w =>
+                        w.InstitutionId == institutionId
+                        && EF.Functions.Like(w.Name, "%" + nameQuery + "%")
+                    )
+                    .ToListAsync();
+
+                return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("get-by-uid/{userId}")]
@@ -37,6 +109,7 @@ namespace StockTrack_API.Controllers
                 {
                     throw new Exception("Usuário não encontrado.");
                 }
+
                 return Ok(EnvelopeFactory.factoryEnvelope(user));
             }
             catch (Exception ex)
@@ -86,7 +159,7 @@ namespace StockTrack_API.Controllers
 
                 if (userInstitution == null)
                 {
-                    throw new Exception("Usuário não pertence à instituição especificada.");
+                    throw new Exception("Usuário não pertence a essa instituição.");
                 }
 
                 user.AccessDate = DateTime.Now;
@@ -96,7 +169,7 @@ namespace StockTrack_API.Controllers
 
                 user.PasswordHash = null;
                 user.PasswordSalt = null;
-                string Token = _userService.CreateToken(user, institutionId ?? credentials.InstitutionId);
+                string Token = _userService.CreateToken(user, userInstitution);
 
                 return Ok(EnvelopeFactory.factoryEnvelope(Token));
             }

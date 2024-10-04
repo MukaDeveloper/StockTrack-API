@@ -18,7 +18,7 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
         private readonly MovimentationService _movimentationService;
-        private readonly InstitutionService _instituionService;
+        private readonly InstitutionService _institutionService;
         private readonly UserService _userService;
 
         public WarehousesController(
@@ -30,7 +30,7 @@ namespace StockTrack_API.Controllers
         {
             _context = context;
             _movimentationService = movimentationService;
-            _instituionService = instituionService;
+            _institutionService = instituionService;
             _userService = userService;
         }
 
@@ -39,7 +39,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = _instituionService.GetInstitutionId();
+                int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES
@@ -62,7 +62,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = _instituionService.GetInstitutionId();
+                int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
@@ -82,7 +82,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = _instituionService.GetInstitutionId();
+                int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
@@ -102,7 +102,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = _instituionService.GetInstitutionId();
+                int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
@@ -135,7 +135,7 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Área do armazém é obrigatória.");
                 }
 
-                int institutionId = _instituionService.GetInstitutionId();
+                int institutionId = _institutionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
                 if (userInstitution.UserRole == UserRole.USER || user.Active == false)
@@ -204,7 +204,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = _instituionService.GetInstitutionId();
+                int institutionId = _institutionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
                 if (userInstitution.UserRole == UserRole.USER || user.Active == false)
@@ -288,7 +288,7 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = _instituionService.GetInstitutionId();
+                int institutionId = _institutionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
                 if (userInstitution.UserRole == UserRole.USER || user.Active == false)

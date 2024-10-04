@@ -43,7 +43,7 @@ namespace StockTrack_API.Controllers
 
                 Area? area = await _context
                     .ST_AREAS.Where(a => a.InstitutionId == institutionId)
-                    .Include(a => a.Institution)
+                    // .Include(a => a.Institution)
                     .FirstOrDefaultAsync(a => a.Id == id);
 
                 if (area == null)
@@ -68,7 +68,7 @@ namespace StockTrack_API.Controllers
 
                 List<Area> list = await _context
                     .ST_AREAS.Where(area => area.InstitutionId == institutionId)
-                    .Include(a => a.Institution)
+                    // .Include(a => a.Institution)
                     .ToListAsync();
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
@@ -124,7 +124,8 @@ namespace StockTrack_API.Controllers
                 );
 
                 Area? areaAdded = await _context
-                    .ST_AREAS.Include(a => a.Institution)
+                    .ST_AREAS
+                    // .Include(a => a.Institution)
                     .Where((a) => a.InstitutionId == institutionId)
                     .FirstOrDefaultAsync(a => a.Id == newArea.Id);
 
