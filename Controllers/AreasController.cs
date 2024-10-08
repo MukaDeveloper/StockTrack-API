@@ -79,7 +79,7 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPost("add-new")]
-        public async Task<IActionResult> AddAsync(AddNewAreaReq data)
+        public async Task<IActionResult> AddAsync(CreateAreaReq data)
         {
             try
             {
@@ -143,7 +143,7 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateAsync(Area area)
+        public async Task<IActionResult> UpdateAsync(UpdateAreaReq area)
         {
             try
             {
@@ -159,7 +159,13 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                if (area.Name != null)
+                Area? areaToUpdate = await _context
+                    .ST_AREAS
+                    // .Include(a => a.Institution)
+                    .Where((a) => a.InstitutionId == institutionId)
+                    .FirstOrDefaultAsync(a => a.Id == area.Id);
+
+                if (area.Name != null && area.Name != areaToUpdate?.Name)
                 {
                     Area? areaCheck = await _context
                         .ST_AREAS.Where((a) => a.InstitutionId == institutionId)
@@ -169,11 +175,6 @@ namespace StockTrack_API.Controllers
                         throw new Exception("Já existe uma área com esse nome!");
                     }
                 }
-
-                Area? areaToUpdate = await _context
-                    .ST_AREAS.Include(a => a.Institution)
-                    .Where((a) => a.InstitutionId == institutionId)
-                    .FirstOrDefaultAsync(a => a.Id == area.Id);
 
                 if (areaToUpdate == null)
                 {
@@ -237,7 +238,17 @@ namespace StockTrack_API.Controllers
                     );
                 }
 
-                return Ok();
+                await _movimentationService.DeleteArea(
+                    institutionId,
+                    areaToDelete.Id,
+                    user.Name,
+                    areaToDelete.Name
+                );
+
+                _context.ST_AREAS.Remove(areaToDelete);
+                await _context.SaveChangesAsync();
+
+                return Ok("Área excluída com sucesso");
             }
             catch (Exception ex)
             {

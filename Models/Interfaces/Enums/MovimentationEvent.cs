@@ -2,7 +2,8 @@ namespace StockTrack_API.Models
 {
     public enum MovimentationEvent
     {
-        Entry = 1,
-        Exit = 2,
+        ENTRY = 1,
+        EDIT = 1,
+        EXIT = 2,
     }
 }

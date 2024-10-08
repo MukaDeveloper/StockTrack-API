@@ -28,9 +28,9 @@ namespace StockTrack_API.Services
                     InstitutionId = institutionId,
                     MovimentationBy = userName,
                     AreaId = areaId,
-                    Type = MovimentationType.Area,
-                    Event = MovimentationEvent.Entry,
-                    Reason = MovimentationReason.Insertion, // Inserção de nova área
+                    Type = MovimentationType.AREA,
+                    Event = MovimentationEvent.ENTRY,
+                    Reason = MovimentationReason.INSERTION, // Inserção de nova área
                     Date = DateTime.Now,
                     Description = description,
                     Quantity = 1,
@@ -57,9 +57,38 @@ namespace StockTrack_API.Services
                     InstitutionId = institutionId,
                     MovimentationBy = userName,
                     AreaId = areaId,
-                    Event = MovimentationEvent.Entry,
-                    Type = MovimentationType.Area,
-                    Reason = MovimentationReason.Edit,
+                    Event = MovimentationEvent.EDIT,
+                    Type = MovimentationType.AREA,
+                    Reason = MovimentationReason.EDIT,
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = 1,
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
+
+        public async Task<Movimentation> DeleteArea(
+            int institutionId,
+            int areaId,
+            string userName,
+            string name,
+            string description = "Remoção de área"
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Área excluída",
+                    InstitutionId = institutionId,
+                    MovimentationBy = userName,
+                    AreaId = areaId,
+                    Event = MovimentationEvent.EXIT,
+                    Type = MovimentationType.AREA,
+                    Reason = MovimentationReason.REMOVED,
                     Date = DateTime.Now,
                     Description = description,
                     Quantity = 1,
@@ -86,9 +115,9 @@ namespace StockTrack_API.Services
                     InstitutionId = institutionId,
                     MovimentationBy = userName,
                     WarehouseId = warehouseId,
-                    Event = MovimentationEvent.Entry,
-                    Type = MovimentationType.Warehouse,
-                    Reason = MovimentationReason.Insertion,
+                    Event = MovimentationEvent.ENTRY,
+                    Type = MovimentationType.WAREHOUSE,
+                    Reason = MovimentationReason.INSERTION,
                     Date = DateTime.Now,
                     Description = description,
                     Quantity = 1,
@@ -115,9 +144,38 @@ namespace StockTrack_API.Services
                     InstitutionId = institutionId,
                     MovimentationBy = userName,
                     WarehouseId = warehouseId,
-                    Event = MovimentationEvent.Entry,
-                    Type = MovimentationType.Warehouse,
-                    Reason = MovimentationReason.Edit,
+                    Event = MovimentationEvent.EDIT,
+                    Type = MovimentationType.WAREHOUSE,
+                    Reason = MovimentationReason.EDIT,
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = 1,
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
+
+        public async Task<Movimentation> DeleteWarehouse(
+            int institutionId,
+            int warehouseId,
+            string userName,
+            string name,
+            string description = "Remoção de almoxarifado"
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Almoxarifado excluído",
+                    InstitutionId = institutionId,
+                    MovimentationBy = userName,
+                    WarehouseId = warehouseId,
+                    Event = MovimentationEvent.EXIT,
+                    Type = MovimentationType.WAREHOUSE,
+                    Reason = MovimentationReason.REMOVED,
                     Date = DateTime.Now,
                     Description = description,
                     Quantity = 1,
@@ -145,9 +203,9 @@ namespace StockTrack_API.Services
                     InstitutionId = institutionId,
                     MovimentationBy = userName,
                     MaterialId = materialId,
-                    Event = MovimentationEvent.Entry,
-                    Type = MovimentationType.Material,
-                    Reason = MovimentationReason.Insertion,
+                    Event = MovimentationEvent.ENTRY,
+                    Type = MovimentationType.MATERIAL,
+                    Reason = MovimentationReason.INSERTION,
                     Date = DateTime.Now,
                     Description = description,
                     Quantity = quantity,
@@ -175,12 +233,68 @@ namespace StockTrack_API.Services
                     InstitutionId = institutionId,
                     MovimentationBy = userName,
                     MaterialId = materialId,
-                    Event = MovimentationEvent.Entry,
-                    Type = MovimentationType.Material,
-                    Reason = MovimentationReason.Edit,
+                    Event = MovimentationEvent.EDIT,
+                    Type = MovimentationType.MATERIAL,
+                    Reason = MovimentationReason.EDIT,
                     Date = DateTime.Now,
                     Description = description,
                     Quantity = quantity,
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
+
+        public async Task<Movimentation> AddUser(
+            int institutionId,
+            int userId,
+            string userName,
+            string movBy
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = userName ?? "Adição de usuário",
+                    InstitutionId = institutionId,
+                    MovimentationBy = movBy,
+                    UserId = userId,
+                    Event = MovimentationEvent.ENTRY,
+                    Type = MovimentationType.USER,
+                    Reason = MovimentationReason.INSERTION,
+                    Date = DateTime.Now,
+                    Description = "Adição de usuário",
+                    Quantity = 1,
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
+
+        public async Task<Movimentation> UpdateUser(
+            int institutionId,
+            int userId,
+            string userName,
+            string movBy
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = userName ?? "Edição de usuário",
+                    InstitutionId = institutionId,
+                    MovimentationBy = movBy,
+                    UserId = userId,
+                    Event = MovimentationEvent.EDIT,
+                    Type = MovimentationType.MATERIAL,
+                    Reason = MovimentationReason.EDIT,
+                    Date = DateTime.Now,
+                    Description = "Edição de usuário",
+                    Quantity = 1,
                 };
 
             _context.ST_MOVIMENTATIONS.Add(mov);

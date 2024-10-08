@@ -42,8 +42,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES
-                    .Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
                     .ThenInclude(wu => wu.User)
                     .Where(w => w.InstitutionId == institutionId)
@@ -121,7 +120,7 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> AddAsync(CreateReq data)
+        public async Task<IActionResult> AddAsync(CreateWarehouseReq data)
         {
             try
             {
@@ -200,7 +199,7 @@ namespace StockTrack_API.Controllers
 
         // Mudar a interface da requisição pra aceitar AreaIdBefore e AreaIdAfter
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateAsync(UpdateReq warehouse)
+        public async Task<IActionResult> UpdateAsync(UpdateWarehouseReq warehouse)
         {
             try
             {
@@ -212,7 +211,11 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                if (warehouse.Name != null)
+                Warehouse? warehouseToUpdate = await _context
+                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .FirstOrDefaultAsync(x => x.Id == warehouse.Id);
+
+                if (warehouse.Name != null && warehouse.Name != warehouseToUpdate?.Name)
                 {
                     Warehouse? warehouseCheck = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(
                         x => x.Name.ToLower() == warehouse.Name.ToLower()
@@ -223,18 +226,11 @@ namespace StockTrack_API.Controllers
                     }
                 }
 
-                Area? areaBefore = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
+                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
                     x.Id == warehouse.AreaId
                 );
-                Area? areaAfter = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
-                    x.Id == warehouse.AreaIdAfter
-                );
 
-                Warehouse? warehouseToUpdate = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
-                    .FirstOrDefaultAsync(x => x.Id == warehouse.Id);
-
-                if (areaBefore?.InstitutionId != institutionId || areaBefore.Active == false)
+                if (area == null || area?.InstitutionId != institutionId || area.Active == false)
                 {
                     throw new Exception("Área não encontrada ou inválida");
                 }
@@ -252,16 +248,10 @@ namespace StockTrack_API.Controllers
                 {
                     warehouseToUpdate.Description = warehouse.Description;
                 }
-                if (warehouse.AreaIdAfter != null && areaAfter != null)
+                if (area.Id != warehouseToUpdate.AreaId)
                 {
-                    if (areaAfter?.InstitutionId != institutionId || areaAfter.Active == false)
-                    {
-                        throw new Exception("Área alvo não encontrada ou inválida");
-                    }
-
-                    warehouseToUpdate.AreaId = (int)warehouse.AreaIdAfter;
-                    warehouseToUpdate.Area = areaAfter;
-                    areaBefore.Warehouses.Remove(warehouseToUpdate);
+                    warehouseToUpdate.AreaId = (int)warehouse.AreaId;
+                    area.Warehouses.Remove(warehouseToUpdate);
                 }
                 warehouseToUpdate.UpdatedAt = DateTime.Now;
                 warehouseToUpdate.UpdatedBy = user.Name;
@@ -275,6 +265,7 @@ namespace StockTrack_API.Controllers
                     user.Name,
                     warehouseToUpdate.Name
                 );
+
                 return Ok(EnvelopeFactory.factoryEnvelope(warehouseToUpdate));
             }
             catch (Exception ex)
@@ -311,7 +302,17 @@ namespace StockTrack_API.Controllers
                     );
                 }
 
-                return Ok();
+                await _movimentationService.DeleteWarehouse(
+                    institutionId,
+                    warehouseToDelete.Id,
+                    user.Name,
+                    warehouseToDelete.Name
+                );
+
+                _context.ST_WAREHOUSES.Remove(warehouseToDelete);
+                await _context.SaveChangesAsync();
+
+                return Ok("Almoxarifado excluído com sucesso.");
             }
             catch (Exception ex)
             {

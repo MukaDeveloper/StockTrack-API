@@ -3,18 +3,18 @@ namespace StockTrack_API.Models
     public enum MovimentationReason
     {
         // Entry reasons
-        Insertion = 1,
-        Edit = 2,
-        ReturnFromLoan = 3,
-        ReturnFromMaintenance = 4,
+        INSERTION = 1,
+        EDIT = 2,
+        RETURN_FROM_LOAN = 3,
+        RETURN_FROM_MAINTENANCE = 4,
 
         // Exit reasons
-        Disposal = 5,
-        Loan = 6,
-        SentToMaintenance = 7,
-        Removed = 8,
+        DISPOSAL = 5,
+        LOAN = 6,
+        SENT_TO_MAINTENANCE = 7,
+        REMOVED = 8,
         
         // Other reason
-        Other = 9,
+        OTHER = 9,
     }
 }

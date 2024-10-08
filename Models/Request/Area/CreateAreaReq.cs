@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StockTrack_API.Models.Request.Area
 {
-    public class AddNewAreaReq
+    public class CreateAreaReq
     {
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;

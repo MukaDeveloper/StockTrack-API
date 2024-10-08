@@ -97,11 +97,9 @@ namespace StockTrack_API.Data
                 .WithMany(w => w.MaterialWarehouses)
                 .HasForeignKey(mw => mw.WarehouseId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
             // WarehouseUsers
-            modelBuilder
-                .Entity<WarehouseUsers>()
-                .HasKey(mw => new { mw.UserId, mw.WarehouseId });
+            modelBuilder.Entity<WarehouseUsers>().HasKey(mw => new { mw.UserId, mw.WarehouseId });
             modelBuilder
                 .Entity<WarehouseUsers>()
                 .HasOne(mw => mw.Warehouse)
@@ -145,8 +143,9 @@ namespace StockTrack_API.Data
                     State = "SP",
                     CEP = "02110010",
                 };
-            Institution institutionHAS = 
-                new() {
+            Institution institutionHAS =
+                new()
+                {
                     Id = 2,
                     AccessCode = "064",
                     Name = "Horácio Augusto da Silveira",
@@ -159,12 +158,7 @@ namespace StockTrack_API.Data
                     State = "SP",
                     CEP = "02110010",
                 };
-            modelBuilder
-                .Entity<Institution>()
-                .HasData(
-                    institutionTest,
-                    institutionHAS
-                );
+            modelBuilder.Entity<Institution>().HasData(institutionTest, institutionHAS);
 
             modelBuilder
                 .Entity<UserInstitution>()
@@ -236,9 +230,9 @@ namespace StockTrack_API.Data
                         InstitutionId = 1,
                         AreaId = 1,
                         Date = DateTime.Now,
-                        Event = MovimentationEvent.Entry,
-                        Type = MovimentationType.Area,
-                        Reason = MovimentationReason.Insertion,
+                        Event = MovimentationEvent.ENTRY,
+                        Type = MovimentationType.AREA,
+                        Reason = MovimentationReason.INSERTION,
                         Quantity = 1,
                     }
                 );
@@ -258,36 +252,37 @@ namespace StockTrack_API.Data
                 );
 
             modelBuilder
-                .Entity<MovimentationTypeEntity>()
+                .Entity<MovimentationEventEntity>()
                 .HasData(
-                    new MovimentationTypeEntity { Id = 1, Type = "ENTRY" },
-                    new MovimentationTypeEntity { Id = 2, Type = "EDIT" },
-                    new MovimentationTypeEntity { Id = 3, Type = "EXIT" }
+                    new MovimentationEventEntity { Id = 1, Event = "ENTRY" },
+                    new MovimentationEventEntity { Id = 2, Event = "EDIT" },
+                    new MovimentationEventEntity { Id = 3, Event = "EXIT" }
                 );
 
             modelBuilder
-                .Entity<MovimentationEventEntity>()
+                .Entity<MovimentationTypeEntity>()
                 .HasData(
-                    new MovimentationEventEntity { Id = 1, Event = "Area" },
-                    new MovimentationEventEntity { Id = 2, Event = "Warehouse" },
-                    new MovimentationEventEntity { Id = 3, Event = "Material" },
-                    new MovimentationEventEntity { Id = 4, Event = "Loan" },
-                    new MovimentationEventEntity { Id = 5, Event = "Maintenance" },
-                    new MovimentationEventEntity { Id = 6, Event = "General" }
+                    new MovimentationTypeEntity { Id = 1, Type = "USER" },
+                    new MovimentationTypeEntity { Id = 2, Type = "AREA" },
+                    new MovimentationTypeEntity { Id = 3, Type = "WAREHOUSE" },
+                    new MovimentationTypeEntity { Id = 4, Type = "MATERIAL" },
+                    new MovimentationTypeEntity { Id = 5, Type = "LOAN" },
+                    new MovimentationTypeEntity { Id = 6, Type = "MAINTENANCE" },
+                    new MovimentationTypeEntity { Id = 7, Type = "GENERAL" }
                 );
 
             modelBuilder
                 .Entity<MovimentationReasonEntity>()
                 .HasData(
-                    new MovimentationReasonEntity { Id = 1, Reason = "Insertion" },
-                    new MovimentationReasonEntity { Id = 2, Reason = "Edit" },
-                    new MovimentationReasonEntity { Id = 3, Reason = "ReturnFromLoan" },
-                    new MovimentationReasonEntity { Id = 4, Reason = "ReturnFromMaintenance" },
-                    new MovimentationReasonEntity { Id = 5, Reason = "Disposal" },
-                    new MovimentationReasonEntity { Id = 6, Reason = "Loan" },
-                    new MovimentationReasonEntity { Id = 7, Reason = "SentToMaintenance" },
-                    new MovimentationReasonEntity { Id = 8, Reason = "Removed" },
-                    new MovimentationReasonEntity { Id = 9, Reason = "Other" }
+                    new MovimentationReasonEntity { Id = 1, Reason = "INSERTION" },
+                    new MovimentationReasonEntity { Id = 2, Reason = "EDIT" },
+                    new MovimentationReasonEntity { Id = 3, Reason = "RETURNFROMLOAN" },
+                    new MovimentationReasonEntity { Id = 4, Reason = "RETURNFROMMAINTENANCE" },
+                    new MovimentationReasonEntity { Id = 5, Reason = "DISPOSAL" },
+                    new MovimentationReasonEntity { Id = 6, Reason = "LOAN" },
+                    new MovimentationReasonEntity { Id = 7, Reason = "SENTTOMAINTENANCE" },
+                    new MovimentationReasonEntity { Id = 8, Reason = "REMOVED" },
+                    new MovimentationReasonEntity { Id = 9, Reason = "OTHER" }
                 );
         }
 
