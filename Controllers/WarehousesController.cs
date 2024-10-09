@@ -64,7 +64,10 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES
+                    .Include(w => w.Area)
+                    .Include(w => w.Warehousemans)
+                    .ThenInclude(wm => wm.User)
                     .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId)
                     .ToListAsync();
 
@@ -84,7 +87,10 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES
+                    .Include(w => w.Area)
+                    .Include(w => w.Warehousemans)
+                    .ThenInclude(wm => wm.User)
                     .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId)
                     .ToListAsync();
 
@@ -104,7 +110,10 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES.Include(w => w.Area)
+                    .ST_WAREHOUSES
+                    .Include(w => w.Area)
+                    .Include(w => w.Warehousemans)
+                    .ThenInclude(wm => wm.User)
                     .Where(w =>
                         w.InstitutionId == institutionId
                         && EF.Functions.Like(w.Name, "%" + nameQuery + "%")
