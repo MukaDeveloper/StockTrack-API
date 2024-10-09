@@ -10,5 +10,6 @@ namespace StockTrack_API.Models.Request.Warehouse
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int AreaId { get; set; }
+        public List<WarehousemansReq>? Warehousemans { get; set; }
     }
 }

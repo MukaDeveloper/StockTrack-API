@@ -10,6 +10,7 @@ namespace StockTrack_API.Models.Request.Warehouse
         public int? Id { get; set; }
         public string? Name { get; set; } = string.Empty;
         public string? Description { get; set; } = string.Empty;
-        public int? AreaId { get; set; }
+        public int AreaId { get; set; }
+        public WarehousemansReq? Warehousemans { get; set; }
     }
 }

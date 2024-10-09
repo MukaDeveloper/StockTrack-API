@@ -44,7 +44,6 @@ namespace StockTrack_API.Controllers
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .ThenInclude(wu => wu.User)
                     .Where(w => w.InstitutionId == institutionId)
                     .ToListAsync();
 
@@ -64,10 +63,8 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES
-                    .Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .ThenInclude(wm => wm.User)
                     .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId)
                     .ToListAsync();
 
@@ -87,10 +84,8 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES
-                    .Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .ThenInclude(wm => wm.User)
                     .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId)
                     .ToListAsync();
 
@@ -110,10 +105,8 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 List<Warehouse> list = await _context
-                    .ST_WAREHOUSES
-                    .Include(w => w.Area)
+                    .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .ThenInclude(wm => wm.User)
                     .Where(w =>
                         w.InstitutionId == institutionId
                         && EF.Functions.Like(w.Name, "%" + nameQuery + "%")
@@ -177,10 +170,25 @@ namespace StockTrack_API.Controllers
                         CreatedAt = DateTime.Now,
                         CreatedBy = user.Name,
                     };
-                area.Warehouses.Add(newWarehouse);
+
                 _context.ST_AREAS.Update(area);
                 await _context.ST_WAREHOUSES.AddAsync(newWarehouse);
                 await _context.SaveChangesAsync();
+
+                if (data.Warehousemans != null && data.Warehousemans.Count > 0)
+                {
+                    for (int i = 0; i < data.Warehousemans.Count; i++)
+                    {
+                        await _context.ST_WAREHOUSE_USERS.AddAsync(
+                            new WarehouseUsers
+                            {
+                                UserId = data.Warehousemans[i].Id,
+                                WarehouseId = newWarehouse.Id,
+                            }
+                        );
+                    }
+                    await _context.SaveChangesAsync();
+                }
 
                 await _movimentationService.AddWarehouse(
                     newWarehouse.Id,
@@ -259,7 +267,7 @@ namespace StockTrack_API.Controllers
                 }
                 if (area.Id != warehouseToUpdate.AreaId)
                 {
-                    warehouseToUpdate.AreaId = (int)warehouse.AreaId;
+                    warehouseToUpdate.AreaId = warehouse.AreaId;
                     area.Warehouses.Remove(warehouseToUpdate);
                 }
                 warehouseToUpdate.UpdatedAt = DateTime.Now;

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using StockTrack_API.Models;
 using StockTrack_API.Models.Entities;
 using StockTrack_API.Models.Enums;
@@ -21,6 +20,7 @@ namespace StockTrack_API.Data
         public DbSet<Warehouse> ST_WAREHOUSES { get; set; }
         public DbSet<UserInstitution> ST_USER_INSTITUTIONS { get; set; }
         public DbSet<MaterialWarehouses> ST_MATERIAL_WAREHOUSES { get; set; }
+        public DbSet<WarehouseUsers> ST_WAREHOUSE_USERS { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,13 +41,15 @@ namespace StockTrack_API.Data
                 .Entity<UserInstitution>()
                 .HasOne(ui => ui.User)
                 .WithMany(u => u.UserInstitutions)
-                .HasForeignKey(ui => ui.UserId);
+                .HasForeignKey(ui => ui.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder
                 .Entity<UserInstitution>()
                 .HasOne(ui => ui.Institution)
                 .WithMany(u => u.Users)
-                .HasForeignKey(ui => ui.InstitutionId);
+                .HasForeignKey(ui => ui.InstitutionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder
                 .Entity<Area>()
@@ -63,6 +65,12 @@ namespace StockTrack_API.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Movimentations
+            modelBuilder
+                .Entity<Movimentation>()
+                .HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId);
+
             modelBuilder
                 .Entity<Movimentation>()
                 .HasOne(m => m.Area)
