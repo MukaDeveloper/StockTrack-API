@@ -1,15 +1,12 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
-using StockTrack_API.Models.Enums;
-using StockTrack_API.Models.Interfaces;
-using StockTrack_API.Models.Request.User;
-using StockTrack_API.Models.Response;
+using StockTrack_API.Models;
+using StockTrack_API.Models.Interfaces.Enums;
+using StockTrack_API.Models.Interfaces.Request;
+using StockTrack_API.Models.Interfaces.Response;
 using StockTrack_API.Services;
 using StockTrack_API.Utils;
 
@@ -93,10 +90,10 @@ namespace StockTrack_API.Controllers
 
                 if (
                     (
-                        userInstitution.UserRole != UserRole.COORDINATOR
-                        && userInstitution.UserRole != UserRole.SUPPORT
+                        userInstitution.UserRole != EUserRole.COORDINATOR
+                        && userInstitution.UserRole != EUserRole.SUPPORT
                     )
-                    || user.Active == false
+                    || userInstitution.Active == false
                 )
                 {
                     throw new Exception("Sem autorização.");
@@ -247,7 +244,6 @@ namespace StockTrack_API.Controllers
                     {
                         Name = user.Name,
                         Email = user.Email,
-                        Active = true,
                         PasswordHash = hash,
                         PasswordSalt = salt,
                         CreatedAt = DateTime.Now,
@@ -291,9 +287,9 @@ namespace StockTrack_API.Controllers
                 }
 
                 if (
-                    userInstitution.UserRole != UserRole.COORDINATOR
-                        && userInstitution.UserRole != UserRole.SUPPORT
-                    || user.Active == false
+                    userInstitution.UserRole != EUserRole.COORDINATOR
+                        && userInstitution.UserRole != EUserRole.SUPPORT
+                    || userInstitution.Active == false
                 )
                 {
                     throw new Exception("Sem autorização.");
@@ -320,7 +316,7 @@ namespace StockTrack_API.Controllers
 
                 Console.WriteLine($"Valor de member.UserRole: '{member.UserRole}'"); // Exibe o valor exato
 
-                UserRole userRole;
+                EUserRole userRole;
                 if (!Enum.TryParse(member.UserRole, true, out userRole)) // true para ignorar case-sensitive
                 {
                     throw new Exception($"Cargo inválido! Valor fornecido: '{member.UserRole}'");

@@ -1,11 +1,10 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
-using StockTrack_API.Models.Enums;
-using StockTrack_API.Models.Interfaces;
-using StockTrack_API.Models.Request.Area;
+using StockTrack_API.Models.Interfaces.Enums;
+using StockTrack_API.Models;
+using StockTrack_API.Models.Interfaces.Request;
 using StockTrack_API.Services;
 using StockTrack_API.Utils;
 
@@ -87,9 +86,9 @@ namespace StockTrack_API.Controllers
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
                 if (
-                    userInstitution.UserRole == UserRole.USER
-                    || userInstitution.UserRole == UserRole.WAREHOUSEMAN
-                    || user.Active == false
+                    userInstitution.UserRole == EUserRole.USER
+                    || userInstitution.UserRole == EUserRole.WAREHOUSEMAN
+                    || userInstitution.Active == false
                 )
                 {
                     throw new Exception("Sem autorização.");
@@ -151,9 +150,9 @@ namespace StockTrack_API.Controllers
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
                 if (
-                    userInstitution.UserRole == UserRole.USER
-                    || userInstitution.UserRole == UserRole.WAREHOUSEMAN
-                    || user.Active == false
+                    userInstitution.UserRole == EUserRole.USER
+                    || userInstitution.UserRole == EUserRole.WAREHOUSEMAN
+                    || userInstitution.Active == false
                 )
                 {
                     throw new Exception("Sem autorização.");
@@ -217,7 +216,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
-                if (userInstitution.UserRole == UserRole.USER || user.Active == false)
+                if (userInstitution.UserRole == EUserRole.USER || userInstitution.Active == false)
                 {
                     throw new Exception("Sem autorização.");
                 }

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Models;
-using StockTrack_API.Models.Entities;
-using StockTrack_API.Models.Enums;
 using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Models.Interfaces.Entities;
+using StockTrack_API.Models.Interfaces.Enums;
 using StockTrack_API.Utils;
 
 namespace StockTrack_API.Data
@@ -15,6 +15,7 @@ namespace StockTrack_API.Data
         public DbSet<Area> ST_AREAS { get; set; }
         public DbSet<Institution> ST_INSTITUTIONS { get; set; }
         public DbSet<Material> ST_MATERIALS { get; set; }
+        public DbSet<MaterialStatus> ST_MATERIALS_STATUS { get; set; }
         public DbSet<Movimentation> ST_MOVIMENTATIONS { get; set; }
         public DbSet<User> ST_USERS { get; set; }
         public DbSet<Warehouse> ST_WAREHOUSES { get; set; }
@@ -63,6 +64,17 @@ namespace StockTrack_API.Data
                 .WithMany(w => w.Warehouses)
                 .HasForeignKey(w => w.AreaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Configurar o relacionamento um-para-muitos entre Material e MaterialStatus
+            modelBuilder.Entity<Material>()
+                .HasMany(m => m.Status)
+                .WithOne(ms => ms.Material)
+                .HasForeignKey(ms => ms.MaterialId);
+
+            modelBuilder.Entity<MaterialStatus>()
+                .HasKey(ui => new { ui.MaterialId, ui.Status });
+
+            base.OnModelCreating(modelBuilder);
 
             // Movimentations
             modelBuilder
@@ -124,7 +136,6 @@ namespace StockTrack_API.Data
             Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
             User admin = new User()
             {
-                Active = true,
                 Id = 1,
                 Name = "Admin",
                 Email = "admin@stocktrack.com",
@@ -175,13 +186,13 @@ namespace StockTrack_API.Data
                     {
                         UserId = admin.Id,
                         InstitutionId = institutionTest.Id,
-                        UserRole = UserRole.SUPPORT,
+                        UserRole = EUserRole.SUPPORT,
                     },
                     new UserInstitution()
                     {
                         UserId = admin.Id,
                         InstitutionId = institutionHAS.Id,
-                        UserRole = UserRole.COORDINATOR,
+                        UserRole = EUserRole.COORDINATOR,
                     }
                 );
 
@@ -209,20 +220,62 @@ namespace StockTrack_API.Data
                 };
             modelBuilder.Entity<Warehouse>().HasData(warehouse);
 
+            Material notebook = new()
+            {
+                Active = true,
+                Id = 1,
+                Name = "Notebook",
+                Description = "Notebook ThinkPad",
+                Manufacturer = "ThinkPad",
+                Measure = "UN",
+                RecordNumber = 123456,
+                InstitutionId = institutionTest.Id,
+            };
             modelBuilder
                 .Entity<Material>()
-                .HasData(
-                    new Material()
+                .HasData(notebook);
+
+            modelBuilder
+                .Entity<MaterialStatus>().HasData(
+                    new MaterialStatus
                     {
-                        Active = true,
-                        Id = 1,
-                        Name = "Notebook",
-                        Description = "Notebook ThinkPad",
-                        Manufacturer = "ThinkPad",
-                        Measure = "UN",
-                        Quantity = 3,
-                        RecordNumber = 123456,
-                        InstitutionId = institutionTest.Id,
+                        Status = EMaterialStatus.AVAILABLE,
+                        MaterialId = notebook.Id,
+                        Quantity = 3
+                    },
+                    new MaterialStatus
+                    {
+                        Status = EMaterialStatus.UNABAILABLE,
+                        MaterialId = notebook.Id,
+                        Quantity = 1
+                    },
+                    new MaterialStatus
+                    {
+                        Status = EMaterialStatus.MAINTENANCE,
+                        MaterialId = notebook.Id,
+                        Quantity = 1
+                    },
+                    new MaterialStatus
+                    {
+                        Status = EMaterialStatus.BORROWED,
+                        MaterialId = notebook.Id,
+                        Quantity = 5
+                    },
+                    new MaterialStatus
+                    {
+                        Status = EMaterialStatus.OBSOLETE,
+                        MaterialId = notebook.Id,
+                        Quantity = 1
+                    }
+                );
+
+            modelBuilder
+                .Entity<MaterialWarehouses>()
+                .HasData(
+                    new MaterialWarehouses()
+                    {
+                        MaterialId = notebook.Id,
+                        WarehouseId = warehouse.Id,
                     }
                 );
 
@@ -238,9 +291,9 @@ namespace StockTrack_API.Data
                         InstitutionId = 1,
                         AreaId = 1,
                         Date = DateTime.Now,
-                        Event = MovimentationEvent.ENTRY,
-                        Type = MovimentationType.AREA,
-                        Reason = MovimentationReason.INSERTION,
+                        Event = EMovimentationEvent.ENTRY,
+                        Type = EMovimentationType.AREA,
+                        Reason = EMovimentationReason.INSERTION,
                         Quantity = 1,
                     }
                 );
@@ -276,7 +329,8 @@ namespace StockTrack_API.Data
                     new MovimentationTypeEntity { Id = 4, Type = "MATERIAL" },
                     new MovimentationTypeEntity { Id = 5, Type = "LOAN" },
                     new MovimentationTypeEntity { Id = 6, Type = "MAINTENANCE" },
-                    new MovimentationTypeEntity { Id = 7, Type = "GENERAL" }
+                    new MovimentationTypeEntity { Id = 7, Type = "GENERAL" },
+                    new MovimentationTypeEntity { Id = 8, Type = "CONSUMPTION" }
                 );
 
             modelBuilder
@@ -292,10 +346,18 @@ namespace StockTrack_API.Data
                     new MovimentationReasonEntity { Id = 8, Reason = "REMOVED" },
                     new MovimentationReasonEntity { Id = 9, Reason = "OTHER" }
                 );
+
+            modelBuilder
+                .Entity<MaterialTypeEntity>()
+                .HasData(
+                    new MaterialTypeEntity { Id = 1, Type = "LOAN" },
+                    new MaterialTypeEntity { Id = 2, Type = "CONSUMPTION" }
+                );
         }
 
         protected override void ConfigureConventions(
             ModelConfigurationBuilder configurationBuilder
-        ) { }
+        )
+        { }
     }
 }

@@ -1,12 +1,12 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
-using StockTrack_API.Models.Enums;
-using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Models.Interfaces.Enums;
+using StockTrack_API.Models;
 using StockTrack_API.Services;
 using StockTrack_API.Utils;
+using StockTrack_API.Models.Interfaces.Response.Material;
 
 namespace StockTrack_API.Controllers
 {
@@ -44,9 +44,11 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 // Busca o material pelo ID e pelo institutionId no banco de dados através do contexto
-                Material? material = await _context.ST_MATERIALS.FirstOrDefaultAsync(m =>
-                    m.Id == id && m.InstitutionId == institutionId
-                );
+                Material? material = await _context.ST_MATERIALS
+                    .Include(m => m.Status)
+                    .FirstOrDefaultAsync(m =>
+                        m.Id == id && m.InstitutionId == institutionId
+                    );
 
                 // O resultado pode ser null
                 if (material == null)
@@ -73,9 +75,31 @@ namespace StockTrack_API.Controllers
                     .ST_MATERIALS.Where(m => m.InstitutionId == institutionId && m.Id > lastDocId)
                     .OrderBy(m => m.Id)
                     .Take(limit)
+                    .Include(m => m.Status)
+                    .Include(m => m.MaterialWarehouses)
                     .ToListAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
+                List<GetAllRes> materials = list.Select(material => new GetAllRes
+                {
+                    Id = material.Id,
+                    Name = material.Name,
+                    Description = material.Description,
+                    ImageURL = material.ImageURL,
+                    Manufacturer = material.Manufacturer,
+                    RecordNumber = material.RecordNumber,
+                    MaterialType = material.MaterialType.ToString(),
+                    Measure = material.Measure,
+                    Status = material.Status.Select(status => new MaterialStatusDto
+                    {
+                        Status = status.Status.ToString(),
+                        Quantity = status.Quantity
+                    }
+                    ).ToList(),
+                    MaterialWarehouses = material.MaterialWarehouses.Select(
+                        mw => mw.WarehouseId).ToList(),
+                }).ToList();
+
+                return Ok(EnvelopeFactory.factoryEnvelopeArray(materials));
             }
             catch (Exception ex)
             {
@@ -91,7 +115,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
-                if (userInstitution.UserRole == UserRole.USER || user.Active == false)
+                if (userInstitution.UserRole == EUserRole.USER || userInstitution.Active == false)
                 {
                     throw new Exception("Sem autorização.");
                 }

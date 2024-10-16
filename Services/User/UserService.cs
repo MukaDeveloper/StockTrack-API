@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
-using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Models;
 
 namespace StockTrack_API.Services
 {
@@ -72,6 +72,7 @@ namespace StockTrack_API.Services
         {
             List<Claim> claims = new List<Claim>()
             {
+                new Claim("active", userInstitution.Active.ToString()),
                 new Claim("id", user.Id.ToString()),
                 new Claim("name", user.Name),
                 new Claim("email", user.Email),

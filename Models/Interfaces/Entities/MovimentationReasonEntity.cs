@@ -1,4 +1,4 @@
-namespace StockTrack_API.Models
+namespace StockTrack_API.Models.Interfaces.Entities
 {
     public class MovimentationReasonEntity
     {

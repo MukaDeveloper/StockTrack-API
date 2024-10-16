@@ -1,4 +1,4 @@
-namespace StockTrack_API.Models.Entities
+namespace StockTrack_API.Models.Interfaces.Entities
 {
     public class MovimentationEventEntity
     {
