@@ -133,7 +133,7 @@ namespace StockTrack_API.Data
                 .HasForeignKey(mw => mw.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            Cryptography.CreatePasswordHash("admin12345", out byte[] hash, out byte[] salt);
+            Cryptography.CryptographyHashHmac("admin12345", out byte[] hash, out byte[] salt);
             User admin = new User()
             {
                 Id = 1,

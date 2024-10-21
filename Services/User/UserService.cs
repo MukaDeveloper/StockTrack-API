@@ -1,10 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
 using StockTrack_API.Models;
+using StockTrack_API.Utils;
 
 namespace StockTrack_API.Services
 {
@@ -21,34 +23,23 @@ namespace StockTrack_API.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public User GetUser()
+        public User GetUserByEmail(string email)
         {
-            string? context = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
+            // string? email = _httpContextAccessor.HttpContext?.User.FindFirstValue("email");
 
-            if (context == null)
-            {
+            if (email == null)
                 throw new Exception("Requisição inválida.");
-            }
 
-            int userId = int.Parse(context);
-
-            User? user = _context.ST_USERS.FirstOrDefault(u => u.Id == userId);
-
-            if (user == null) {
-              throw new Exception("Usuário não encontrado.");
-            }
+            User? user = _context.ST_USERS.FirstOrDefault(u => u.Email == email) 
+                ?? throw new Exception("Usuário não encontrado.");
 
             return user;
         }
-        
+
         public (User, UserInstitution) GetUserAndInstitution(int institutionId)
         {
-            string? context = _httpContextAccessor.HttpContext?.User.FindFirstValue("id");
-
-            if (context == null)
-            {
-                throw new Exception("Requisição inválida.");
-            }
+            string? context = _httpContextAccessor.HttpContext?.User.FindFirstValue("id")
+                ?? throw new Exception("Requisição inválida.");
 
             int userId = int.Parse(context);
 
@@ -57,12 +48,14 @@ namespace StockTrack_API.Services
                 ui.UserId == userId && ui.InstitutionId == institutionId
             );
 
-            if (user == null) {
-              throw new Exception("Usuário não encontrado.");
+            if (user == null)
+            {
+                throw new Exception("Usuário não encontrado.");
             }
 
-            if (userInstitution == null) {
-              throw new Exception("Usuário não pertence a instituição.");
+            if (userInstitution == null)
+            {
+                throw new Exception("Usuário não pertence a instituição.");
             }
 
             return (user, userInstitution);
@@ -70,7 +63,7 @@ namespace StockTrack_API.Services
 
         public string CreateToken(User user, UserInstitution userInstitution)
         {
-            List<Claim> claims = new List<Claim>()
+            List<Claim> claims = new()
             {
                 new Claim("active", userInstitution.Active.ToString()),
                 new Claim("id", user.Id.ToString()),
@@ -79,25 +72,26 @@ namespace StockTrack_API.Services
                 new Claim("photoUrl", user.PhotoUrl),
                 new Claim("institutionId", userInstitution.InstitutionId.ToString()),
                 new Claim("role", userInstitution.UserRole.ToString()),
+                new Claim("verified", user.Verified.ToString())
             };
 
-            SymmetricSecurityKey key = new SymmetricSecurityKey(
+            SymmetricSecurityKey key = new(
                 Encoding.UTF8.GetBytes(_configuration.GetSection("TokenConfiguration:Key").Value!)
             );
 
-            SigningCredentials creds = new SigningCredentials(
+            SigningCredentials creds = new(
                 key,
                 SecurityAlgorithms.HmacSha512Signature
             );
 
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            SecurityTokenDescriptor tokenDescriptor = new()
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(30),
                 SigningCredentials = creds,
             };
 
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler tokenHandler = new();
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
@@ -109,6 +103,26 @@ namespace StockTrack_API.Services
                 return true;
             }
             return false;
+        }
+
+        public User SendConfirmationEmail(string email)
+        {
+            User? user = this.GetUserByEmail(email)
+                ?? throw new Exception("Usuário não encontrado.");
+
+            string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+            Cryptography.CryptographyHashSHA256(token, out byte[] hash);
+            user.VerifiedToken = hash;
+            user.VerifiedScheduled = DateTime.UtcNow.AddHours(2);
+            _context.ST_USERS.Update(user);
+            _context.SaveChangesAsync();
+
+
+            // ENVIAR O EMAIL AQUI
+            // string url = $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={hash}";
+
+            return user;
         }
     }
 }

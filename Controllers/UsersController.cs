@@ -234,7 +234,7 @@ namespace StockTrack_API.Controllers
                 if (await _userService.ExistUser(user.Email))
                     throw new Exception("Usuário já existente.");
 
-                Cryptography.CreatePasswordHash(user.Password, out byte[] hash, out byte[] salt);
+                Cryptography.CryptographyHashHmac(user.Password, out byte[] hash, out byte[] salt);
 
                 if (hash == null || salt == null)
                     throw new Exception("[ERR500] Erro ao cadastrar usuário.");
@@ -247,6 +247,7 @@ namespace StockTrack_API.Controllers
                         PasswordHash = hash,
                         PasswordSalt = salt,
                         CreatedAt = DateTime.Now,
+                        Verified = false,
                     };
 
                 if (user.PhotoUrl != null)
@@ -254,17 +255,14 @@ namespace StockTrack_API.Controllers
                     newUser.PhotoUrl = user.PhotoUrl;
                 }
 
+                // newUser = _userService.SendConfirmationEmail(newUser.Email);
+
                 await _context.ST_USERS.AddAsync(newUser);
                 await _context.SaveChangesAsync();
 
                 User? returnUser = await _context.ST_USERS.FirstOrDefaultAsync(x =>
-                    x.Id == newUser.Id
-                );
+                    x.Id == newUser.Id) ?? throw new Exception("[ERR501] Erro ao cadastrar usuário.");;
 
-                if (returnUser == null)
-                {
-                    throw new Exception("[ERR501] Erro ao cadastrar usuário.");
-                }
                 return Ok(EnvelopeFactory.factoryEnvelope(returnUser));
             }
             catch (Exception ex)
