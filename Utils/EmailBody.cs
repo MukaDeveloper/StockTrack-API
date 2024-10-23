@@ -44,7 +44,7 @@ namespace StockTrack_API
             sb.AppendLine("        }");
             sb.AppendLine("        .button {");
             sb.AppendLine("            display: inline-block;");
-            sb.AppendLine("            background-color: #2980b9;");
+            sb.AppendLine("            background-color: #3A0614;");
             sb.AppendLine("            color: white;");
             sb.AppendLine("            padding: 10px 20px;");
             sb.AppendLine("            text-decoration: none;");
@@ -67,12 +67,16 @@ namespace StockTrack_API
             sb.AppendLine("        <div class=\"content\">");
             sb.AppendLine($"            <p>Olá {name},</p>");
             sb.AppendLine(
-                "            <p>Obrigado por se registrar no StockTrack. Para ativar sua conta, clique no botão abaixo:</p>"
+                "            <p>Obrigado por se registrar na StockTrack. Para ativar sua conta, clique no botão abaixo:</p>"
             );
+            sb.AppendLine($"            <a href=\"{url}\" class=\"button\">Confirmar Conta</a>");
             sb.AppendLine(
-                $"            <a href=\"{url}\" class=\"button\">Confirmar Conta</a>"
+                $"            <p><small>Caso o botão não funcione, acesse o link: <a href=\"{url}\">{url}</a></small></p>"
             );
-            sb.AppendLine("            <p>Se você não se registrou, pode ignorar este e-mail.</p>");
+            sb.AppendLine("            <br />");
+            sb.AppendLine(
+                "            <p>Se você não foi você que se registrou, pode ignorar este e-mail.</p>"
+            );
             sb.AppendLine("        </div>");
             sb.AppendLine("        <div class=\"footer\">");
             sb.AppendLine("            <p>Atenciosamente,<br>Equipe StockTrack</p>");
@@ -82,7 +86,8 @@ namespace StockTrack_API
             sb.AppendLine("</html>");
 
             // Para retornar o HTML como uma string
-            return sb.ToString();;
+            return sb.ToString();
+            ;
         }
     }
 }

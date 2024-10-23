@@ -12,8 +12,8 @@ using StockTrack_API.Data;
 namespace StockTrack_API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241016203735_Repagination")]
-    partial class Repagination
+    [Migration("20241023134824_EmailCreate")]
+    partial class EmailCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,12 +72,12 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 10, 16, 20, 37, 35, 315, DateTimeKind.Utc).AddTicks(6253),
+                            CreatedAt = new DateTime(2024, 10, 23, 13, 48, 23, 343, DateTimeKind.Utc).AddTicks(6635),
                             CreatedBy = "Admin",
                             Description = "Área de Testes",
                             InstitutionId = 1,
                             Name = "Teste",
-                            UpdatedAt = new DateTime(2024, 10, 16, 20, 37, 35, 315, DateTimeKind.Utc).AddTicks(6254),
+                            UpdatedAt = new DateTime(2024, 10, 23, 13, 48, 23, 343, DateTimeKind.Utc).AddTicks(6635),
                             UpdatedBy = ""
                         });
                 });
@@ -390,6 +390,54 @@ namespace StockTrack_API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("StockTrack_API.Models.Interfaces.MaterialStatus", b =>
+                {
+                    b.Property<int>("MaterialId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Quantity")
+                        .HasColumnType("real");
+
+                    b.HasKey("MaterialId", "Status");
+
+                    b.ToTable("ST_MATERIALS_STATUS");
+
+                    b.HasData(
+                        new
+                        {
+                            MaterialId = 1,
+                            Status = 0,
+                            Quantity = 3f
+                        },
+                        new
+                        {
+                            MaterialId = 1,
+                            Status = 1,
+                            Quantity = 1f
+                        },
+                        new
+                        {
+                            MaterialId = 1,
+                            Status = 2,
+                            Quantity = 1f
+                        },
+                        new
+                        {
+                            MaterialId = 1,
+                            Status = 3,
+                            Quantity = 5f
+                        },
+                        new
+                        {
+                            MaterialId = 1,
+                            Status = 4,
+                            Quantity = 1f
+                        });
+                });
+
             modelBuilder.Entity("StockTrack_API.Models.Material", b =>
                 {
                     b.Property<int>("Id")
@@ -434,9 +482,6 @@ namespace StockTrack_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Quantity")
-                        .HasColumnType("real");
-
                     b.Property<int>("RecordNumber")
                         .HasColumnType("int");
 
@@ -458,7 +503,7 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             Active = true,
-                            CreatedAt = new DateTime(2024, 10, 16, 20, 37, 35, 315, DateTimeKind.Utc).AddTicks(6322),
+                            CreatedAt = new DateTime(2024, 10, 23, 13, 48, 23, 343, DateTimeKind.Utc).AddTicks(6714),
                             CreatedBy = "",
                             Description = "Notebook ThinkPad",
                             ImageURL = "",
@@ -467,9 +512,8 @@ namespace StockTrack_API.Migrations
                             MaterialType = 0,
                             Measure = "UN",
                             Name = "Notebook",
-                            Quantity = 3f,
                             RecordNumber = 123456,
-                            UpdatedAt = new DateTime(2024, 10, 16, 20, 37, 35, 315, DateTimeKind.Utc).AddTicks(6323),
+                            UpdatedAt = new DateTime(2024, 10, 23, 13, 48, 23, 343, DateTimeKind.Utc).AddTicks(6714),
                             UpdatedBy = ""
                         });
                 });
@@ -487,6 +531,13 @@ namespace StockTrack_API.Migrations
                     b.HasIndex("WarehouseId");
 
                     b.ToTable("ST_MATERIAL_WAREHOUSES", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            MaterialId = 1,
+                            WarehouseId = 1
+                        });
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Movimentation", b =>
@@ -556,15 +607,15 @@ namespace StockTrack_API.Migrations
                         {
                             Id = 1,
                             AreaId = 1,
-                            Date = new DateTime(2024, 10, 16, 17, 37, 35, 315, DateTimeKind.Local).AddTicks(6348),
+                            Date = new DateTime(2024, 10, 23, 10, 48, 23, 343, DateTimeKind.Local).AddTicks(6853),
                             Description = "Adição de área \"Teste\"",
-                            Event = 1,
+                            Event = 0,
                             InstitutionId = 1,
                             MovimentationBy = "Admin",
                             Name = "Área Teste",
                             Quantity = 1f,
-                            Reason = 1,
-                            Type = 2
+                            Reason = 0,
+                            Type = 1
                         });
                 });
 
@@ -600,6 +651,18 @@ namespace StockTrack_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Verified")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("VerifiedScheduled")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("VerifiedToken")
+                        .HasColumnType("varbinary(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("ST_USERS", (string)null);
@@ -608,12 +671,13 @@ namespace StockTrack_API.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 10, 16, 17, 37, 35, 315, DateTimeKind.Local).AddTicks(5906),
+                            CreatedAt = new DateTime(2024, 10, 23, 10, 48, 23, 343, DateTimeKind.Local).AddTicks(6286),
                             Email = "admin@stocktrack.com",
                             Name = "Admin",
-                            PasswordHash = new byte[] { 150, 206, 138, 251, 156, 163, 58, 146, 126, 193, 106, 194, 211, 225, 158, 226, 237, 46, 116, 141, 78, 2, 158, 101, 126, 33, 82, 218, 53, 107, 204, 142, 60, 152, 166, 8, 100, 225, 125, 141, 145, 38, 223, 8, 28, 160, 30, 96, 75, 215, 48, 238, 45, 252, 212, 28, 87, 53, 91, 224, 229, 112, 215, 207 },
-                            PasswordSalt = new byte[] { 218, 2, 218, 161, 114, 77, 41, 65, 98, 13, 165, 210, 228, 202, 89, 184, 68, 83, 112, 1, 87, 85, 182, 139, 31, 196, 111, 193, 35, 37, 144, 166, 30, 196, 5, 165, 67, 238, 139, 159, 13, 141, 235, 148, 140, 174, 130, 60, 226, 202, 227, 140, 72, 102, 84, 101, 74, 84, 20, 218, 36, 17, 46, 221, 226, 130, 60, 171, 41, 101, 193, 182, 13, 161, 63, 212, 136, 174, 201, 84, 129, 230, 244, 216, 241, 0, 76, 33, 102, 115, 1, 31, 146, 215, 13, 165, 117, 119, 195, 161, 189, 126, 131, 78, 247, 53, 48, 201, 224, 12, 123, 155, 169, 40, 0, 11, 64, 12, 37, 105, 115, 122, 49, 155, 202, 91, 88, 27 },
-                            PhotoUrl = "https://imgur.com/mOXzZLE.png"
+                            PasswordHash = new byte[] { 128, 50, 154, 158, 125, 100, 250, 158, 10, 102, 165, 131, 100, 13, 102, 82, 229, 47, 72, 173, 177, 70, 139, 140, 182, 141, 10, 26, 43, 218, 197, 220, 106, 223, 229, 150, 155, 48, 207, 141, 201, 16, 167, 204, 92, 13, 62, 138, 80, 178, 69, 255, 145, 72, 138, 105, 113, 135, 192, 41, 33, 195, 240, 176 },
+                            PasswordSalt = new byte[] { 123, 220, 14, 26, 14, 16, 178, 19, 13, 174, 80, 104, 130, 111, 13, 203, 83, 179, 48, 251, 1, 38, 227, 47, 245, 138, 65, 104, 107, 27, 100, 40, 193, 16, 200, 79, 122, 125, 150, 215, 70, 162, 187, 185, 210, 129, 179, 137, 98, 220, 172, 44, 113, 138, 125, 40, 202, 195, 172, 34, 252, 112, 101, 189, 140, 95, 95, 91, 73, 142, 242, 57, 69, 243, 97, 146, 146, 190, 65, 214, 229, 240, 124, 177, 48, 172, 199, 43, 133, 228, 171, 157, 202, 84, 111, 180, 196, 136, 192, 169, 214, 74, 144, 197, 64, 51, 134, 1, 20, 2, 175, 208, 153, 236, 68, 150, 163, 233, 213, 217, 97, 27, 94, 148, 1, 170, 7, 232 },
+                            PhotoUrl = "https://imgur.com/mOXzZLE.png",
+                            Verified = false
                         });
                 });
 
@@ -643,14 +707,14 @@ namespace StockTrack_API.Migrations
                             UserId = 1,
                             InstitutionId = 1,
                             Active = true,
-                            UserRole = 4
+                            UserRole = 3
                         },
                         new
                         {
                             UserId = 1,
                             InstitutionId = 2,
                             Active = true,
-                            UserRole = 3
+                            UserRole = 2
                         });
                 });
 
@@ -707,12 +771,12 @@ namespace StockTrack_API.Migrations
                             Id = 1,
                             Active = true,
                             AreaId = 1,
-                            CreatedAt = new DateTime(2024, 10, 16, 20, 37, 35, 315, DateTimeKind.Utc).AddTicks(6283),
+                            CreatedAt = new DateTime(2024, 10, 23, 13, 48, 23, 343, DateTimeKind.Utc).AddTicks(6674),
                             CreatedBy = "",
                             Description = "Almoxarifado de informática",
                             InstitutionId = 1,
                             Name = "Informática",
-                            UpdatedAt = new DateTime(2024, 10, 16, 20, 37, 35, 315, DateTimeKind.Utc).AddTicks(6284),
+                            UpdatedAt = new DateTime(2024, 10, 23, 13, 48, 23, 343, DateTimeKind.Utc).AddTicks(6674),
                             UpdatedBy = ""
                         });
                 });
@@ -741,6 +805,17 @@ namespace StockTrack_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Institution");
+                });
+
+            modelBuilder.Entity("StockTrack_API.Models.Interfaces.MaterialStatus", b =>
+                {
+                    b.HasOne("StockTrack_API.Models.Material", "Material")
+                        .WithMany("Status")
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Material");
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.Material", b =>
@@ -872,6 +947,8 @@ namespace StockTrack_API.Migrations
             modelBuilder.Entity("StockTrack_API.Models.Material", b =>
                 {
                     b.Navigation("MaterialWarehouses");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("StockTrack_API.Models.User", b =>

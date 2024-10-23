@@ -120,16 +120,11 @@ namespace StockTrack_API.Services
             return false;
         }
 
-        public async Task<User> SendConfirmationEmail(string userEmail)
+        public async Task<byte[]> SendConfirmationEmail(string userEmail, string userName)
         {
-            User? user = this.GetUserByEmail(userEmail)
-                ?? throw new Exception("Usuário não encontrado.");
-
             string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
             Cryptography.CryptographyHashSHA256(token, out byte[] hash);
-            user.VerifiedToken = hash;
-            user.VerifiedScheduled = DateTime.UtcNow.AddHours(2);
 
             // ENVIAR O EMAIL AQUI
             string url = $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={hash}";
@@ -139,14 +134,14 @@ namespace StockTrack_API.Services
                 SenderPassword = "bukk dzhp gecy cyub",
                 Receiver = userEmail,
                 Subject = "Confirmação de E-mail",
-                Message = EmailBody.ConfirmationEmail(user.Name, url),
+                Message = EmailBody.ConfirmationEmail(userName, url),
                 PrimaryDomain = "smtp.gmail.com",
                 PrimaryPort = 587,
             };
 
             await _emailService.SendEmail(email);
 
-            return user;
+            return hash;
         }
     }
 }

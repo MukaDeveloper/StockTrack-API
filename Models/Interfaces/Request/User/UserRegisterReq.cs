@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace StockTrack_API.Models.Interfaces.Request
 {
     public class UserRegisterReq
