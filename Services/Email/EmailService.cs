@@ -2,20 +2,37 @@ using System.Net;
 using System.Net.Mail;
 using StockTrack_API.Models;
 
-namespace StockTrack_API.Services 
+namespace StockTrack_API.Services
 {
-    public class EmailService 
+    public class EmailService
     {
-        public async Task SendEmail(Email email)
+        private readonly IConfiguration _configuration;
+
+        public EmailService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        public async Task SendEmail(string receiver, string subject, string body)
         {
             try
             {
+                Email email =
+                new()
+                {
+                    Sender = $"{_configuration.GetSection("Email:Sender").Value!}",
+                    SenderPassword = $"{_configuration.GetSection("Email:Password").Value!}",
+                    Receiver = receiver,
+                    Subject = subject,
+                    Message = body,
+                    PrimaryDomain = "smtp.gmail.com",
+                    PrimaryPort = 587,
+                };
+
                 string toEmail = email.Receiver;
 
-                MailMessage mailMessage = new()
-                {
-                    From = new MailAddress(email.Sender, "StockTrack")
-                };
+                MailMessage mailMessage =
+                    new() { From = new MailAddress(email.Sender, "StockTrack") };
 
                 mailMessage.To.Add(new MailAddress(toEmail));
 

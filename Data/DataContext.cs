@@ -66,13 +66,13 @@ namespace StockTrack_API.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configurar o relacionamento um-para-muitos entre Material e MaterialStatus
-            modelBuilder.Entity<Material>()
+            modelBuilder
+                .Entity<Material>()
                 .HasMany(m => m.Status)
                 .WithOne(ms => ms.Material)
                 .HasForeignKey(ms => ms.MaterialId);
 
-            modelBuilder.Entity<MaterialStatus>()
-                .HasKey(ui => new { ui.MaterialId, ui.Status });
+            modelBuilder.Entity<MaterialStatus>().HasKey(ui => new { ui.MaterialId, ui.Status });
 
             base.OnModelCreating(modelBuilder);
 
@@ -140,7 +140,9 @@ namespace StockTrack_API.Data
                 Name = "Admin",
                 Email = "admin@stocktrack.com",
                 PhotoUrl = "https://imgur.com/mOXzZLE.png",
+                Verified = true,
                 CreatedAt = DateTime.Now,
+                VerifiedAt = DateTime.Now,
                 PasswordString = string.Empty,
                 PasswordHash = hash,
                 PasswordSalt = salt,
@@ -220,52 +222,52 @@ namespace StockTrack_API.Data
                 };
             modelBuilder.Entity<Warehouse>().HasData(warehouse);
 
-            Material notebook = new()
-            {
-                Active = true,
-                Id = 1,
-                Name = "Notebook",
-                Description = "Notebook ThinkPad",
-                Manufacturer = "ThinkPad",
-                Measure = "UN",
-                RecordNumber = 123456,
-                InstitutionId = institutionTest.Id,
-            };
-            modelBuilder
-                .Entity<Material>()
-                .HasData(notebook);
+            Material notebook =
+                new()
+                {
+                    Active = true,
+                    Id = 1,
+                    Name = "Notebook",
+                    Description = "Notebook ThinkPad",
+                    Manufacturer = "ThinkPad",
+                    Measure = "UN",
+                    RecordNumber = 123456,
+                    InstitutionId = institutionTest.Id,
+                };
+            modelBuilder.Entity<Material>().HasData(notebook);
 
             modelBuilder
-                .Entity<MaterialStatus>().HasData(
+                .Entity<MaterialStatus>()
+                .HasData(
                     new MaterialStatus
                     {
                         Status = EMaterialStatus.AVAILABLE,
                         MaterialId = notebook.Id,
-                        Quantity = 3
+                        Quantity = 3,
                     },
                     new MaterialStatus
                     {
                         Status = EMaterialStatus.UNABAILABLE,
                         MaterialId = notebook.Id,
-                        Quantity = 1
+                        Quantity = 1,
                     },
                     new MaterialStatus
                     {
                         Status = EMaterialStatus.MAINTENANCE,
                         MaterialId = notebook.Id,
-                        Quantity = 1
+                        Quantity = 1,
                     },
                     new MaterialStatus
                     {
                         Status = EMaterialStatus.BORROWED,
                         MaterialId = notebook.Id,
-                        Quantity = 5
+                        Quantity = 5,
                     },
                     new MaterialStatus
                     {
                         Status = EMaterialStatus.OBSOLETE,
                         MaterialId = notebook.Id,
-                        Quantity = 1
+                        Quantity = 1,
                     }
                 );
 
@@ -357,7 +359,6 @@ namespace StockTrack_API.Data
 
         protected override void ConfigureConventions(
             ModelConfigurationBuilder configurationBuilder
-        )
-        { }
+        ) { }
     }
 }

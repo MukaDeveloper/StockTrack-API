@@ -46,9 +46,9 @@ namespace StockTrack_API
             sb.AppendLine("            display: inline-block;");
             sb.AppendLine("            background-color: #3A0614;");
             sb.AppendLine("            color: white;");
-            sb.AppendLine("            padding: 10px 20px;");
+            sb.AppendLine("            padding: 16px 32px;");
             sb.AppendLine("            text-decoration: none;");
-            sb.AppendLine("            border-radius: 5px;");
+            sb.AppendLine("            border-radius: 8px;");
             sb.AppendLine("            margin-top: 20px;");
             sb.AppendLine("        }");
             sb.AppendLine("        .footer {");
@@ -69,7 +69,9 @@ namespace StockTrack_API
             sb.AppendLine(
                 "            <p>Obrigado por se registrar na StockTrack. Para ativar sua conta, clique no botão abaixo:</p>"
             );
-            sb.AppendLine($"            <a href=\"{url}\" class=\"button\">Confirmar Conta</a>");
+            sb.AppendLine(
+                $"            <a href=\"{url}\" class=\"button\"><span style=\"color: #FDFDFD\">CONFIRMAR</span></a>"
+            );
             sb.AppendLine(
                 $"            <p><small>Caso o botão não funcione, acesse o link: <a href=\"{url}\">{url}</a></small></p>"
             );

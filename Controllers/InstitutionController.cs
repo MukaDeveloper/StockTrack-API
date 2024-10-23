@@ -28,9 +28,6 @@ namespace StockTrack_API.Controllers
             _institutionService = institutionService;
         }
 
-        /*
-        * GET BY ID
-        */
         [HttpGet("get-current")]
         public async Task<IActionResult> GetSingleAsync()
         {

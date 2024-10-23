@@ -17,7 +17,12 @@ namespace StockTrack_API.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly EmailService _emailService;
 
-        public UserService(DataContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, EmailService emailService)
+        public UserService(
+            DataContext context,
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor,
+            EmailService emailService
+        )
         {
             _context = context;
             _configuration = configuration;
@@ -27,12 +32,14 @@ namespace StockTrack_API.Services
 
         public User GetUser()
         {
-            string? context = _httpContextAccessor.HttpContext?.User.FindFirstValue("id")
+            string? context =
+                _httpContextAccessor.HttpContext?.User.FindFirstValue("id")
                 ?? throw new Exception("Requisição inválida.");
 
             int userId = int.Parse(context);
 
-            User? user = _context.ST_USERS.FirstOrDefault(u => u.Id == userId) 
+            User? user =
+                _context.ST_USERS.FirstOrDefault(u => u.Id == userId)
                 ?? throw new Exception("Usuário não encontrado.");
 
             return user;
@@ -45,7 +52,8 @@ namespace StockTrack_API.Services
             if (email == null)
                 throw new Exception("Requisição inválida.");
 
-            User? user = _context.ST_USERS.FirstOrDefault(u => u.Email == email) 
+            User? user =
+                _context.ST_USERS.FirstOrDefault(u => u.Email == email)
                 ?? throw new Exception("Usuário não encontrado.");
 
             return user;
@@ -53,7 +61,8 @@ namespace StockTrack_API.Services
 
         public (User, UserInstitution) GetUserAndInstitution(int institutionId)
         {
-            string? context = _httpContextAccessor.HttpContext?.User.FindFirstValue("id")
+            string? context =
+                _httpContextAccessor.HttpContext?.User.FindFirstValue("id")
                 ?? throw new Exception("Requisição inválida.");
 
             int userId = int.Parse(context);
@@ -76,35 +85,37 @@ namespace StockTrack_API.Services
             return (user, userInstitution);
         }
 
-        public string CreateToken(User user, UserInstitution userInstitution)
+        public string CreateToken(User user, UserInstitution? userInstitution)
         {
-            List<Claim> claims = new()
-            {
-                new Claim("active", userInstitution.Active.ToString()),
-                new Claim("id", user.Id.ToString()),
-                new Claim("name", user.Name),
-                new Claim("email", user.Email),
-                new Claim("photoUrl", user.PhotoUrl),
-                new Claim("institutionId", userInstitution.InstitutionId.ToString()),
-                new Claim("role", userInstitution.UserRole.ToString()),
-                new Claim("verified", user.Verified.ToString())
-            };
+            List<Claim> claims =
+                new()
+                {
+                    new Claim("id", user.Id.ToString()),
+                    new Claim("name", user.Name),
+                    new Claim("email", user.Email),
+                    new Claim("photoUrl", user.PhotoUrl),
+                    new Claim("verified", user.Verified.ToString()),
+                    new Claim("active", userInstitution?.Active.ToString() ?? ""),
+                    new Claim("institutionId", userInstitution?.InstitutionId.ToString() ?? ""),
+                    new Claim("role", userInstitution?.UserRole.ToString() ?? ""),
+                };
 
-            SymmetricSecurityKey key = new(
-                Encoding.UTF8.GetBytes(_configuration.GetSection("TokenConfiguration:Key").Value!)
-            );
+            SymmetricSecurityKey key =
+                new(
+                    Encoding.UTF8.GetBytes(
+                        _configuration.GetSection("TokenConfiguration:Key").Value!
+                    )
+                );
 
-            SigningCredentials creds = new(
-                key,
-                SecurityAlgorithms.HmacSha512Signature
-            );
+            SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha512Signature);
 
-            SecurityTokenDescriptor tokenDescriptor = new()
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(30),
-                SigningCredentials = creds,
-            };
+            SecurityTokenDescriptor tokenDescriptor =
+                new()
+                {
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.Now.AddDays(30),
+                    SigningCredentials = creds,
+                };
 
             JwtSecurityTokenHandler tokenHandler = new();
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
@@ -126,20 +137,21 @@ namespace StockTrack_API.Services
 
             Cryptography.CryptographyHashSHA256(token, out byte[] hash);
 
-            // ENVIAR O EMAIL AQUI
-            string url = $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={hash}";
-            Email email = new()
+            // Transformo a criptografia em uma string hexadecimal para enviar na URL
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in hash)
             {
-                Sender = "noreply.stocktrack@gmail.com",
-                SenderPassword = "bukk dzhp gecy cyub",
-                Receiver = userEmail,
-                Subject = "Confirmação de E-mail",
-                Message = EmailBody.ConfirmationEmail(userName, url),
-                PrimaryDomain = "smtp.gmail.com",
-                PrimaryPort = 587,
-            };
+                sb.Append(b.ToString("x2")); // "x2" gera a representação hexadecimal em minúsculas
+            }
 
-            await _emailService.SendEmail(email);
+            string url =
+                $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={sb}";
+
+            await _emailService.SendEmail(
+                userEmail,
+                "Confirmação de cadastro",
+                EmailBody.ConfirmationEmail(userName, url)
+            );
 
             return hash;
         }

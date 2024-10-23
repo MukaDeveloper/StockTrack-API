@@ -168,17 +168,17 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int? institutionId = credentials.InstitutionId;
+                // int? institutionId = credentials.InstitutionId;
 
                 if (credentials.Email.IsNullOrEmpty() || credentials.PasswordString.IsNullOrEmpty())
                 {
                     throw new Exception("Todos os campos são obrigatórios.");
                 }
 
-                if (institutionId == null)
-                {
-                    throw new Exception("Instituição não informada.");
-                }
+                // if (institutionId == null)
+                // {
+                //     throw new Exception("Instituição não informada.");
+                // }
 
                 User? user = await _context
                     .ST_USERS.Where(x => x.Email.ToLower() == credentials.Email.ToLower())
@@ -196,24 +196,24 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Usuário ou senha incorreto(s).");
                 }
 
-                UserInstitution? userInstitution =
-                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
-                        ui.UserId == user.Id && ui.InstitutionId == institutionId
-                    );
+                // UserInstitution? userInstitution =
+                //     await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                //         ui.UserId == user.Id && ui.InstitutionId == institutionId
+                //     );
 
-                if (userInstitution == null)
-                {
-                    throw new Exception("Usuário não pertence a essa instituição.");
-                }
+                // if (userInstitution == null)
+                // {
+                //     throw new Exception("Usuário não pertence a essa instituição.");
+                // }
 
                 user.AccessDate = DateTime.Now;
-                user.Role = userInstitution.UserRole;
+                // user.Role = userInstitution.UserRole;
                 _context.ST_USERS.Update(user);
                 await _context.SaveChangesAsync();
 
                 user.PasswordHash = null;
                 user.PasswordSalt = null;
-                string Token = _userService.CreateToken(user, userInstitution);
+                string Token = _userService.CreateToken(user, null);
 
                 return Ok(EnvelopeFactory.factoryEnvelope(Token));
             }
@@ -223,6 +223,7 @@ namespace StockTrack_API.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync(UserRegisterReq user)
         {
