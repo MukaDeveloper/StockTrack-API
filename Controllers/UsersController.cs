@@ -255,7 +255,7 @@ namespace StockTrack_API.Controllers
                     newUser.PhotoUrl = user.PhotoUrl;
                 }
 
-                // newUser = _userService.SendConfirmationEmail(newUser.Email);
+                newUser = await _userService.SendConfirmationEmail(newUser.Email);
 
                 await _context.ST_USERS.AddAsync(newUser);
                 await _context.SaveChangesAsync();

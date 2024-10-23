@@ -15,12 +15,27 @@ namespace StockTrack_API.Services
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly EmailService _emailService;
 
-        public UserService(DataContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public UserService(DataContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, EmailService emailService)
         {
             _context = context;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _emailService = emailService;
+        }
+
+        public User GetUser()
+        {
+            string? context = _httpContextAccessor.HttpContext?.User.FindFirstValue("id")
+                ?? throw new Exception("Requisição inválida.");
+
+            int userId = int.Parse(context);
+
+            User? user = _context.ST_USERS.FirstOrDefault(u => u.Id == userId) 
+                ?? throw new Exception("Usuário não encontrado.");
+
+            return user;
         }
 
         public User GetUserByEmail(string email)
@@ -105,9 +120,9 @@ namespace StockTrack_API.Services
             return false;
         }
 
-        public User SendConfirmationEmail(string email)
+        public async Task<User> SendConfirmationEmail(string userEmail)
         {
-            User? user = this.GetUserByEmail(email)
+            User? user = this.GetUserByEmail(userEmail)
                 ?? throw new Exception("Usuário não encontrado.");
 
             string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
@@ -115,12 +130,21 @@ namespace StockTrack_API.Services
             Cryptography.CryptographyHashSHA256(token, out byte[] hash);
             user.VerifiedToken = hash;
             user.VerifiedScheduled = DateTime.UtcNow.AddHours(2);
-            _context.ST_USERS.Update(user);
-            _context.SaveChangesAsync();
-
 
             // ENVIAR O EMAIL AQUI
-            // string url = $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={hash}";
+            string url = $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={hash}";
+            Email email = new()
+            {
+                Sender = "noreply.stocktrack@gmail.com",
+                SenderPassword = "bukk dzhp gecy cyub",
+                Receiver = userEmail,
+                Subject = "Confirmação de E-mail",
+                Message = EmailBody.ConfirmationEmail(user.Name, url),
+                PrimaryDomain = "smtp.gmail.com",
+                PrimaryPort = 587,
+            };
+
+            await _emailService.SendEmail(email);
 
             return user;
         }

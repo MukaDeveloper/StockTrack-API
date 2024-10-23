@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace StockTrack_API.Utils
+namespace StockTrack_API.Services
 {
     public class InstitutionService
     {
