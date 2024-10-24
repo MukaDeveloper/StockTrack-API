@@ -13,9 +13,13 @@ namespace StockTrack_API.Services
 
         public int GetInstitutionId()
         {
-            string? contextAcessor =
-                (_httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId"))
-                ?? throw new Exception("Requisição inválida.");
+            string? contextAcessor = _httpContextAccessor.HttpContext?.User.FindFirstValue("institutionId");
+
+            if (contextAcessor == null || contextAcessor == "")
+            {
+                throw new Exception("Requisição inválida.");
+            }
+
             int? institutionId = int.Parse(contextAcessor);
 
             if (!institutionId.HasValue)

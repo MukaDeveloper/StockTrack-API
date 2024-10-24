@@ -131,7 +131,7 @@ namespace StockTrack_API.Services
             return false;
         }
 
-        public async Task<byte[]> SendConfirmationEmail(string userEmail, string userName)
+        public async Task<byte[]> SendConfirmationEmail(User user)
         {
             string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
@@ -145,12 +145,12 @@ namespace StockTrack_API.Services
             }
 
             string url =
-                $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={sb}";
+                $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={sb}&uid={user.Id}";
 
             await _emailService.SendEmail(
-                userEmail,
+                user.Email,
                 "Confirmação de cadastro",
-                EmailBody.ConfirmationEmail(userName, url)
+                EmailBody.ConfirmationEmail(user.Name, url)
             );
 
             return hash;

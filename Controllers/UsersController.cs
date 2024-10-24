@@ -64,6 +64,7 @@ namespace StockTrack_API.Controllers
                                     Email = user.Email,
                                     PhotoUrl = user.PhotoUrl,
                                     Role = userInstitution[i].UserRole.ToString(),
+                                    Verified = user.Verified,
                                 };
 
                             members.Add(member);
@@ -131,6 +132,7 @@ namespace StockTrack_API.Controllers
                         Name = u.Name,
                         Email = u.Email,
                         PhotoUrl = u.PhotoUrl,
+                        Verified = u.Verified,
                     })
                     .ToList();
 
@@ -256,14 +258,16 @@ namespace StockTrack_API.Controllers
                     newUser.PhotoUrl = user.PhotoUrl;
                 }
 
-                newUser.VerifiedToken = await _userService.SendConfirmationEmail(newUser.Email, newUser.Name);
+                newUser.VerifiedToken = await _userService.SendConfirmationEmail(newUser);
                 newUser.VerifiedScheduled = DateTime.UtcNow.AddHours(2);
 
                 await _context.ST_USERS.AddAsync(newUser);
                 await _context.SaveChangesAsync();
 
-                User? returnUser = await _context.ST_USERS.FirstOrDefaultAsync(x =>
-                    x.Id == newUser.Id) ?? throw new Exception("[ERR501] Erro ao cadastrar usuário.");;
+                User? returnUser =
+                    await _context.ST_USERS.FirstOrDefaultAsync(x => x.Id == newUser.Id)
+                    ?? throw new Exception("[ERR501] Erro ao cadastrar usuário.");
+                ;
 
                 return Ok(EnvelopeFactory.factoryEnvelope(returnUser));
             }
@@ -340,6 +344,26 @@ namespace StockTrack_API.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelope("OK"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPatch("select-institution")]
+        public IActionResult SelectInstitutionAsync(SelectInstitutionReq req)
+        {
+            try
+            {
+                var (user, userInstitution) = _userService.GetUserAndInstitution(req.InstitutionId);
+
+                if (userInstitution == null)
+                    throw new Exception("Usuário não pertence a essa instituição.");
+
+                string Token = _userService.CreateToken(user, userInstitution);
+
+                return Ok(EnvelopeFactory.factoryEnvelope(Token));
             }
             catch (Exception ex)
             {
