@@ -30,7 +30,7 @@ namespace StockTrack_API.Models
         public string Token { get; set; } = string.Empty;
 
         public bool Verified { get; set; } = false;
-        public byte[]? VerifiedToken { get; set; }
+        public string? VerifiedToken { get; set; }
         public DateTime? VerifiedAt { get; set; }
         public DateTime? VerifiedScheduled { get; set; }
     }

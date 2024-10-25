@@ -73,11 +73,11 @@ namespace StockTrack_API
                 $"            <a href=\"{url}\" class=\"button\"><span style=\"color: #FDFDFD\">CONFIRMAR</span></a>"
             );
             sb.AppendLine(
-                $"            <p><small>Caso o botão não funcione, acesse o link: <a href=\"{url}\">{url}</a></small></p>"
+                $"            <p><small>Caso tenha dificuldade, acesse o link: <a href=\"{url}\">{url}</a></small></p>"
             );
             sb.AppendLine("            <br />");
             sb.AppendLine(
-                "            <p>Se você não foi você que se registrou, pode ignorar este e-mail.</p>"
+                "            <p>Se você não se registrou, pode desconsiderar este e-mail.</p>"
             );
             sb.AppendLine("        </div>");
             sb.AppendLine("        <div class=\"footer\">");

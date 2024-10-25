@@ -171,7 +171,6 @@ namespace StockTrack_API.Controllers
                         CreatedBy = user.Name,
                     };
 
-                _context.ST_AREAS.Update(area);
                 await _context.ST_WAREHOUSES.AddAsync(newWarehouse);
                 await _context.SaveChangesAsync();
 

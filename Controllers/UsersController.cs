@@ -258,10 +258,13 @@ namespace StockTrack_API.Controllers
                     newUser.PhotoUrl = user.PhotoUrl;
                 }
 
+                await _context.ST_USERS.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+
                 newUser.VerifiedToken = await _userService.SendConfirmationEmail(newUser);
                 newUser.VerifiedScheduled = DateTime.UtcNow.AddHours(2);
 
-                await _context.ST_USERS.AddAsync(newUser);
+                _context.ST_USERS.Update(newUser);
                 await _context.SaveChangesAsync();
 
                 User? returnUser =
@@ -349,6 +352,63 @@ namespace StockTrack_API.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpPost("resend-email")]
+        public async Task<IActionResult> ResendEmailAsync()
+        {
+            try
+            {
+                User user = _userService.GetUser();
+
+                if (user.Verified == true)
+                    return Ok(EnvelopeFactory.factoryEnvelope(user));
+
+                user.VerifiedToken = await _userService.SendConfirmationEmail(user);
+                user.VerifiedScheduled = DateTime.UtcNow.AddHours(2);
+
+                _context.ST_USERS.Update(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(EnvelopeFactory.factoryEnvelope(user));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(ConfirmEmailRequest request)
+        {
+            // Passo 1: Busca o usuário pelo ID
+            User? user = await _context.ST_USERS.FirstOrDefaultAsync(u => u.Id == request.UserId);
+
+            if (user == null)
+            {
+                return NotFound("Usuário não encontrado.");
+            }
+
+            // Passo 2: Aplica o mesmo hash no token recebido
+            string hashedToken = Cryptography.HashToken(request.Token);
+
+            // Passo 3: Compara o hash gerado com o armazenado no banco de dados
+            if (user.VerifiedToken != hashedToken)
+            {
+                return BadRequest("Token inválido ou expirado.");
+            }
+
+            // Passo 4: Atualiza o status do usuário para verificado
+            user.Verified = true;
+            user.VerifiedToken = null; // Limpa o campo do token de verificação
+            user.VerifiedScheduled = null; // Limpa a data agendada para verificação, se houver
+
+            _context.ST_USERS.Update(user);
+            await _context.SaveChangesAsync();
+
+            // Passo 5: Retorna o token do usuário confirmado
+            string Token = _userService.CreateToken(user, null);
+            return Ok(EnvelopeFactory.factoryEnvelope(Token));
         }
 
         [HttpPatch("select-institution")]

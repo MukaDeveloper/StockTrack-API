@@ -5,9 +5,20 @@ namespace StockTrack_API.Utils
 {
     public class Cryptography
     {
-        public static void CryptographyHashSHA256(string input, out byte[] hash)
+        public static string HashToken(string token)
         {
-            hash = SHA256.HashData(Encoding.UTF8.GetBytes(input));
+            using (var sha256 = SHA256.Create())
+            {
+                var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
+
+                // Converte o hash para uma string hexadecimal
+                StringBuilder sb = new StringBuilder();
+                foreach (byte b in hashBytes)
+                {
+                    sb.Append(b.ToString("x2")); // "x2" para hexadecimal em minúsculas
+                }
+                return sb.ToString();
+            }
         }
 
         public static void CryptographyHashHmac(string input, out byte[] hash, out byte[] salt)

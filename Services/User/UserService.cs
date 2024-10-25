@@ -95,6 +95,7 @@ namespace StockTrack_API.Services
                     new Claim("email", user.Email),
                     new Claim("photoUrl", user.PhotoUrl),
                     new Claim("verified", user.Verified.ToString()),
+                    new Claim("verifiedScheduled", user.VerifiedScheduled.ToString() ?? ""),
                     new Claim("active", userInstitution?.Active.ToString() ?? ""),
                     new Claim("institutionId", userInstitution?.InstitutionId.ToString() ?? ""),
                     new Claim("role", userInstitution?.UserRole.ToString() ?? ""),
@@ -131,29 +132,36 @@ namespace StockTrack_API.Services
             return false;
         }
 
-        public async Task<byte[]> SendConfirmationEmail(User user)
+        public async Task<string> SendConfirmationEmail(User user)
         {
+            // Gera um token aleatório
             string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
-            Cryptography.CryptographyHashSHA256(token, out byte[] hash);
+            // Criptografa o token com SHA256 e transforma em uma string hexadecimal para o banco de dados
+            string tokenHash = Cryptography.HashToken(token);
 
-            // Transformo a criptografia em uma string hexadecimal para enviar na URL
-            StringBuilder sb = new StringBuilder();
-            foreach (byte b in hash)
-            {
-                sb.Append(b.ToString("x2")); // "x2" gera a representação hexadecimal em minúsculas
-            }
-
+            // Gera a URL com a versão original do token (segura para URL)
             string url =
-                $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={sb}&uid={user.Id}";
+                $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={ConvertToBase64Url(token)}&uid={user.Id}";
 
+            // Envia o e-mail
             await _emailService.SendEmail(
                 user.Email,
                 "Confirmação de cadastro",
                 EmailBody.ConfirmationEmail(user.Name, url)
             );
 
-            return hash;
+            // Retorna o hash que será armazenado no banco de dados
+            return tokenHash;
+        }
+
+        private string ConvertToBase64Url(string token)
+        {
+            return Convert
+                .ToBase64String(Encoding.UTF8.GetBytes(token))
+                .Replace('+', '-') // Substitui '+' por '-'
+                .Replace('/', '_') // Substitui '/' por '_'
+                .TrimEnd('='); // Remove o padding '='
         }
     }
 }
