@@ -135,14 +135,15 @@ namespace StockTrack_API.Services
         public async Task<string> SendConfirmationEmail(User user)
         {
             // Gera um token aleatório
-            string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            byte[] tokenBytes = RandomNumberGenerator.GetBytes(64);
+            string token = ConvertToBase64Url(tokenBytes); // Converte para Base64 URL-safe
 
-            // Criptografa o token com SHA256 e transforma em uma string hexadecimal para o banco de dados
+            // Gera o hash do token URL-safe para armazenamento no banco
             string tokenHash = Cryptography.HashToken(token);
 
             // Gera a URL com a versão original do token (segura para URL)
             string url =
-                $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={ConvertToBase64Url(token)}&uid={user.Id}";
+                $"{_configuration.GetSection("FrontEndURL:Url").Value!}/confirm?token={tokenHash}&uid={user.Id}";
 
             // Envia o e-mail
             await _emailService.SendEmail(
@@ -155,13 +156,13 @@ namespace StockTrack_API.Services
             return tokenHash;
         }
 
-        private string ConvertToBase64Url(string token)
+        private string ConvertToBase64Url(byte[] input)
         {
             return Convert
-                .ToBase64String(Encoding.UTF8.GetBytes(token))
+                .ToBase64String(input)
                 .Replace('+', '-') // Substitui '+' por '-'
                 .Replace('/', '_') // Substitui '/' por '_'
-                .TrimEnd('='); // Remove o padding '='
+                .TrimEnd('=');
         }
     }
 }

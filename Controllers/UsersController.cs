@@ -364,6 +364,20 @@ namespace StockTrack_API.Controllers
                 if (user.Verified == true)
                     return Ok(EnvelopeFactory.factoryEnvelope(user));
 
+                // Verifica se o agendamento anterior foi há menos de 1 hora
+                if (
+                    user.VerifiedScheduled.HasValue
+                    && DateTime.UtcNow < user.VerifiedScheduled.Value.AddMinutes(45)
+                )
+                {
+                    return BadRequest(
+                        new
+                        {
+                            message = "O e-mail de verificação só pode ser reenviado após 1 hora da última tentativa.",
+                        }
+                    );
+                }
+
                 user.VerifiedToken = await _userService.SendConfirmationEmail(user);
                 user.VerifiedScheduled = DateTime.UtcNow.AddHours(2);
 
