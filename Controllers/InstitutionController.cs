@@ -69,7 +69,7 @@ namespace StockTrack_API.Controllers
 
                 if (institutionIds.Count == 0)
                 {
-                    return NotFound();
+                    return Ok(EnvelopeFactory.factoryEnvelopeArray(institutionIds));
                 }
 
                 List<Institution> list = await _context
@@ -78,7 +78,7 @@ namespace StockTrack_API.Controllers
 
                 if (list.Count == 0)
                 {
-                    return NotFound();
+                    return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
                 }
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -88,7 +88,7 @@ namespace StockTrack_API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        
+
         [HttpPost("create")]
         public async Task<IActionResult> AddAsync(Institution newInstitution)
         {

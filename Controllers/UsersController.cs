@@ -364,19 +364,19 @@ namespace StockTrack_API.Controllers
                 if (user.Verified == true)
                     return Ok(EnvelopeFactory.factoryEnvelope(user));
 
-                // Verifica se o agendamento anterior foi há menos de 1 hora
-                if (
-                    user.VerifiedScheduled.HasValue
-                    && DateTime.UtcNow < user.VerifiedScheduled.Value.AddMinutes(45)
-                )
-                {
-                    return BadRequest(
-                        new
-                        {
-                            message = "O e-mail de verificação só pode ser reenviado após 1 hora da última tentativa.",
-                        }
-                    );
-                }
+                // Verifica se o agendamento anterior foi há menos de 45 minutos
+                // if (
+                //     user.VerifiedScheduled.HasValue
+                //     && DateTime.UtcNow < user.VerifiedScheduled.Value.AddMinutes(45)
+                // )
+                // {
+                //     return BadRequest(
+                //         new
+                //         {
+                //             message = "O e-mail de verificação só pode ser reenviado após 45 minutos da última tentativa.",
+                //         }
+                //     );
+                // }
 
                 user.VerifiedToken = await _userService.SendConfirmationEmail(user);
                 user.VerifiedScheduled = DateTime.UtcNow.AddHours(2);
@@ -395,34 +395,45 @@ namespace StockTrack_API.Controllers
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(ConfirmEmailRequest request)
         {
-            // Passo 1: Busca o usuário pelo ID
-            User? user = await _context.ST_USERS.FirstOrDefaultAsync(u => u.Id == request.UserId);
-
-            if (user == null)
+            try
             {
-                return NotFound("Usuário não encontrado.");
+                // Passo 1: Busca o usuário pelo ID
+                User? user = await _context.ST_USERS.FirstOrDefaultAsync(u => u.Id == request.UserId);
+
+                if (user == null)
+                    return NotFound("Usuário não encontrado.");
+
+                if (user.Verified == true)
+                {
+                    string returnToken = _userService.CreateToken(user, null);
+                    return Ok(EnvelopeFactory.factoryEnvelope(returnToken));
+                }
+
+                if (request.Token == null)
+                    return BadRequest("Token não informado.");
+
+                // Passo 3: Compara o hash gerado com o armazenado no banco de dados
+                if (user.VerifiedToken != request.Token)
+                {
+                    return BadRequest("Token inválido ou expirado.");
+                }
+
+                // Passo 4: Atualiza o status do usuário para verificado
+                user.Verified = true;
+                user.VerifiedToken = null; // Limpa o campo do token de verificação
+                user.VerifiedScheduled = null; // Limpa a data agendada para verificação, se houver
+
+                _context.ST_USERS.Update(user);
+                await _context.SaveChangesAsync();
+
+                // Passo 5: Retorna o token do usuário confirmado
+                string Token = _userService.CreateToken(user, null);
+                return Ok(EnvelopeFactory.factoryEnvelope(Token));
             }
-
-            // Passo 2: Aplica o mesmo hash no token recebido
-            string hashedToken = Cryptography.HashToken(request.Token);
-
-            // Passo 3: Compara o hash gerado com o armazenado no banco de dados
-            if (user.VerifiedToken != hashedToken)
+            catch (Exception ex)
             {
-                return BadRequest("Token inválido ou expirado.");
+                return BadRequest(new { message = ex.Message });
             }
-
-            // Passo 4: Atualiza o status do usuário para verificado
-            user.Verified = true;
-            user.VerifiedToken = null; // Limpa o campo do token de verificação
-            user.VerifiedScheduled = null; // Limpa a data agendada para verificação, se houver
-
-            _context.ST_USERS.Update(user);
-            await _context.SaveChangesAsync();
-
-            // Passo 5: Retorna o token do usuário confirmado
-            string Token = _userService.CreateToken(user, null);
-            return Ok(EnvelopeFactory.factoryEnvelope(Token));
         }
 
         [HttpPatch("select-institution")]
