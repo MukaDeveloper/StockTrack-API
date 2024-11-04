@@ -436,6 +436,23 @@ namespace StockTrack_API.Controllers
             }
         }
 
+        [HttpPatch("change-institution")]
+        public IActionResult ChangeInstitutionAsync()
+        {
+            try
+            {
+                User user = _userService.GetUser();
+
+                string Token = _userService.CreateToken(user, null);
+
+                return Ok(EnvelopeFactory.factoryEnvelope(Token));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPatch("select-institution")]
         public IActionResult SelectInstitutionAsync(SelectInstitutionReq req)
         {
