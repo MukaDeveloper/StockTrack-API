@@ -346,7 +346,7 @@ namespace StockTrack_API.Controllers
                 await _context.ST_USER_INSTITUTIONS.AddAsync(newUserInstitution);
                 await _context.SaveChangesAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelope("OK"));
+                return Ok(EnvelopeFactory.factoryEnvelope(userToAdd));
             }
             catch (Exception ex)
             {
@@ -398,7 +398,9 @@ namespace StockTrack_API.Controllers
             try
             {
                 // Passo 1: Busca o usuário pelo ID
-                User? user = await _context.ST_USERS.FirstOrDefaultAsync(u => u.Id == request.UserId);
+                User? user = await _context.ST_USERS.FirstOrDefaultAsync(u =>
+                    u.Id == request.UserId
+                );
 
                 if (user == null)
                     return NotFound("Usuário não encontrado.");
