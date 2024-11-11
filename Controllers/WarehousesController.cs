@@ -264,6 +264,28 @@ namespace StockTrack_API.Controllers
                 {
                     warehouseToUpdate.Description = warehouse.Description;
                 }
+                if (warehouse.Warehousemans != null) {
+                    List<WarehouseUsers>? warehouseUsers = await _context.ST_WAREHOUSE_USERS
+                        .Where(wu => wu.WarehouseId == warehouse.Id)
+                        .ToListAsync();
+
+                    if (warehouseUsers.Count > 0)
+                    {
+                        _context.ST_WAREHOUSE_USERS.RemoveRange(warehouseUsers);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    for (int i = 0; i < warehouse.Warehousemans.Count; i++)
+                    {
+                        await _context.ST_WAREHOUSE_USERS.AddAsync(
+                            new WarehouseUsers
+                            {
+                                UserId = warehouse.Warehousemans[i].Id,
+                                WarehouseId = warehouseToUpdate.Id,
+                            }
+                        );
+                    }
+                }
                 if (area.Id != warehouseToUpdate.AreaId)
                 {
                     warehouseToUpdate.AreaId = warehouse.AreaId;
