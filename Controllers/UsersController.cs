@@ -170,17 +170,11 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                // int? institutionId = credentials.InstitutionId;
 
                 if (credentials.Email.IsNullOrEmpty() || credentials.PasswordString.IsNullOrEmpty())
                 {
                     throw new Exception("Todos os campos são obrigatórios.");
                 }
-
-                // if (institutionId == null)
-                // {
-                //     throw new Exception("Instituição não informada.");
-                // }
 
                 User? user = await _context
                     .ST_USERS.Where(x => x.Email.ToLower() == credentials.Email.ToLower())
@@ -198,18 +192,7 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Usuário ou senha incorreto(s).");
                 }
 
-                // UserInstitution? userInstitution =
-                //     await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
-                //         ui.UserId == user.Id && ui.InstitutionId == institutionId
-                //     );
-
-                // if (userInstitution == null)
-                // {
-                //     throw new Exception("Usuário não pertence a essa instituição.");
-                // }
-
                 user.AccessDate = DateTime.Now;
-                // user.Role = userInstitution.UserRole;
                 _context.ST_USERS.Update(user);
                 await _context.SaveChangesAsync();
 
@@ -321,8 +304,6 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Usuário já cadastrado na instituição.");
                 }
 
-                Console.WriteLine($"Valor de member.UserRole: '{member.UserRole}'"); // Exibe o valor exato
-
                 EUserRole userRole;
                 if (!Enum.TryParse(member.UserRole, true, out userRole)) // true para ignorar case-sensitive
                 {
@@ -346,7 +327,156 @@ namespace StockTrack_API.Controllers
                 await _context.ST_USER_INSTITUTIONS.AddAsync(newUserInstitution);
                 await _context.SaveChangesAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelope(userToAdd));
+                GetMembersRes memberRes =
+                    new()
+                    {
+                        Id = userToAdd.Id.ToString(),
+                        Name = userToAdd.Name,
+                        Email = userToAdd.Email,
+                        PhotoUrl = userToAdd.PhotoUrl,
+                        Role = newUserInstitution.UserRole.ToString(),
+                        Verified = userToAdd.Verified,
+                    };
+
+                return Ok(EnvelopeFactory.factoryEnvelope(memberRes));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("update-institution-member")]
+        public async Task<IActionResult> UpdateMemberAsync(UpdateUserInstitutionReq member)
+        {
+            try
+            {
+                int institutionId = _institutionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+
+                if (institutionId != member.InstitutionId)
+                {
+                    throw new Exception("Instituição inválida.");
+                }
+
+                if (
+                    userInstitution.UserRole != EUserRole.COORDINATOR
+                        && userInstitution.UserRole != EUserRole.SUPPORT
+                    || userInstitution.Active == false
+                )
+                {
+                    throw new Exception("Sem autorização.");
+                }
+
+                User? userToUpdate = await _context.ST_USERS.FirstOrDefaultAsync(x =>
+                    x.Id == member.UserId
+                );
+
+                if (userToUpdate == null)
+                {
+                    throw new Exception("Usuário inválido.");
+                }
+
+                UserInstitution? userInstitutionToUpdate =
+                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                        ui.UserId == member.UserId && ui.InstitutionId == member.InstitutionId
+                    );
+
+                if (userInstitutionToUpdate == null)
+                {
+                    throw new Exception("Usuário não identificado na instituição.");
+                }
+
+                EUserRole userRole;
+                if (!Enum.TryParse(member.UserRole, true, out userRole)) // true para ignorar case-sensitive
+                {
+                    throw new Exception($"Cargo inválido! Valor fornecido: '{member.UserRole}'");
+                }
+
+                UserInstitution updatedUserInstitution =
+                    new()
+                    {
+                        UserId = member.UserId,
+                        InstitutionId = member.InstitutionId,
+                        UserRole = userRole,
+                    };
+
+                await _movimentationService.UpdateUser(
+                    member.InstitutionId,
+                    member.UserId,
+                    userToUpdate.Name,
+                    user.Name
+                );
+
+                _context.ST_USER_INSTITUTIONS.Update(updatedUserInstitution);
+                await _context.SaveChangesAsync();
+
+                GetMembersRes memberRes =
+                    new()
+                    {
+                        Id = userToUpdate.Id.ToString(),
+                        Name = userToUpdate.Name,
+                        Email = userToUpdate.Email,
+                        PhotoUrl = userToUpdate.PhotoUrl,
+                        Role = updatedUserInstitution.UserRole.ToString(),
+                        Verified = userToUpdate.Verified,
+                    };
+
+                return Ok(EnvelopeFactory.factoryEnvelope(memberRes));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("remove-institution-member")]
+        public async Task<IActionResult> RemoveMemberAsync(User member)
+        {
+            try
+            {
+                int institutionId = _institutionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+
+                if (
+                    userInstitution.UserRole != EUserRole.COORDINATOR
+                        && userInstitution.UserRole != EUserRole.SUPPORT
+                    || userInstitution.Active == false
+                )
+                {
+                    throw new Exception("Sem autorização.");
+                }
+
+                User? userToRemove = await _context.ST_USERS.FirstOrDefaultAsync(x =>
+                    x.Id == member.Id
+                );
+
+                if (userToRemove == null)
+                {
+                    throw new Exception("Usuário inválido.");
+                }
+
+                UserInstitution? userInstitutionToRemove =
+                    await _context.ST_USER_INSTITUTIONS.FirstOrDefaultAsync(ui =>
+                        ui.UserId == member.Id && ui.InstitutionId == institutionId
+                    );
+
+                if (userInstitutionToRemove == null)
+                {
+                    throw new Exception("Usuário não identificado na instituição.");
+                }
+
+                await _movimentationService.RemoveUser(
+                    institutionId,
+                    member.Id,
+                    member.Name,
+                    user.Name
+                );
+
+                _context.ST_USER_INSTITUTIONS.Remove(userInstitutionToRemove);
+                await _context.SaveChangesAsync();
+
+                return Ok(EnvelopeFactory.factoryEnvelope("Ok"));
             }
             catch (Exception ex)
             {

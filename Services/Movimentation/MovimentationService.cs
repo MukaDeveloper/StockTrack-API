@@ -302,5 +302,33 @@ namespace StockTrack_API.Services
 
             return mov;
         }
+
+        public async Task<Movimentation> RemoveUser(
+            int institutionId,
+            int userId,
+            string userName,
+            string movBy
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = userName ?? "Remoção de usuário",
+                    InstitutionId = institutionId,
+                    MovimentationBy = movBy,
+                    UserId = userId,
+                    Event = EMovimentationEvent.EXIT,
+                    Type = EMovimentationType.USER,
+                    Reason = EMovimentationReason.REMOVED,
+                    Date = DateTime.Now,
+                    Description = "Remoção de usuário",
+                    Quantity = 1,
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
     }
 }
