@@ -40,12 +40,19 @@ namespace StockTrack_API.Controllers
             try
             {
                 int institutionId = _institutionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
                     .Where(w => w.InstitutionId == institutionId)
                     .ToListAsync();
+
+                if (userInstitution.UserRole == EUserRole.WAREHOUSEMAN)
+                {
+                    list = list.Where(w => w.Warehousemans != null
+                        && w.Warehousemans.Any(wh => wh.UserId == userInstitution.UserId)).ToList();
+                }
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
@@ -264,7 +271,8 @@ namespace StockTrack_API.Controllers
                 {
                     warehouseToUpdate.Description = warehouse.Description;
                 }
-                if (warehouse.Warehousemans != null) {
+                if (warehouse.Warehousemans != null)
+                {
                     List<WarehouseUsers>? warehouseUsers = await _context.ST_WAREHOUSE_USERS
                         .Where(wu => wu.WarehouseId == warehouse.Id)
                         .ToListAsync();
