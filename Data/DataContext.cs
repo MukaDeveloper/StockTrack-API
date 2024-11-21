@@ -23,6 +23,9 @@ namespace StockTrack_API.Data
         public DbSet<MaterialWarehouses> ST_MATERIAL_WAREHOUSES { get; set; }
         public DbSet<WarehouseUsers> ST_WAREHOUSE_USERS { get; set; }
 
+        public DbSet<Solicitation> ST_SOLICITATIONS { get; set; }
+        public DbSet<Solicitation> ST_SOLICITATION_MATERIALS { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Area>().ToTable("ST_AREAS");
@@ -33,6 +36,9 @@ namespace StockTrack_API.Data
             modelBuilder.Entity<Warehouse>().ToTable("ST_WAREHOUSES");
             modelBuilder.Entity<MaterialWarehouses>().ToTable("ST_MATERIAL_WAREHOUSES");
             modelBuilder.Entity<WarehouseUsers>().ToTable("ST_WAREHOUSE_USERS");
+
+            modelBuilder.Entity<Solicitation>().ToTable("ST_SOLICITATIONS");
+            modelBuilder.Entity<SolicitationMaterials>().ToTable("ST_SOLICITATION_MATERIALS");
 
             modelBuilder
                 .Entity<UserInstitution>()
@@ -50,6 +56,13 @@ namespace StockTrack_API.Data
                 .HasOne(ui => ui.Institution)
                 .WithMany(u => u.Users)
                 .HasForeignKey(ui => ui.InstitutionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder
+                .Entity<UserInstitution>()
+                .HasMany(ui => ui.Solicitations)
+                .WithOne(s => s.UserInstitution)
+                .HasForeignKey(s => new { s.UserId, s.InstitutionId })
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder
@@ -132,6 +145,34 @@ namespace StockTrack_API.Data
                 .WithMany(m => m.WarehouseUsers)
                 .HasForeignKey(mw => mw.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Solicitações
+                modelBuilder.Entity<Solicitation>().HasKey(s => s.Id);
+
+            modelBuilder.Entity<Solicitation>()
+                .HasOne(s => s.UserInstitution)
+                .WithMany(ui => ui.Solicitations)
+                .HasForeignKey(s => new { s.UserId, s.InstitutionId });
+
+            modelBuilder.Entity<Solicitation>()
+                .HasMany(s => s.Items)
+                .WithOne(sm => sm.Solicitation)
+                .HasForeignKey(sm => sm.SolicitationId);
+
+            // Items da solicitação
+            modelBuilder.Entity<SolicitationMaterials>().HasKey(sm => new { sm.MaterialId, sm.SolicitationId });
+
+            modelBuilder.Entity<SolicitationMaterials>()
+                .HasOne(sm => sm.Material)
+                .WithMany()
+                .HasForeignKey(sm => sm.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SolicitationMaterials>()
+                .HasOne(sm => sm.Solicitation)
+                .WithMany(s => s.Items)
+                .HasForeignKey(sm => sm.SolicitationId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             Cryptography.CryptographyHashHmac("admin12345", out byte[] hash, out byte[] salt);
             User admin = new User()

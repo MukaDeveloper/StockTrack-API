@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using StockTrack_API.Models.Interfaces.Enums;
 
 namespace StockTrack_API.Models
@@ -12,6 +13,9 @@ namespace StockTrack_API.Models
 
         public int InstitutionId { get; set; }
         public Institution? Institution { get; set; }
+
+        [JsonIgnore]
+        public List<Solicitation> Solicitations { get; set; } = new List<Solicitation>();
 
         // Define se o usuário está ativo na instituição
         public bool Active { get; set; } = true;

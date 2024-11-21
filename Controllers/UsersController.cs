@@ -312,9 +312,11 @@ namespace StockTrack_API.Controllers
                 UserInstitution newUserInstitution =
                     new()
                     {
+                        Active = true,
                         UserId = member.UserId,
                         InstitutionId = member.InstitutionId,
                         UserRole = userRole,
+                        Solicitations = new List<Solicitation>()
                     };
 
                 await _movimentationService.AddUser(
