@@ -6,11 +6,14 @@ namespace StockTrack_API.Models.Interfaces
     public class SolicitationMaterials
     {
         public float Quantity { get; set; }
+        public ESolicitationStatus Status { get; set; }
 
         public int MaterialId { get; set; }
-        public Material Material { get; set; }
+        [JsonIgnore]
+        public Material? Material { get; set; }
 
         public int SolicitationId { get; set; }
-        public Solicitation Solicitation { get; set; }
+        [JsonIgnore]
+        public Solicitation? Solicitation { get; set; }
     }
 }

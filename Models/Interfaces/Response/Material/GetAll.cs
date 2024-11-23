@@ -13,8 +13,8 @@ namespace StockTrack_API.Models.Interfaces.Response.Material
         public string MaterialType { get; set; } = string.Empty;
         public float Quantity => Status.Sum(s => s.Quantity);
         public string Measure { get; set; } = string.Empty;
-        public List<MaterialStatusDto> Status { get; set; } = [];
-        public List<int> MaterialWarehouses { get; set; } = [];
+        public List<MaterialStatusDto> Status { get; set; } = new List<MaterialStatusDto>();
+        public List<int> MaterialWarehouses { get; set; } = new List<int>();
     }
 
     public class MaterialStatusDto
