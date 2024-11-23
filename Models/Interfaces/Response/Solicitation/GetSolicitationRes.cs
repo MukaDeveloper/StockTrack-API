@@ -15,6 +15,7 @@ namespace StockTrack_API.Models
         public UserInstitution? UserInstitution { get; set; }
 
         public DateTime SolicitedAt { get; set; }
+        public DateTime ExpectReturnAt { get; set; }
         public string Status { get; set; } = string.Empty;
     }
 }

@@ -19,19 +19,19 @@ namespace StockTrack_API.Controllers
     {
 
         private readonly DataContext _context;
-        private readonly MovimentationService _movimentationService;
+        // private readonly MovimentationService _movimentationService;
         private readonly InstitutionService _institutionService;
         private readonly UserService _userService;
 
         public SolicitationsController(
             DataContext context,
-            MovimentationService movimentationService,
+            // MovimentationService movimentationService,
             InstitutionService instituionService,
             UserService userService
         )
         {
             _context = context;
-            _movimentationService = movimentationService;
+            // _movimentationService = movimentationService;
             _institutionService = instituionService;
             _userService = userService;
         }
@@ -97,6 +97,7 @@ namespace StockTrack_API.Controllers
                         UserId = list[i].UserId,
                         InstitutionId = list[i].InstitutionId,
                         SolicitedAt = list[i].SolicitedAt,
+                        ExpectReturnAt = list[i].ExpectReturnAt,
                         Status = list[i].Status.ToString(),
                     };
 
@@ -111,13 +112,16 @@ namespace StockTrack_API.Controllers
             }
         }
 
+        // Liberado Anonymous apenas para testes no postman
+        // [AllowAnonymous]
         [HttpPost]
-        public IActionResult CreateSolicitation(Solicitation solicitation)
+        public IActionResult CreateSolicitation(CreateSolicitationReq solicitation)
         {
             ArgumentNullException.ThrowIfNull(solicitation);
 
             try
             {
+                Console.WriteLine("New Solicitation Request => " + solicitation);
                 throw new NotImplementedException();
             }
             catch (Exception ex)
