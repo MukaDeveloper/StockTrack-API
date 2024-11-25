@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
 using StockTrack_API.Models;
+using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Interfaces.Enums;
 using StockTrack_API.Models.Interfaces.Request;
 using StockTrack_API.Services;
@@ -64,7 +65,6 @@ namespace StockTrack_API.Controllers
                         // Modifico minha lista para exibir somente as solicitações onde algum item
                         // Faça parte de algum almoxarifado que o usuário é responsável
                         list = await _context.ST_SOLICITATIONS
-                            .Include(s => s.Items)
                             .Where(s => s.Items.Any(item => _context.ST_MATERIAL_WAREHOUSES
                                 .Where(mw => managedWarehouseIds.Contains(mw.WarehouseId))
                                 .Select(mw => mw.MaterialId)
@@ -115,14 +115,84 @@ namespace StockTrack_API.Controllers
         // Liberado Anonymous apenas para testes no postman
         // [AllowAnonymous]
         [HttpPost]
-        public IActionResult CreateSolicitation(CreateSolicitationReq solicitation)
+        public async Task<IActionResult> CreateSolicitationAsync(CreateSolicitationReq solicitation)
         {
-            ArgumentNullException.ThrowIfNull(solicitation);
-
             try
             {
-                Console.WriteLine("New Solicitation Request => " + solicitation);
-                throw new NotImplementedException();
+                ArgumentNullException.ThrowIfNull(solicitation);
+                if (solicitation == null || solicitation.Items == null || !solicitation.Items.Any())
+                {
+                    return BadRequest("A solicitação deve conter materiais.");
+                }
+
+                int institutionId = _institutionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+
+                if (user.Id != userInstitution.UserId)
+                {
+                    return BadRequest("Informações divergentes");
+                }
+
+                var validatedItems = new List<SolicitationMaterials>();
+
+                foreach (var itemReq in solicitation.Items)
+                {
+                    Material? material = await _context.ST_MATERIALS
+                        .Include(m => m.Status)
+                        .FirstOrDefaultAsync(m => m.Id == itemReq.MaterialId);
+
+                    if (material == null)
+                    {
+                        return NotFound($"Material com ID {itemReq.MaterialId} não encontrado.");
+                    }
+
+                    var availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
+                    if (availableStatus == null || availableStatus.Quantity < itemReq.Quantity)
+                    {
+                        return BadRequest($"Quantidade divergente para o material: {material.Name}");
+                    }
+
+                    validatedItems.Add(new SolicitationMaterials
+                    {
+                        MaterialId = itemReq.MaterialId,
+                        Quantity = itemReq.Quantity,
+                        Status = ESolicitationStatus.WAITING
+                    });
+                }
+
+                var newSolicitation = new Solicitation
+                {
+                    Description = solicitation.Description,
+                    Items = validatedItems,
+                    UserId = userInstitution.UserId,
+                    InstitutionId = userInstitution.InstitutionId,
+                    UserInstitution = userInstitution,
+                    SolicitedAt = DateTime.UtcNow,
+                    ExpectReturnAt = solicitation.ExpectReturnAt,
+                    Status = ESolicitationStatus.WAITING
+                };
+
+                _context.ST_SOLICITATIONS.Add(newSolicitation);
+                _context.SaveChanges();
+
+                GetSolicitationRes res = new()
+                {
+                    Id = newSolicitation.Id,
+                    Description = newSolicitation.Description,
+                    Items = newSolicitation.Items,
+                    UserId = newSolicitation.UserId,
+                    InstitutionId = newSolicitation.InstitutionId,
+                    SolicitedAt = newSolicitation.SolicitedAt,
+                    ExpectReturnAt = newSolicitation.ExpectReturnAt,
+                    Status = newSolicitation.Status.ToString(),
+                };
+
+                if (res == null)
+                {
+                    return BadRequest("Houve um problema ao registrar sua solicitação. Consulte o responsável do(s) almoxarifado(s) relacionados.");
+                }
+
+                return Ok(EnvelopeFactory.factoryEnvelope(res));
             }
             catch (Exception ex)
             {

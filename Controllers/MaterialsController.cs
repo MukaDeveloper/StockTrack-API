@@ -9,6 +9,7 @@ using StockTrack_API.Utils;
 using StockTrack_API.Models.Interfaces.Response.Material;
 using StockTrack_API.Models.Interfaces.Request;
 using StockTrack_API.Models.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace StockTrack_API.Controllers
 {
@@ -23,16 +24,19 @@ namespace StockTrack_API.Controllers
         // Serviços
         private readonly InstitutionService _instituionService;
         private readonly UserService _userService;
+        private readonly MovimentationService _movimentationService;
 
         // Construtor
         public MaterialsController(
             DataContext context,
             InstitutionService institutionService,
+            MovimentationService movimentationService,
             UserService userService
         )
         {
             _context = context;
             _instituionService = institutionService;
+            _movimentationService = movimentationService;
             _userService = userService;
         }
 
@@ -124,7 +128,8 @@ namespace StockTrack_API.Controllers
 
                 // VERIFICAR SE JÁ TEM UM MATERIAL COM ESSE NOME, E SE TIVER, 
                 // DAR UM UPDATE ADICIONANDO A QUANTIDADE QUE SERIA INSERIDA
-                Material materialToAdd = new() {
+                Material materialToAdd = new()
+                {
                     Active = true,
                     CreatedAt = DateTime.Now,
                     CreatedBy = user.Name,
@@ -146,7 +151,14 @@ namespace StockTrack_API.Controllers
                 await _context.ST_MATERIALS.AddAsync(materialToAdd);
                 await _context.SaveChangesAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelope(newMaterial));
+                await _movimentationService.AddMaterial(institutionId, materialToAdd.Id, user.Name, materialToAdd.Name, materialToAdd.Description, materialToAdd.Quantity);
+                Material? res = await _context.ST_MATERIALS.FirstOrDefaultAsync(m => m.Id == materialToAdd.Id);
+
+                if (res == null) {
+                    return BadRequest("Houve um erro ao referenciar seu material. Verifique se o mesmo foi adicionado!");
+                }
+ 
+                return Ok(EnvelopeFactory.factoryEnvelope(res));
             }
             catch (Exception ex)
             {
