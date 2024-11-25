@@ -7,6 +7,8 @@ using StockTrack_API.Models;
 using StockTrack_API.Services;
 using StockTrack_API.Utils;
 using StockTrack_API.Models.Interfaces.Response.Material;
+using StockTrack_API.Models.Interfaces.Request;
+using StockTrack_API.Models.Interfaces;
 
 namespace StockTrack_API.Controllers
 {
@@ -108,7 +110,7 @@ namespace StockTrack_API.Controllers
         }
 
         [HttpPost("add-new")]
-        public async Task<IActionResult> AddAsync(Material newMaterial)
+        public async Task<IActionResult> AddAsync(AddNewMaterialReq newMaterial)
         {
             try
             {
@@ -122,7 +124,26 @@ namespace StockTrack_API.Controllers
 
                 // VERIFICAR SE JÁ TEM UM MATERIAL COM ESSE NOME, E SE TIVER, 
                 // DAR UM UPDATE ADICIONANDO A QUANTIDADE QUE SERIA INSERIDA
-                await _context.ST_MATERIALS.AddAsync(newMaterial);
+                Material materialToAdd = new() {
+                    Active = true,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = user.Name,
+                    Description = newMaterial.Description,
+                    ImageURL = newMaterial.ImageURL,
+                    InstitutionId = institutionId,
+                    Manufacturer = newMaterial.Manufacturer,
+                    MaterialType = Enum.Parse<EMaterialType>(newMaterial.MaterialType),
+                    Measure = newMaterial.Measure,
+                    Name = newMaterial.Name,
+                    RecordNumber = newMaterial.RecordNumber,
+                    Status = new List<MaterialStatus> {
+                        new MaterialStatus {
+                            Quantity = newMaterial.quantity,
+                            Status = EMaterialStatus.AVAILABLE
+                        }
+                    },
+                };
+                await _context.ST_MATERIALS.AddAsync(materialToAdd);
                 await _context.SaveChangesAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelope(newMaterial));
