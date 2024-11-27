@@ -1,15 +1,12 @@
-using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
 using StockTrack_API.Models;
 using StockTrack_API.Models.Interfaces;
 using StockTrack_API.Models.Interfaces.Enums;
 using StockTrack_API.Models.Interfaces.Request;
 using StockTrack_API.Services;
-using StockTrack_API.Utils;
 
 namespace StockTrack_API.Controllers
 {
