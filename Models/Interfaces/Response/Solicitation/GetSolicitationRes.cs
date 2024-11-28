@@ -8,7 +8,7 @@ namespace StockTrack_API.Models
         public int Id { get; set; }
         public string Description { get; set; } = string.Empty;
 
-        public required List<SolicitationMaterials> Items { get; set; }
+        public required List<GetSolicitationItemsRes> Items { get; set; }
 
         public int UserId { get; set; }
         public int InstitutionId { get; set; }
@@ -16,6 +16,14 @@ namespace StockTrack_API.Models
 
         public DateTime SolicitedAt { get; set; }
         public DateTime ExpectReturnAt { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+
+    public class GetSolicitationItemsRes
+    {
+        public int MaterialId { get; set; }
+        public string? MaterialName { get; set; } = string.Empty;
+        public float Quantity { get; set; }
         public string Status { get; set; } = string.Empty;
     }
 }
