@@ -152,9 +152,9 @@ namespace StockTrack_API.Controllers
                 }
 
                 Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == data.AreaId);
-                Warehouse? warehouse = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x =>
-                    x.Name.ToLower() == data.Name.ToLower()
-                );
+                Warehouse? warehouse = await _context.ST_WAREHOUSES
+                    .Where((a) => a.InstitutionId == institutionId)
+                    .FirstOrDefaultAsync(x => x.Name.ToLower() == data.Name.ToLower());
 
                 if (warehouse != null)
                 {

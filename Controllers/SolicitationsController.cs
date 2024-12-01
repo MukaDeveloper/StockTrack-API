@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using StockTrack_API.Data;
 using StockTrack_API.Models;
 using StockTrack_API.Models.Interfaces;
@@ -39,102 +41,10 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                int institutionId = _institutionService.GetInstitutionId();
-                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+                // Efetua a consulta no banco com todos os itens necessários
+                List<GetSolicitationRes> list = await this.GetSolicitationsAsync();
 
-                List<Solicitation> list = await _context
-                    .ST_SOLICITATIONS.Include(s => s.Items)
-                    .Where(s => s.InstitutionId == institutionId)
-                    .ToListAsync();
-
-                switch (userInstitution.UserRole)
-                {
-                    case EUserRole.USER:
-                        list = list.Where(w => w.UserId == user.Id).ToList();
-                        break;
-                    case EUserRole.WAREHOUSEMAN:
-                        // Se o usuário for um almoxarife, pego quais almoxarifados o usuário é responsável
-                        var managedWarehouseIds = await _context
-                            .ST_WAREHOUSE_USERS.Where(wu => wu.UserId == user.Id)
-                            .Select(wu => wu.WarehouseId)
-                            .ToListAsync();
-
-                        // Modifico minha lista para exibir somente as solicitações onde algum item
-                        // Faça parte de algum almoxarifado que o usuário é responsável
-                        list = await _context
-                            .ST_SOLICITATIONS.Where(s =>
-                                s.Items.Any(item =>
-                                    _context
-                                        .ST_MATERIAL_WAREHOUSES.Where(mw =>
-                                            managedWarehouseIds.Contains(mw.WarehouseId)
-                                        )
-                                        .Select(mw => mw.MaterialId)
-                                        .Contains(item.MaterialId)
-                                )
-                            )
-                            .ToListAsync();
-
-                        // Para cada solicitação, eu filtro para exibir apenas os materiais no qual
-                        // o usuário é responsável
-                        foreach (var solicitation in list)
-                        {
-                            solicitation.Items = solicitation
-                                .Items.Where(item =>
-                                    _context.ST_MATERIAL_WAREHOUSES.Any(mw =>
-                                        managedWarehouseIds.Contains(mw.WarehouseId)
-                                        && mw.MaterialId == item.MaterialId
-                                    )
-                                )
-                                .ToList();
-                        }
-                        break;
-                    default:
-                        break;
-                }
-
-                List<GetSolicitationRes> res = new();
-                for (int i = 0; i < list.Count; i++)
-                {
-                    List<GetSolicitationItemsRes> items = new();
-                    for (int j = 0; j < list[i].Items.Count; j++)
-                    {
-                        GetSolicitationItemsRes item =
-                            new()
-                            {
-                                MaterialId = list[i].Items[j].MaterialId,
-                                MaterialName = _context
-                                    .ST_MATERIALS.FirstOrDefault(m =>
-                                        m.Id == list[i].Items[j].MaterialId
-                                    )
-                                    ?.Name,
-                                Quantity = list[i].Items[j].Quantity,
-                                Status = list[i].Items[j].Status.ToString(),
-                            };
-
-                        items.Add(item);
-                    }
-
-                    GetSolicitationRes solicitation =
-                        new()
-                        {
-                            Id = list[i].Id,
-                            Description = list[i].Description,
-                            Items = items,
-                            UserId = list[i].UserId,
-                            InstitutionId = list[i].InstitutionId,
-                            SolicitedAt = list[i].SolicitedAt,
-                            ExpectReturnAt = list[i].ExpectReturnAt,
-                            Status = list[i].Status.ToString(),
-                        };
-                    solicitation.Items.ForEach(item =>
-                    {
-                        item.Status = item.Status.ToString();
-                    });
-
-                    res.Add(solicitation);
-                }
-
-                return Ok(EnvelopeFactory.factoryEnvelopeArray(res));
+                return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
             }
             catch (Exception ex)
             {
@@ -142,18 +52,17 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        // Liberado Anonymous apenas para testes no postman
-        // [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateSolicitationAsync(CreateSolicitationReq solicitation)
         {
+            if (solicitation == null || solicitation.Items == null || !solicitation.Items.Any())
+            {
+                return BadRequest("A solicitação deve conter materiais.");
+            }
+
             try
             {
                 ArgumentNullException.ThrowIfNull(solicitation);
-                if (solicitation == null || solicitation.Items == null || !solicitation.Items.Any())
-                {
-                    return BadRequest("A solicitação deve conter materiais.");
-                }
 
                 int institutionId = _institutionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
@@ -163,37 +72,11 @@ namespace StockTrack_API.Controllers
                     return BadRequest("Informações divergentes");
                 }
 
-                var validatedItems = new List<SolicitationMaterials>();
-
-                foreach (var itemReq in solicitation.Items)
+                // Validação dos itens da solicitação
+                var validatedItems = await ValidateSolicitationItemsAsync(solicitation.Items);
+                if (validatedItems == null)
                 {
-                    Material? material = await _context
-                        .ST_MATERIALS.Include(m => m.Status)
-                        .FirstOrDefaultAsync(m => m.Id == itemReq.MaterialId);
-
-                    if (material == null)
-                    {
-                        return NotFound($"Material com ID {itemReq.MaterialId} não encontrado.");
-                    }
-
-                    var availableStatus = material.Status.FirstOrDefault(s =>
-                        s.Status == EMaterialStatus.AVAILABLE
-                    );
-                    if (availableStatus == null || availableStatus.Quantity < itemReq.Quantity)
-                    {
-                        return BadRequest(
-                            $"Quantidade divergente para o material: {material.Name}"
-                        );
-                    }
-
-                    validatedItems.Add(
-                        new SolicitationMaterials
-                        {
-                            MaterialId = itemReq.MaterialId,
-                            Quantity = itemReq.Quantity,
-                            Status = ESolicitationStatus.WAITING,
-                        }
-                    );
+                    return BadRequest("Erro na validação dos materiais.");
                 }
 
                 var newSolicitation = new Solicitation
@@ -209,45 +92,13 @@ namespace StockTrack_API.Controllers
                 };
 
                 _context.ST_SOLICITATIONS.Add(newSolicitation);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
-                List<GetSolicitationItemsRes> items = new();
-                for (int j = 0; j < newSolicitation.Items.Count; j++)
-                {
-                    GetSolicitationItemsRes item =
-                        new()
-                        {
-                            MaterialId = newSolicitation.Items[j].MaterialId,
-                            MaterialName = _context
-                                .ST_MATERIALS.FirstOrDefault(m =>
-                                    m.Id == newSolicitation.Items[j].MaterialId
-                                )
-                                ?.Name,
-                            Quantity = newSolicitation.Items[j].Quantity,
-                            Status = newSolicitation.Items[j].Status.ToString(),
-                        };
-
-                    items.Add(item);
-                }
-
-                GetSolicitationRes res =
-                    new()
-                    {
-                        Id = newSolicitation.Id,
-                        Description = newSolicitation.Description,
-                        Items = items,
-                        UserId = newSolicitation.UserId,
-                        InstitutionId = newSolicitation.InstitutionId,
-                        SolicitedAt = newSolicitation.SolicitedAt,
-                        ExpectReturnAt = newSolicitation.ExpectReturnAt,
-                        Status = newSolicitation.Status.ToString(),
-                    };
+                var res = CreateSolicitationResponse(newSolicitation);
 
                 if (res == null)
                 {
-                    return BadRequest(
-                        "Houve um problema ao registrar sua solicitação. Consulte o responsável do(s) almoxarifado(s) relacionados."
-                    );
+                    return BadRequest("Houve um problema ao registrar sua solicitação.");
                 }
 
                 return Ok(EnvelopeFactory.factoryEnvelope(res));
@@ -256,6 +107,138 @@ namespace StockTrack_API.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        // Método auxiliar para validar os itens da solicitação
+        private async Task<List<SolicitationMaterials>?> ValidateSolicitationItemsAsync(IEnumerable<SolicitationMaterialsReq> items)
+        {
+            var validatedItems = new List<SolicitationMaterials>();
+
+            foreach (var itemReq in items)
+            {
+                var material = await _context.ST_MATERIALS.Include(m => m.Status)
+                    .FirstOrDefaultAsync(m => m.Id == itemReq.MaterialId);
+
+                if (material == null)
+                {
+                    return null; // Ou você pode lançar uma exceção personalizada
+                }
+
+                var availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
+                if (availableStatus == null || availableStatus.Quantity < itemReq.Quantity)
+                {
+                    return null; // Ou lançar uma exceção personalizada
+                }
+
+                validatedItems.Add(new SolicitationMaterials
+                {
+                    MaterialId = itemReq.MaterialId,
+                    Quantity = itemReq.Quantity,
+                    Status = ESolicitationStatus.WAITING,
+                });
+            }
+
+            return validatedItems;
+        }
+
+        // Método auxiliar para criar a resposta da solicitação
+        private GetSolicitationRes CreateSolicitationResponse(Solicitation newSolicitation)
+        {
+            var items = newSolicitation.Items.Select(item => new GetSolicitationItemsRes
+            {
+                MaterialId = item.MaterialId,
+                MaterialName = _context.ST_MATERIALS.FirstOrDefault(m => m.Id == item.MaterialId)?.Name,
+                Quantity = item.Quantity,
+                Status = item.Status.ToString(),
+            }).ToList();
+
+            return new GetSolicitationRes
+            {
+                Id = newSolicitation.Id,
+                Description = newSolicitation.Description,
+                Items = items,
+                UserId = newSolicitation.UserId,
+                InstitutionId = newSolicitation.InstitutionId,
+                UserInstitution = new UserInstitutionRes()
+                {
+                    Active = newSolicitation.UserInstitution.Active,
+                    UserRole = newSolicitation.UserInstitution.UserRole.ToString(),
+                    UserName = newSolicitation.UserInstitution.User.Name
+                },
+                SolicitedAt = newSolicitation.SolicitedAt,
+                ExpectReturnAt = newSolicitation.ExpectReturnAt,
+                Status = newSolicitation.Status.ToString(),
+            };
+        }
+
+        private async Task<List<GetSolicitationRes>> GetSolicitationsAsync()
+        {
+            // Obtenha o ID da instituição e os dados do usuário
+            int institutionId = _institutionService.GetInstitutionId();
+            var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+
+            // Otimização: Buscando diretamente os dados necessários
+            var solicitationsQuery = _context
+                .ST_SOLICITATIONS
+                .Include(s => s.Items)
+                .Include(s => s.UserInstitution)
+                .Where(s => s.InstitutionId == institutionId);
+
+            // Filtragem por role do usuário
+            switch (userInstitution.UserRole)
+            {
+                case EUserRole.USER:
+                    solicitationsQuery = solicitationsQuery.Where(s => s.UserId == user.Id);
+                    break;
+                case EUserRole.WAREHOUSEMAN:
+                    // Buscando os almoxarifados que o usuário pode acessar
+                    var managedWarehouseIds = await _context
+                        .ST_WAREHOUSE_USERS
+                        .Where(wu => wu.UserId == user.Id)
+                        .Select(wu => wu.WarehouseId)
+                        .ToListAsync();
+
+                    solicitationsQuery = solicitationsQuery
+                        .Where(s => s.UserId == user.Id || s.Items.Any(item =>
+                            _context.ST_MATERIAL_WAREHOUSES
+                                .Where(mw => managedWarehouseIds.Contains(mw.WarehouseId))
+                                .Select(mw => mw.MaterialId)
+                                .Contains(item.MaterialId)
+                        ));
+                    break;
+            }
+
+            // Efetua a consulta no banco com todos os itens necessários
+            var list = await solicitationsQuery
+                .Select(s => new GetSolicitationRes
+                {
+                    Id = s.Id,
+                    Description = s.Description,
+                    UserId = s.UserId,
+                    InstitutionId = s.InstitutionId,
+                    UserInstitution = new UserInstitutionRes()
+                    {
+                        Active = s.UserInstitution.Active,
+                        UserRole = s.UserInstitution.UserRole.ToString(),
+                        UserName = s.UserInstitution.User.Name
+                    },
+                    SolicitedAt = s.SolicitedAt,
+                    ExpectReturnAt = s.ExpectReturnAt,
+                    Status = s.Status.ToString(),
+                    Items = s.Items.Select(item => new GetSolicitationItemsRes
+                    {
+                        MaterialId = item.MaterialId,
+                        MaterialName = _context.ST_MATERIALS
+                            .Where(m => m.Id == item.MaterialId)
+                            .Select(m => m.Name)
+                            .FirstOrDefault(),
+                        Quantity = item.Quantity,
+                        Status = item.Status.ToString()
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return list;
         }
     }
 }

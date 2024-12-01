@@ -10,6 +10,7 @@ using StockTrack_API.Models.Interfaces.Response.Material;
 using StockTrack_API.Models.Interfaces.Request;
 using StockTrack_API.Models.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.IdentityModel.Tokens;
 
 namespace StockTrack_API.Controllers
 {
@@ -126,6 +127,52 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
+                if (newMaterial.Name.IsNullOrEmpty())
+                {
+                    throw new Exception("Nome do material é obrigatório.");
+                }
+
+                if (newMaterial.WarehouseId == 0)
+                {
+                    throw new Exception("Área do armazém é obrigatória.");
+                }
+
+                Warehouse? wh = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(w => w.Id == newMaterial.WarehouseId);
+                Material? search = await _context.ST_MATERIALS
+                    .Where((a) => a.InstitutionId == institutionId)
+                    .FirstOrDefaultAsync(m => (m.Name == newMaterial.Name) || (m.RecordNumber == newMaterial.RecordNumber));
+
+
+                if (wh?.InstitutionId != institutionId || wh.Active == false)
+                {
+                    throw new Exception("Almoxarifado não encontrado ou inválido!");
+                }
+
+                if (search != null)
+                {
+                    throw new Exception("Matérial já registrado na base de dados!");
+                }
+
+                switch (Enum.Parse<EMaterialType>(newMaterial.MaterialType))
+                {
+                    case EMaterialType.LOAN:
+                        if (newMaterial.quantity <= 0)
+                        {
+                            newMaterial.quantity = 1;
+                        }
+                        if (newMaterial.RecordNumber <= 0)
+                        {
+                            throw new Exception("Número de registro inválido!");
+                        }
+                        break;
+                    case EMaterialType.CONSUMPTION:
+                        if (newMaterial.quantity <= 0)
+                        {
+                            throw new Exception("Quantidade inválida!");
+                        }
+                        break;
+                }
+
                 // VERIFICAR SE JÁ TEM UM MATERIAL COM ESSE NOME, E SE TIVER, 
                 // DAR UM UPDATE ADICIONANDO A QUANTIDADE QUE SERIA INSERIDA
                 Material materialToAdd = new()
@@ -154,10 +201,11 @@ namespace StockTrack_API.Controllers
                 await _movimentationService.AddMaterial(institutionId, materialToAdd.Id, user.Name, materialToAdd.Name, materialToAdd.Description, materialToAdd.Quantity);
                 Material? res = await _context.ST_MATERIALS.FirstOrDefaultAsync(m => m.Id == materialToAdd.Id);
 
-                if (res == null) {
+                if (res == null)
+                {
                     return BadRequest("Houve um erro ao referenciar seu material. Verifique se o mesmo foi adicionado!");
                 }
- 
+
                 return Ok(EnvelopeFactory.factoryEnvelope(res));
             }
             catch (Exception ex)

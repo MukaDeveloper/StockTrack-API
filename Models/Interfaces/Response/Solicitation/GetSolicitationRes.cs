@@ -12,7 +12,7 @@ namespace StockTrack_API.Models
 
         public int UserId { get; set; }
         public int InstitutionId { get; set; }
-        public UserInstitution? UserInstitution { get; set; }
+        public required UserInstitutionRes UserInstitution { get; set; }
 
         public DateTime SolicitedAt { get; set; }
         public DateTime ExpectReturnAt { get; set; }
@@ -25,5 +25,11 @@ namespace StockTrack_API.Models
         public string? MaterialName { get; set; } = string.Empty;
         public float Quantity { get; set; }
         public string Status { get; set; } = string.Empty;
+    }
+
+    public class UserInstitutionRes {
+        public bool Active { get; set; }
+        public string UserRole { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
     }
 }
