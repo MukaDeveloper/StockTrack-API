@@ -21,7 +21,9 @@ namespace StockTrack_API.Models
         public DateTime SolicitedAt { get; set; } = DateTime.UtcNow;
         public DateTime ExpectReturnAt { get; set; } = DateTime.UtcNow;
         
-        public DateTime? ReturnedAt { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public DateTime? DeclinedAt { get; set; }
         public DateTime? BorroadAt { get; set; }
+        public DateTime? ReturnedAt { get; set; }
     }
 }

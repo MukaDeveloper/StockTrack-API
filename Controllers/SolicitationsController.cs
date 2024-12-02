@@ -109,24 +109,40 @@ namespace StockTrack_API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSolicitationAsync(Solicitation sol)
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateSolicitationAsync(UpdateSolicitationReq updateSol)
         {
             try
             {
+                ArgumentNullException.ThrowIfNull(updateSol);
+
+                int institutionId = _institutionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+
+                if (user.Id != userInstitution.UserId)
+                {
+                    return BadRequest("Informações divergentes");
+                }
+
                 var solicitation = await _context
                     .ST_SOLICITATIONS.Include(s => s.Items)
                     .Include(s => s.UserInstitution)
-                    .FirstOrDefaultAsync(s => s.Id == sol.Id);
+                    .FirstOrDefaultAsync(s => s.Id == updateSol.Id);
 
                 if (solicitation == null)
                 {
                     return NotFound("Solicitação não encontrada.");
                 }
 
-                if (solicitation.Status != ESolicitationStatus.WAITING)
+                if (solicitation.Status == ESolicitationStatus.WAITING)
                 {
-                    return BadRequest("Solicitação não pode ser alterada.");
+                    switch (Enum.Parse<ESolicitationStatus>(updateSol.Status))
+                    {
+                        case ESolicitationStatus.WAITING:
+                            return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
+                        case ESolicitationStatus.ACCEPT:
+                            break;
+                    }
                 }
 
                 // if (update.Status == ESolicitationStatus.RETURNED)
@@ -259,22 +275,30 @@ namespace StockTrack_API.Controllers
 
             // Efetua a consulta no banco com todos os itens necessários
             var list = await solicitationsQuery
-                .Select(s => new GetSolicitationRes
+                .Select(s => this.SolicitationRes(s))
+                .ToListAsync();
+
+            return list;
+        }
+
+        private GetSolicitationRes SolicitationRes(Solicitation s)
+        {
+            return new GetSolicitationRes
+            {
+                Id = s.Id,
+                Description = s.Description,
+                UserId = s.UserId,
+                InstitutionId = s.InstitutionId,
+                UserInstitution = new UserInstitutionRes()
                 {
-                    Id = s.Id,
-                    Description = s.Description,
-                    UserId = s.UserId,
-                    InstitutionId = s.InstitutionId,
-                    UserInstitution = new UserInstitutionRes()
-                    {
-                        Active = s.UserInstitution.Active,
-                        UserRole = s.UserInstitution.UserRole.ToString(),
-                        UserName = s.UserInstitution.User.Name,
-                    },
-                    SolicitedAt = s.SolicitedAt,
-                    ExpectReturnAt = s.ExpectReturnAt,
-                    Status = s.Status.ToString(),
-                    Items = s
+                    Active = s.UserInstitution.Active,
+                    UserRole = s.UserInstitution.UserRole.ToString(),
+                    UserName = s.UserInstitution.User.Name,
+                },
+                SolicitedAt = s.SolicitedAt,
+                ExpectReturnAt = s.ExpectReturnAt,
+                Status = s.Status.ToString(),
+                Items = s
                         .Items.Select(item => new GetSolicitationItemsRes
                         {
                             MaterialId = item.MaterialId,
@@ -286,10 +310,7 @@ namespace StockTrack_API.Controllers
                             Status = item.Status.ToString(),
                         })
                         .ToList(),
-                })
-                .ToListAsync();
-
-            return list;
+            };
         }
     }
 }
