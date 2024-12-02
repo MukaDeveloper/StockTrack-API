@@ -7,5 +7,6 @@ namespace StockTrack_API.Models
     {
         public int Id { get; set; }
         public string Status { get; set; } = string.Empty;
+        public DateTime MovimentedAt { get; set; }
     }
 }

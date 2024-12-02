@@ -119,6 +119,11 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
                 var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
 
+                if (userInstitution.UserRole == EUserRole.USER || userInstitution.Active == false)
+                {
+                    throw new Exception("Sem autorização.");
+                }
+
                 if (user.Id != userInstitution.UserId)
                 {
                     return BadRequest("Informações divergentes");
@@ -134,26 +139,59 @@ namespace StockTrack_API.Controllers
                     return NotFound("Solicitação não encontrada.");
                 }
 
-                if (solicitation.Status == ESolicitationStatus.WAITING)
+                switch (solicitation.Status)
                 {
-                    switch (Enum.Parse<ESolicitationStatus>(updateSol.Status))
-                    {
-                        case ESolicitationStatus.WAITING:
-                            return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
-                        case ESolicitationStatus.ACCEPT:
-                            break;
-                    }
+                    case ESolicitationStatus.WAITING:
+                        switch (Enum.Parse<ESolicitationStatus>(updateSol.Status))
+                        {
+                            case ESolicitationStatus.WAITING:
+                                return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
+                            case ESolicitationStatus.ACCEPT:
+                                solicitation.Status = ESolicitationStatus.ACCEPT;
+                                solicitation.ApprovedAt = updateSol.MovimentedAt;
+                                break;
+                            case ESolicitationStatus.DECLINED:
+                                solicitation.Status = ESolicitationStatus.DECLINED;
+                                solicitation.DeclinedAt = updateSol.MovimentedAt;
+                                break;
+                            default:
+                                throw new Exception($"Estado {updateSol.Status} inválido");
+                        }
+                        break;
+                    case ESolicitationStatus.ACCEPT:
+                        switch (Enum.Parse<ESolicitationStatus>(updateSol.Status))
+                        {
+                            case ESolicitationStatus.ACCEPT:
+                                return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
+                            case ESolicitationStatus.WITHDRAWN:
+                                solicitation.Status = ESolicitationStatus.WITHDRAWN;
+                                solicitation.BorroadAt = updateSol.MovimentedAt;
+                                break;
+                            default:
+                                throw new Exception($"Estado {updateSol.Status} inválido");
+                        }
+                        break;
+                    case ESolicitationStatus.DECLINED:
+                        throw new Exception($"Essa solicitação foi recusada e não pode ser alterada");
+                    case ESolicitationStatus.WITHDRAWN:
+                        switch (Enum.Parse<ESolicitationStatus>(updateSol.Status))
+                        {
+                            case ESolicitationStatus.WITHDRAWN:
+                                return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
+                            case ESolicitationStatus.RETURNED:
+                                solicitation.Status = ESolicitationStatus.RETURNED;
+                                solicitation.ReturnedAt = updateSol.MovimentedAt;
+                                break;
+                            default:
+                                throw new Exception($"Estado {updateSol.Status} inválido");
+                        }
+                        break;
                 }
 
-                // if (update.Status == ESolicitationStatus.RETURNED)
-                // {
-                //     solicitation.Status = ESolicitationStatus.RETURNED;
-                //     solicitation.ReturnedAt = DateTime.UtcNow;
-                // }
-
+                _context.ST_SOLICITATIONS.Update(solicitation);
                 await _context.SaveChangesAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
+                return Ok(EnvelopeFactory.factoryEnvelope(SolicitationRes(solicitation)));
             }
             catch (Exception ex)
             {
@@ -275,7 +313,7 @@ namespace StockTrack_API.Controllers
 
             // Efetua a consulta no banco com todos os itens necessários
             var list = await solicitationsQuery
-                .Select(s => this.SolicitationRes(s))
+                .Select(s => SolicitationRes(s))
                 .ToListAsync();
 
             return list;
