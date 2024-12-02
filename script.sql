@@ -47,7 +47,7 @@ CREATE TABLE [ST_INSTITUTIONS] (
     [StreetName] nvarchar(max) NOT NULL,
     [StreetNumber] nvarchar(max) NOT NULL,
     [Complement] nvarchar(max) NOT NULL,
-    [Neightboor] nvarchar(max) NOT NULL,
+    [Neighborhood] nvarchar(max) NOT NULL,
     [City] nvarchar(max) NOT NULL,
     [State] nvarchar(max) NOT NULL,
     [CEP] nvarchar(max) NOT NULL,
@@ -270,12 +270,12 @@ IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Type
     SET IDENTITY_INSERT [MovimentationTypeEntity] OFF;
 GO
 
-IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AccessCode', N'CEP', N'City', N'Complement', N'Name', N'Neightboor', N'Nickname', N'State', N'StreetName', N'StreetNumber') AND [object_id] = OBJECT_ID(N'[ST_INSTITUTIONS]'))
+IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AccessCode', N'CEP', N'City', N'Complement', N'Name', N'Neighborhood', N'Nickname', N'State', N'StreetName', N'StreetNumber') AND [object_id] = OBJECT_ID(N'[ST_INSTITUTIONS]'))
     SET IDENTITY_INSERT [ST_INSTITUTIONS] ON;
-INSERT INTO [ST_INSTITUTIONS] ([Id], [AccessCode], [CEP], [City], [Complement], [Name], [Neightboor], [Nickname], [State], [StreetName], [StreetNumber])
+INSERT INTO [ST_INSTITUTIONS] ([Id], [AccessCode], [CEP], [City], [Complement], [Name], [Neighborhood], [Nickname], [State], [StreetName], [StreetNumber])
 VALUES (1, N'000', N'02110010', N'Sao Paulo', N'', N'Servidor de testes', N'Vila Guilherme', N'Testes', N'SP', N'Rua Alcantara', N'113'),
 (2, N'064', N'02110010', N'Sao Paulo', N'', N'Horácio Augusto da Silveira', N'Vila Guilherme', N'ETEC Prof. Horácio', N'SP', N'Rua Alcantara', N'113');
-IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AccessCode', N'CEP', N'City', N'Complement', N'Name', N'Neightboor', N'Nickname', N'State', N'StreetName', N'StreetNumber') AND [object_id] = OBJECT_ID(N'[ST_INSTITUTIONS]'))
+IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AccessCode', N'CEP', N'City', N'Complement', N'Name', N'Neighborhood', N'Nickname', N'State', N'StreetName', N'StreetNumber') AND [object_id] = OBJECT_ID(N'[ST_INSTITUTIONS]'))
     SET IDENTITY_INSERT [ST_INSTITUTIONS] OFF;
 GO
 

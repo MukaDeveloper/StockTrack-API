@@ -77,7 +77,7 @@ namespace StockTrack_API.Migrations
                     StreetName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StreetNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Complement = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Neightboor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Neighborhood = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     State = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CEP = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -460,7 +460,7 @@ namespace StockTrack_API.Migrations
 
             migrationBuilder.InsertData(
                 table: "ST_INSTITUTIONS",
-                columns: new[] { "Id", "AccessCode", "CEP", "City", "Complement", "Name", "Neightboor", "Nickname", "State", "StreetName", "StreetNumber" },
+                columns: new[] { "Id", "AccessCode", "CEP", "City", "Complement", "Name", "Neighborhood", "Nickname", "State", "StreetName", "StreetNumber" },
                 values: new object[,]
                 {
                     { 1, "000", "02110010", "Sao Paulo", "", "Servidor de testes", "Vila Guilherme", "Testes", "SP", "Rua Alcantara", "113" },

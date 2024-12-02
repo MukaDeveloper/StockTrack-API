@@ -107,7 +107,7 @@ namespace StockTrack_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Neightboor")
+                    b.Property<string>("Neighborhood")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -140,7 +140,7 @@ namespace StockTrack_API.Migrations
                             City = "Sao Paulo",
                             Complement = "",
                             Name = "Servidor de testes",
-                            Neightboor = "Vila Guilherme",
+                            Neighborhood = "Vila Guilherme",
                             Nickname = "Testes",
                             State = "SP",
                             StreetName = "Rua Alcantara",
@@ -154,7 +154,7 @@ namespace StockTrack_API.Migrations
                             City = "Sao Paulo",
                             Complement = "",
                             Name = "Horácio Augusto da Silveira",
-                            Neightboor = "Vila Guilherme",
+                            Neighborhood = "Vila Guilherme",
                             Nickname = "ETEC Prof. Horácio",
                             State = "SP",
                             StreetName = "Rua Alcantara",
