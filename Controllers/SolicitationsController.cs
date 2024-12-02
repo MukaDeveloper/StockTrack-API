@@ -191,7 +191,36 @@ namespace StockTrack_API.Controllers
                 _context.ST_SOLICITATIONS.Update(solicitation);
                 await _context.SaveChangesAsync();
 
-                return Ok(EnvelopeFactory.factoryEnvelope(SolicitationRes(solicitation)));
+                var res = new GetSolicitationRes
+                {
+                    Id = solicitation.Id,
+                    Description = solicitation.Description,
+                    UserId = solicitation.UserId,
+                    InstitutionId = solicitation.InstitutionId,
+                    UserInstitution = new UserInstitutionRes()
+                    {
+                        Active = solicitation.UserInstitution.Active,
+                        UserRole = solicitation.UserInstitution.UserRole.ToString(),
+                        UserName = solicitation.UserInstitution.User.Name,
+                    },
+                    SolicitedAt = solicitation.SolicitedAt,
+                    ExpectReturnAt = solicitation.ExpectReturnAt,
+                    Status = solicitation.Status.ToString(),
+                    Items = solicitation
+                        .Items.Select(item => new GetSolicitationItemsRes
+                        {
+                            MaterialId = item.MaterialId,
+                            MaterialName = _context
+                                .ST_MATERIALS.Where(m => m.Id == item.MaterialId)
+                                .Select(m => m.Name)
+                                .FirstOrDefault(),
+                            Quantity = item.Quantity,
+                            Status = item.Status.ToString(),
+                        })
+                        .ToList(),
+                };
+
+                return Ok(EnvelopeFactory.factoryEnvelope(res));
             }
             catch (Exception ex)
             {
@@ -313,30 +342,22 @@ namespace StockTrack_API.Controllers
 
             // Efetua a consulta no banco com todos os itens necessários
             var list = await solicitationsQuery
-                .Select(s => SolicitationRes(s))
-                .ToListAsync();
-
-            return list;
-        }
-
-        private GetSolicitationRes SolicitationRes(Solicitation s)
-        {
-            return new GetSolicitationRes
-            {
-                Id = s.Id,
-                Description = s.Description,
-                UserId = s.UserId,
-                InstitutionId = s.InstitutionId,
-                UserInstitution = new UserInstitutionRes()
+                .Select(s => new GetSolicitationRes
                 {
-                    Active = s.UserInstitution.Active,
-                    UserRole = s.UserInstitution.UserRole.ToString(),
-                    UserName = s.UserInstitution.User.Name,
-                },
-                SolicitedAt = s.SolicitedAt,
-                ExpectReturnAt = s.ExpectReturnAt,
-                Status = s.Status.ToString(),
-                Items = s
+                    Id = s.Id,
+                    Description = s.Description,
+                    UserId = s.UserId,
+                    InstitutionId = s.InstitutionId,
+                    UserInstitution = new UserInstitutionRes()
+                    {
+                        Active = s.UserInstitution.Active,
+                        UserRole = s.UserInstitution.UserRole.ToString(),
+                        UserName = s.UserInstitution.User.Name,
+                    },
+                    SolicitedAt = s.SolicitedAt,
+                    ExpectReturnAt = s.ExpectReturnAt,
+                    Status = s.Status.ToString(),
+                    Items = s
                         .Items.Select(item => new GetSolicitationItemsRes
                         {
                             MaterialId = item.MaterialId,
@@ -348,7 +369,10 @@ namespace StockTrack_API.Controllers
                             Status = item.Status.ToString(),
                         })
                         .ToList(),
-            };
+                })
+                .ToListAsync();
+
+            return list;
         }
     }
 }
