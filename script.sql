@@ -90,7 +90,7 @@ CREATE TABLE [ST_AREAS] (
     [Active] bit NOT NULL,
     [InstitutionId] int NOT NULL,
     CONSTRAINT [PK_ST_AREAS] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_ST_AREAS_ST_INSTITUTIONS_InstitutionId] FOREIGN KEY ([InstitutionId]) REFERENCES [ST_INSTITUTIONS] ([Id]) ON DELETE CASCADE
+    CONSTRAINT [FK_ST_AREAS_ST_INSTITUTIONS_InstitutionId] FOREIGN KEY ([InstitutionId]) REFERENCES [ST_INSTITUTIONS] ([Id]) ON DELETE NO ACTION
 );
 GO
 
@@ -151,6 +151,21 @@ CREATE TABLE [ST_MATERIALS_STATUS] (
 );
 GO
 
+CREATE TABLE [ST_SOLICITATIONS] (
+    [Id] int NOT NULL IDENTITY,
+    [Description] nvarchar(max) NOT NULL,
+    [UserId] int NOT NULL,
+    [InstitutionId] int NOT NULL,
+    [Status] int NOT NULL,
+    [SolicitedAt] datetime2 NOT NULL,
+    [ExpectReturnAt] datetime2 NOT NULL,
+    [ReturnedAt] datetime2 NULL,
+    [BorroadAt] datetime2 NULL,
+    CONSTRAINT [PK_ST_SOLICITATIONS] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_ST_SOLICITATIONS_ST_USER_INSTITUTIONS_UserId_InstitutionId] FOREIGN KEY ([UserId], [InstitutionId]) REFERENCES [ST_USER_INSTITUTIONS] ([UserId], [InstitutionId]) ON DELETE CASCADE
+);
+GO
+
 CREATE TABLE [ST_MATERIAL_WAREHOUSES] (
     [MaterialId] int NOT NULL,
     [WarehouseId] int NOT NULL,
@@ -176,9 +191,9 @@ CREATE TABLE [ST_MOVIMENTATIONS] (
     [Quantity] real NOT NULL,
     [Date] datetime2 NOT NULL,
     CONSTRAINT [PK_ST_MOVIMENTATIONS] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_ST_MOVIMENTATIONS_ST_AREAS_AreaId] FOREIGN KEY ([AreaId]) REFERENCES [ST_AREAS] ([Id]),
-    CONSTRAINT [FK_ST_MOVIMENTATIONS_ST_MATERIALS_MaterialId] FOREIGN KEY ([MaterialId]) REFERENCES [ST_MATERIALS] ([Id]),
-    CONSTRAINT [FK_ST_MOVIMENTATIONS_ST_USERS_UserId] FOREIGN KEY ([UserId]) REFERENCES [ST_USERS] ([Id]),
+    CONSTRAINT [FK_ST_MOVIMENTATIONS_ST_AREAS_AreaId] FOREIGN KEY ([AreaId]) REFERENCES [ST_AREAS] ([Id]) ON DELETE SET NULL,
+    CONSTRAINT [FK_ST_MOVIMENTATIONS_ST_MATERIALS_MaterialId] FOREIGN KEY ([MaterialId]) REFERENCES [ST_MATERIALS] ([Id]) ON DELETE SET NULL,
+    CONSTRAINT [FK_ST_MOVIMENTATIONS_ST_USERS_UserId] FOREIGN KEY ([UserId]) REFERENCES [ST_USERS] ([Id]) ON DELETE SET NULL,
     CONSTRAINT [FK_ST_MOVIMENTATIONS_ST_WAREHOUSES_WarehouseId] FOREIGN KEY ([WarehouseId]) REFERENCES [ST_WAREHOUSES] ([Id])
 );
 GO
@@ -189,6 +204,17 @@ CREATE TABLE [ST_WAREHOUSE_USERS] (
     CONSTRAINT [PK_ST_WAREHOUSE_USERS] PRIMARY KEY ([UserId], [WarehouseId]),
     CONSTRAINT [FK_ST_WAREHOUSE_USERS_ST_USERS_UserId] FOREIGN KEY ([UserId]) REFERENCES [ST_USERS] ([Id]) ON DELETE NO ACTION,
     CONSTRAINT [FK_ST_WAREHOUSE_USERS_ST_WAREHOUSES_WarehouseId] FOREIGN KEY ([WarehouseId]) REFERENCES [ST_WAREHOUSES] ([Id]) ON DELETE NO ACTION
+);
+GO
+
+CREATE TABLE [ST_SOLICITATION_MATERIALS] (
+    [MaterialId] int NOT NULL,
+    [SolicitationId] int NOT NULL,
+    [Quantity] real NOT NULL,
+    [Status] int NOT NULL,
+    CONSTRAINT [PK_ST_SOLICITATION_MATERIALS] PRIMARY KEY ([MaterialId], [SolicitationId]),
+    CONSTRAINT [FK_ST_SOLICITATION_MATERIALS_ST_MATERIALS_MaterialId] FOREIGN KEY ([MaterialId]) REFERENCES [ST_MATERIALS] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_ST_SOLICITATION_MATERIALS_ST_SOLICITATIONS_SolicitationId] FOREIGN KEY ([SolicitationId]) REFERENCES [ST_SOLICITATIONS] ([Id]) ON DELETE CASCADE
 );
 GO
 
@@ -254,7 +280,7 @@ GO
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AccessDate', N'CreatedAt', N'Email', N'Name', N'PasswordHash', N'PasswordSalt', N'PhotoUrl', N'Verified', N'VerifiedAt', N'VerifiedScheduled', N'VerifiedToken') AND [object_id] = OBJECT_ID(N'[ST_USERS]'))
     SET IDENTITY_INSERT [ST_USERS] ON;
 INSERT INTO [ST_USERS] ([Id], [AccessDate], [CreatedAt], [Email], [Name], [PasswordHash], [PasswordSalt], [PhotoUrl], [Verified], [VerifiedAt], [VerifiedScheduled], [VerifiedToken])
-VALUES (1, NULL, '2024-10-24T21:23:25.2217463-03:00', N'admin@stocktrack.com', N'Admin', 0xBBEB8254FB0A8F1952C9C4FFA1A3B1EBD60FCDAA35AB2D61A7B0C07EBDF2A34C3EB98E130C12284AE14076C237580770A282F307874AFF1D834EEB5101FFD0E9, 0x005232E3C3C31B5AB380F59962CED8E27EDF5387504D40A70225DC10E15257A5B3FE804146E62980BCCA332D8F0D3D40E83B4E6CA2E9784696E43559FD5060D8BA3C35401B1EC56DC78EFD3E07A2A389D4F89EB66ADF4F77FBA6838412650D368FA4570A276DE55650A2810B688A9340BC26A42A5C06DCC13DEC9FBDCAF5F8BA, N'https://imgur.com/mOXzZLE.png', CAST(1 AS bit), '2024-10-24T21:23:25.2217473-03:00', NULL, NULL);
+VALUES (1, NULL, '2024-12-01T22:15:56.8880674-03:00', N'admin@stocktrack.com', N'Admin', 0x7D8301103AA81B0596EA8C80F495887A7042133580DE9ABFC8FE2DCD9B90FC464E2452B88717CA3317B8C533BB231091AC0AA57AD89AEA6DFF3162217F194F0E, 0xCAE482CD8382E0CC4081AE055FE417772030A60D1BE7145EF8B0282D04FCBA2DC256D7B17D0405665004266CFC33F680B03E136B7A613556FD844CDE90599D64F272438505B043892B8964D692EACBF26CE9DCCD7F24DFAD5B8755D2C416D1C772CF2618A9FA612064BA891E32D457AAF6E23692C48A588ECC405B64349F881E, N'https://imgur.com/mOXzZLE.png', CAST(1 AS bit), '2024-12-01T22:15:56.8880688-03:00', NULL, NULL);
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AccessDate', N'CreatedAt', N'Email', N'Name', N'PasswordHash', N'PasswordSalt', N'PhotoUrl', N'Verified', N'VerifiedAt', N'VerifiedScheduled', N'VerifiedToken') AND [object_id] = OBJECT_ID(N'[ST_USERS]'))
     SET IDENTITY_INSERT [ST_USERS] OFF;
 GO
@@ -273,7 +299,7 @@ GO
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Active', N'CreatedAt', N'CreatedBy', N'Description', N'InstitutionId', N'Name', N'UpdatedAt', N'UpdatedBy') AND [object_id] = OBJECT_ID(N'[ST_AREAS]'))
     SET IDENTITY_INSERT [ST_AREAS] ON;
 INSERT INTO [ST_AREAS] ([Id], [Active], [CreatedAt], [CreatedBy], [Description], [InstitutionId], [Name], [UpdatedAt], [UpdatedBy])
-VALUES (1, CAST(1 AS bit), '2024-10-25T00:23:25.2217660Z', N'Admin', N'Área de Testes', 1, N'Teste', '2024-10-25T00:23:25.2217660Z', N'');
+VALUES (1, CAST(1 AS bit), '2024-12-02T01:15:56.8880876Z', N'Admin', N'Área de Testes', 1, N'Teste', '2024-12-02T01:15:56.8880877Z', N'');
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Active', N'CreatedAt', N'CreatedBy', N'Description', N'InstitutionId', N'Name', N'UpdatedAt', N'UpdatedBy') AND [object_id] = OBJECT_ID(N'[ST_AREAS]'))
     SET IDENTITY_INSERT [ST_AREAS] OFF;
 GO
@@ -281,7 +307,7 @@ GO
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Active', N'CreatedAt', N'CreatedBy', N'Description', N'ImageURL', N'InstitutionId', N'Manufacturer', N'MaterialType', N'Measure', N'Name', N'RecordNumber', N'UpdatedAt', N'UpdatedBy') AND [object_id] = OBJECT_ID(N'[ST_MATERIALS]'))
     SET IDENTITY_INSERT [ST_MATERIALS] ON;
 INSERT INTO [ST_MATERIALS] ([Id], [Active], [CreatedAt], [CreatedBy], [Description], [ImageURL], [InstitutionId], [Manufacturer], [MaterialType], [Measure], [Name], [RecordNumber], [UpdatedAt], [UpdatedBy])
-VALUES (1, CAST(1 AS bit), '2024-10-25T00:23:25.2217697Z', N'', N'Notebook ThinkPad', N'', 1, N'ThinkPad', 0, N'UN', N'Notebook', 123456, '2024-10-25T00:23:25.2217697Z', N'');
+VALUES (1, CAST(1 AS bit), '2024-12-02T01:15:56.8880934Z', N'', N'Notebook ThinkPad', N'', 1, N'ThinkPad', 0, N'UN', N'Notebook', 123456, '2024-12-02T01:15:56.8880934Z', N'');
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Active', N'CreatedAt', N'CreatedBy', N'Description', N'ImageURL', N'InstitutionId', N'Manufacturer', N'MaterialType', N'Measure', N'Name', N'RecordNumber', N'UpdatedAt', N'UpdatedBy') AND [object_id] = OBJECT_ID(N'[ST_MATERIALS]'))
     SET IDENTITY_INSERT [ST_MATERIALS] OFF;
 GO
@@ -310,7 +336,7 @@ GO
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AreaId', N'Date', N'Description', N'Event', N'InstitutionId', N'MaterialId', N'MovimentationBy', N'Name', N'Quantity', N'Reason', N'Type', N'UserId', N'WarehouseId') AND [object_id] = OBJECT_ID(N'[ST_MOVIMENTATIONS]'))
     SET IDENTITY_INSERT [ST_MOVIMENTATIONS] ON;
 INSERT INTO [ST_MOVIMENTATIONS] ([Id], [AreaId], [Date], [Description], [Event], [InstitutionId], [MaterialId], [MovimentationBy], [Name], [Quantity], [Reason], [Type], [UserId], [WarehouseId])
-VALUES (1, 1, '2024-10-24T21:23:25.2217761-03:00', N'Adição de área "Teste"', 0, 1, NULL, N'Admin', N'Área Teste', CAST(1 AS real), 0, 1, NULL, NULL);
+VALUES (1, 1, '2024-12-01T22:15:56.8881075-03:00', N'Adição de área "Teste"', 0, 1, NULL, N'Admin', N'Área Teste', CAST(1 AS real), 0, 1, NULL, NULL);
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AreaId', N'Date', N'Description', N'Event', N'InstitutionId', N'MaterialId', N'MovimentationBy', N'Name', N'Quantity', N'Reason', N'Type', N'UserId', N'WarehouseId') AND [object_id] = OBJECT_ID(N'[ST_MOVIMENTATIONS]'))
     SET IDENTITY_INSERT [ST_MOVIMENTATIONS] OFF;
 GO
@@ -318,7 +344,7 @@ GO
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Active', N'AreaId', N'CreatedAt', N'CreatedBy', N'Description', N'InstitutionId', N'Name', N'UpdatedAt', N'UpdatedBy') AND [object_id] = OBJECT_ID(N'[ST_WAREHOUSES]'))
     SET IDENTITY_INSERT [ST_WAREHOUSES] ON;
 INSERT INTO [ST_WAREHOUSES] ([Id], [Active], [AreaId], [CreatedAt], [CreatedBy], [Description], [InstitutionId], [Name], [UpdatedAt], [UpdatedBy])
-VALUES (1, CAST(1 AS bit), 1, '2024-10-25T00:23:25.2217679Z', N'', N'Almoxarifado de informática', 1, N'Informática', '2024-10-25T00:23:25.2217680Z', N'');
+VALUES (1, CAST(1 AS bit), 1, '2024-12-02T01:15:56.8880904Z', N'', N'Almoxarifado de informática', 1, N'Informática', '2024-12-02T01:15:56.8880904Z', N'');
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Active', N'AreaId', N'CreatedAt', N'CreatedBy', N'Description', N'InstitutionId', N'Name', N'UpdatedAt', N'UpdatedBy') AND [object_id] = OBJECT_ID(N'[ST_WAREHOUSES]'))
     SET IDENTITY_INSERT [ST_WAREHOUSES] OFF;
 GO
@@ -352,6 +378,12 @@ GO
 CREATE INDEX [IX_ST_MOVIMENTATIONS_WarehouseId] ON [ST_MOVIMENTATIONS] ([WarehouseId]);
 GO
 
+CREATE INDEX [IX_ST_SOLICITATION_MATERIALS_SolicitationId] ON [ST_SOLICITATION_MATERIALS] ([SolicitationId]);
+GO
+
+CREATE INDEX [IX_ST_SOLICITATIONS_UserId_InstitutionId] ON [ST_SOLICITATIONS] ([UserId], [InstitutionId]);
+GO
+
 CREATE INDEX [IX_ST_USER_INSTITUTIONS_InstitutionId] ON [ST_USER_INSTITUTIONS] ([InstitutionId]);
 GO
 
@@ -365,7 +397,7 @@ CREATE INDEX [IX_ST_WAREHOUSES_InstitutionId] ON [ST_WAREHOUSES] ([InstitutionId
 GO
 
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-VALUES (N'20241025002326_create', N'8.0.7');
+VALUES (N'20241202011557_aaa', N'8.0.7');
 GO
 
 COMMIT;

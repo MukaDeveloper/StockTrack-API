@@ -7,24 +7,20 @@ using StockTrack_API.Utils;
 
 namespace StockTrack_API.Data
 {
-    public class DataContext : DbContext
+    public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
     {
-        public DataContext(DbContextOptions<DataContext> options)
-            : base(options) { }
-
-        public DbSet<Area> ST_AREAS { get; set; }
-        public DbSet<Institution> ST_INSTITUTIONS { get; set; }
-        public DbSet<Material> ST_MATERIALS { get; set; }
-        public DbSet<MaterialStatus> ST_MATERIALS_STATUS { get; set; }
-        public DbSet<Movimentation> ST_MOVIMENTATIONS { get; set; }
-        public DbSet<User> ST_USERS { get; set; }
-        public DbSet<Warehouse> ST_WAREHOUSES { get; set; }
-        public DbSet<UserInstitution> ST_USER_INSTITUTIONS { get; set; }
-        public DbSet<MaterialWarehouses> ST_MATERIAL_WAREHOUSES { get; set; }
-        public DbSet<WarehouseUsers> ST_WAREHOUSE_USERS { get; set; }
-
-        public DbSet<Solicitation> ST_SOLICITATIONS { get; set; }
-        public DbSet<Solicitation> ST_SOLICITATION_MATERIALS { get; set; }
+        public required DbSet<Area> ST_AREAS { get; set; }
+        public required DbSet<Institution> ST_INSTITUTIONS { get; set; }
+        public required DbSet<Material> ST_MATERIALS { get; set; }
+        public required DbSet<MaterialStatus> ST_MATERIALS_STATUS { get; set; }
+        public required DbSet<Movimentation> ST_MOVIMENTATIONS { get; set; }
+        public required DbSet<User> ST_USERS { get; set; }
+        public required DbSet<Warehouse> ST_WAREHOUSES { get; set; }
+        public required DbSet<UserInstitution> ST_USER_INSTITUTIONS { get; set; }
+        public required DbSet<MaterialWarehouses> ST_MATERIAL_WAREHOUSES { get; set; }
+        public required DbSet<WarehouseUsers> ST_WAREHOUSE_USERS { get; set; }
+        public required DbSet<Solicitation> ST_SOLICITATIONS { get; set; }
+        public required DbSet<Solicitation> ST_SOLICITATION_MATERIALS { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -69,7 +65,8 @@ namespace StockTrack_API.Data
                 .Entity<Area>()
                 .HasOne(a => a.Institution)
                 .WithMany(i => i.Areas)
-                .HasForeignKey(a => a.InstitutionId);
+                .HasForeignKey(a => a.InstitutionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder
                 .Entity<Warehouse>()
@@ -94,25 +91,29 @@ namespace StockTrack_API.Data
                 .Entity<Movimentation>()
                 .HasOne(m => m.User)
                 .WithMany()
-                .HasForeignKey(m => m.UserId);
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder
                 .Entity<Movimentation>()
                 .HasOne(m => m.Area)
                 .WithMany()
-                .HasForeignKey(m => m.AreaId);
+                .HasForeignKey(m => m.AreaId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder
                 .Entity<Movimentation>()
                 .HasOne(m => m.Warehouse)
                 .WithMany()
-                .HasForeignKey(m => m.WarehouseId);
+                .HasForeignKey(m => m.WarehouseId)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder
                 .Entity<Movimentation>()
                 .HasOne(m => m.Material)
                 .WithMany()
-                .HasForeignKey(m => m.MaterialId);
+                .HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // MaterialWarehouses
             modelBuilder

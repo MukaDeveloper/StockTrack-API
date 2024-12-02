@@ -10,11 +10,11 @@ namespace StockTrack_API.Models
         // Tabela associativa atributiva (keys => UserId, InstitutionId)
         public int UserId { get; set; }
         [JsonIgnore]
-        public User User { get; set; }
+        public User? User { get; set; }
 
         public int InstitutionId { get; set; }
         [JsonIgnore]
-        public Institution Institution { get; set; }
+        public Institution? Institution { get; set; }
 
         [JsonIgnore]
         public List<Solicitation> Solicitations { get; set; } = new List<Solicitation>();

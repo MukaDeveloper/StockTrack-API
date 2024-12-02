@@ -109,6 +109,42 @@ namespace StockTrack_API.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateSolicitationAsync(Solicitation sol)
+        {
+            try
+            {
+                var solicitation = await _context.ST_SOLICITATIONS
+                    .Include(s => s.Items)
+                    .Include(s => s.UserInstitution)
+                    .FirstOrDefaultAsync(s => s.Id == sol.Id);
+
+                if (solicitation == null)
+                {
+                    return NotFound("Solicitação não encontrada.");
+                }
+
+                if (solicitation.Status != ESolicitationStatus.WAITING)
+                {
+                    return BadRequest("Solicitação não pode ser alterada.");
+                }
+
+                // if (update.Status == ESolicitationStatus.RETURNED)
+                // {
+                //     solicitation.Status = ESolicitationStatus.RETURNED;
+                //     solicitation.ReturnedAt = DateTime.UtcNow;
+                // }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         // Método auxiliar para validar os itens da solicitação
         private async Task<List<SolicitationMaterials>?> ValidateSolicitationItemsAsync(IEnumerable<SolicitationMaterialsReq> items)
         {
