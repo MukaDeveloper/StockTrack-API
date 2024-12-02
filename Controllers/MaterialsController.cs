@@ -137,7 +137,7 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Área do armazém é obrigatória.");
                 }
 
-                Warehouse? wh = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(w => w.Id == newMaterial.WarehouseId);
+                Warehouse? wh = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(w => w.Id == newMaterial.WarehouseId && w.Active == true);
                 Material? search = await _context.ST_MATERIALS
                     .Where((a) => a.InstitutionId == institutionId)
                     .FirstOrDefaultAsync(m => (m.Name == newMaterial.Name) || (m.RecordNumber == newMaterial.RecordNumber));

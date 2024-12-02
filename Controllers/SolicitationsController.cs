@@ -114,8 +114,8 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-                var solicitation = await _context.ST_SOLICITATIONS
-                    .Include(s => s.Items)
+                var solicitation = await _context
+                    .ST_SOLICITATIONS.Include(s => s.Items)
                     .Include(s => s.UserInstitution)
                     .FirstOrDefaultAsync(s => s.Id == sol.Id);
 
@@ -146,13 +146,16 @@ namespace StockTrack_API.Controllers
         }
 
         // Método auxiliar para validar os itens da solicitação
-        private async Task<List<SolicitationMaterials>?> ValidateSolicitationItemsAsync(IEnumerable<SolicitationMaterialsReq> items)
+        private async Task<List<SolicitationMaterials>?> ValidateSolicitationItemsAsync(
+            IEnumerable<SolicitationMaterialsReq> items
+        )
         {
             var validatedItems = new List<SolicitationMaterials>();
 
             foreach (var itemReq in items)
             {
-                var material = await _context.ST_MATERIALS.Include(m => m.Status)
+                var material = await _context
+                    .ST_MATERIALS.Include(m => m.Status)
                     .FirstOrDefaultAsync(m => m.Id == itemReq.MaterialId);
 
                 if (material == null)
@@ -160,18 +163,22 @@ namespace StockTrack_API.Controllers
                     return null; // Ou você pode lançar uma exceção personalizada
                 }
 
-                var availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
+                var availableStatus = material.Status.FirstOrDefault(s =>
+                    s.Status == EMaterialStatus.AVAILABLE
+                );
                 if (availableStatus == null || availableStatus.Quantity < itemReq.Quantity)
                 {
                     return null; // Ou lançar uma exceção personalizada
                 }
 
-                validatedItems.Add(new SolicitationMaterials
-                {
-                    MaterialId = itemReq.MaterialId,
-                    Quantity = itemReq.Quantity,
-                    Status = ESolicitationStatus.WAITING,
-                });
+                validatedItems.Add(
+                    new SolicitationMaterials
+                    {
+                        MaterialId = itemReq.MaterialId,
+                        Quantity = itemReq.Quantity,
+                        Status = ESolicitationStatus.WAITING,
+                    }
+                );
             }
 
             return validatedItems;
@@ -180,13 +187,17 @@ namespace StockTrack_API.Controllers
         // Método auxiliar para criar a resposta da solicitação
         private GetSolicitationRes CreateSolicitationResponse(Solicitation newSolicitation)
         {
-            var items = newSolicitation.Items.Select(item => new GetSolicitationItemsRes
-            {
-                MaterialId = item.MaterialId,
-                MaterialName = _context.ST_MATERIALS.FirstOrDefault(m => m.Id == item.MaterialId)?.Name,
-                Quantity = item.Quantity,
-                Status = item.Status.ToString(),
-            }).ToList();
+            var items = newSolicitation
+                .Items.Select(item => new GetSolicitationItemsRes
+                {
+                    MaterialId = item.MaterialId,
+                    MaterialName = _context
+                        .ST_MATERIALS.FirstOrDefault(m => m.Id == item.MaterialId)
+                        ?.Name,
+                    Quantity = item.Quantity,
+                    Status = item.Status.ToString(),
+                })
+                .ToList();
 
             return new GetSolicitationRes
             {
@@ -199,7 +210,7 @@ namespace StockTrack_API.Controllers
                 {
                     Active = newSolicitation.UserInstitution.Active,
                     UserRole = newSolicitation.UserInstitution.UserRole.ToString(),
-                    UserName = newSolicitation.UserInstitution.User.Name
+                    UserName = newSolicitation.UserInstitution.User.Name,
                 },
                 SolicitedAt = newSolicitation.SolicitedAt,
                 ExpectReturnAt = newSolicitation.ExpectReturnAt,
@@ -215,8 +226,7 @@ namespace StockTrack_API.Controllers
 
             // Otimização: Buscando diretamente os dados necessários
             var solicitationsQuery = _context
-                .ST_SOLICITATIONS
-                .Include(s => s.Items)
+                .ST_SOLICITATIONS.Include(s => s.Items)
                 .Include(s => s.UserInstitution)
                 .Where(s => s.InstitutionId == institutionId);
 
@@ -229,18 +239,21 @@ namespace StockTrack_API.Controllers
                 case EUserRole.WAREHOUSEMAN:
                     // Buscando os almoxarifados que o usuário pode acessar
                     var managedWarehouseIds = await _context
-                        .ST_WAREHOUSE_USERS
-                        .Where(wu => wu.UserId == user.Id)
+                        .ST_WAREHOUSE_USERS.Where(wu => wu.UserId == user.Id)
                         .Select(wu => wu.WarehouseId)
                         .ToListAsync();
 
-                    solicitationsQuery = solicitationsQuery
-                        .Where(s => s.UserId == user.Id || s.Items.Any(item =>
-                            _context.ST_MATERIAL_WAREHOUSES
-                                .Where(mw => managedWarehouseIds.Contains(mw.WarehouseId))
+                    solicitationsQuery = solicitationsQuery.Where(s =>
+                        s.UserId == user.Id
+                        || s.Items.Any(item =>
+                            _context
+                                .ST_MATERIAL_WAREHOUSES.Where(mw =>
+                                    managedWarehouseIds.Contains(mw.WarehouseId)
+                                )
                                 .Select(mw => mw.MaterialId)
                                 .Contains(item.MaterialId)
-                        ));
+                        )
+                    );
                     break;
             }
 
@@ -256,21 +269,23 @@ namespace StockTrack_API.Controllers
                     {
                         Active = s.UserInstitution.Active,
                         UserRole = s.UserInstitution.UserRole.ToString(),
-                        UserName = s.UserInstitution.User.Name
+                        UserName = s.UserInstitution.User.Name,
                     },
                     SolicitedAt = s.SolicitedAt,
                     ExpectReturnAt = s.ExpectReturnAt,
                     Status = s.Status.ToString(),
-                    Items = s.Items.Select(item => new GetSolicitationItemsRes
-                    {
-                        MaterialId = item.MaterialId,
-                        MaterialName = _context.ST_MATERIALS
-                            .Where(m => m.Id == item.MaterialId)
-                            .Select(m => m.Name)
-                            .FirstOrDefault(),
-                        Quantity = item.Quantity,
-                        Status = item.Status.ToString()
-                    }).ToList()
+                    Items = s
+                        .Items.Select(item => new GetSolicitationItemsRes
+                        {
+                            MaterialId = item.MaterialId,
+                            MaterialName = _context
+                                .ST_MATERIALS.Where(m => m.Id == item.MaterialId)
+                                .Select(m => m.Name)
+                                .FirstOrDefault(),
+                            Quantity = item.Quantity,
+                            Status = item.Status.ToString(),
+                        })
+                        .ToList(),
                 })
                 .ToListAsync();
 

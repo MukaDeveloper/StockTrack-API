@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockTrack_API.Data;
-using StockTrack_API.Models.Interfaces.Enums;
 using StockTrack_API.Models;
+using StockTrack_API.Models.Interfaces.Enums;
 using StockTrack_API.Models.Interfaces.Request;
 using StockTrack_API.Services;
 using StockTrack_API.Utils;
@@ -41,7 +41,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 Area? area = await _context
-                    .ST_AREAS.Where(a => a.InstitutionId == institutionId)
+                    .ST_AREAS.Where(a => a.InstitutionId == institutionId && a.Active == true)
                     // .Include(a => a.Institution)
                     .FirstOrDefaultAsync(a => a.Id == id);
 
@@ -66,7 +66,9 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 List<Area> list = await _context
-                    .ST_AREAS.Where(area => area.InstitutionId == institutionId)
+                    .ST_AREAS.Where(area =>
+                        area.InstitutionId == institutionId && area.Active == true
+                    )
                     // .Include(a => a.Institution)
                     .ToListAsync();
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -95,7 +97,7 @@ namespace StockTrack_API.Controllers
                 }
 
                 Area? area = await _context
-                    .ST_AREAS.Where((a) => a.InstitutionId == institutionId)
+                    .ST_AREAS.Where((a) => a.InstitutionId == institutionId && a.Active == true)
                     .FirstOrDefaultAsync(a => a.Name.ToLower() == data.Name.ToLower());
                 if (area != null)
                 {
@@ -125,7 +127,7 @@ namespace StockTrack_API.Controllers
                 Area? areaAdded = await _context
                     .ST_AREAS
                     // .Include(a => a.Institution)
-                    .Where((a) => a.InstitutionId == institutionId)
+                    .Where((a) => a.InstitutionId == institutionId && a.Active == true)
                     .FirstOrDefaultAsync(a => a.Id == newArea.Id);
 
                 if (areaAdded == null)
@@ -161,13 +163,13 @@ namespace StockTrack_API.Controllers
                 Area? areaToUpdate = await _context
                     .ST_AREAS
                     // .Include(a => a.Institution)
-                    .Where((a) => a.InstitutionId == institutionId)
+                    .Where((a) => a.InstitutionId == institutionId && a.Active == true)
                     .FirstOrDefaultAsync(a => a.Id == area.Id);
 
                 if (area.Name != null && area.Name != areaToUpdate?.Name)
                 {
                     Area? areaCheck = await _context
-                        .ST_AREAS.Where((a) => a.InstitutionId == institutionId)
+                        .ST_AREAS.Where((a) => a.InstitutionId == institutionId && a.Active == true)
                         .FirstOrDefaultAsync(a => a.Name.ToLower() == area.Name.ToLower());
                     if (areaCheck != null)
                     {
@@ -223,12 +225,12 @@ namespace StockTrack_API.Controllers
 
                 Area? areaToDelete =
                     await _context
-                        .ST_AREAS.Where((a) => a.InstitutionId == institutionId)
+                        .ST_AREAS.Where((a) => a.InstitutionId == institutionId && a.Active == true)
                         .FirstOrDefaultAsync(x => x.Id == areaId)
                     ?? throw new Exception("Área não encontrada");
 
                 List<Warehouse>? listWarehouses = await _context
-                    .ST_WAREHOUSES.Where(wh => wh.AreaId == areaId)
+                    .ST_WAREHOUSES.Where(wh => wh.AreaId == areaId && wh.Active == true)
                     .ToListAsync();
                 if (listWarehouses.Count > 0)
                 {
@@ -244,7 +246,11 @@ namespace StockTrack_API.Controllers
                     areaToDelete.Name
                 );
 
-                _context.ST_AREAS.Remove(areaToDelete);
+                areaToDelete.Active = false;
+                areaToDelete.UpdatedAt = DateTime.Now;
+                areaToDelete.UpdatedBy = user.Name;
+
+                _context.ST_AREAS.Update(areaToDelete);
                 await _context.SaveChangesAsync();
 
                 return Ok("Área excluída com sucesso");

@@ -45,7 +45,7 @@ namespace StockTrack_API.Controllers
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .Where(w => w.InstitutionId == institutionId)
+                    .Where(w => w.InstitutionId == institutionId && w.Active == true)
                     .ToListAsync();
 
                 if (userInstitution.UserRole == EUserRole.WAREHOUSEMAN)
@@ -72,7 +72,7 @@ namespace StockTrack_API.Controllers
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId)
+                    .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId && w.Active == true)
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -93,7 +93,7 @@ namespace StockTrack_API.Controllers
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId)
+                    .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId && w.Active == true)
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -117,6 +117,7 @@ namespace StockTrack_API.Controllers
                     .Where(w =>
                         w.InstitutionId == institutionId
                         && EF.Functions.Like(w.Name, "%" + nameQuery + "%")
+                        && w.Active == true
                     )
                     .ToListAsync();
 
@@ -151,9 +152,9 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == data.AreaId);
+                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == data.AreaId && x.Active == true);
                 Warehouse? warehouse = await _context.ST_WAREHOUSES
-                    .Where((a) => a.InstitutionId == institutionId)
+                    .Where((a) => a.InstitutionId == institutionId && a.Active == true)
                     .FirstOrDefaultAsync(x => x.Name.ToLower() == data.Name.ToLower());
 
                 if (warehouse != null)
@@ -236,12 +237,12 @@ namespace StockTrack_API.Controllers
 
                 Warehouse? warehouseToUpdate = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
-                    .FirstOrDefaultAsync(x => x.Id == warehouse.Id);
+                    .FirstOrDefaultAsync(x => x.Id == warehouse.Id && x.Active == true);
 
                 if (warehouse.Name != null && warehouse.Name != warehouseToUpdate?.Name)
                 {
                     Warehouse? warehouseCheck = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(
-                        x => x.Name.ToLower() == warehouse.Name.ToLower()
+                        x => x.Name.ToLower() == warehouse.Name.ToLower() && x.Active == true
                     );
                     if (warehouseCheck != null)
                     {
@@ -250,7 +251,7 @@ namespace StockTrack_API.Controllers
                 }
 
                 Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
-                    x.Id == warehouse.AreaId
+                    x.Id == warehouse.AreaId && x.Active == true
                 );
 
                 if (area == null || area?.InstitutionId != institutionId || area.Active == false)
@@ -334,7 +335,7 @@ namespace StockTrack_API.Controllers
                 }
 
                 Warehouse? warehouseToDelete =
-                    await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Id == warehouseId)
+                    await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Id == warehouseId && x.Active == true)
                     ?? throw new Exception("Almoxarifado não encontrado");
 
                 List<MaterialWarehouses>? listMaterialWarehouses = await _context
@@ -355,7 +356,11 @@ namespace StockTrack_API.Controllers
                     warehouseToDelete.Name
                 );
 
-                _context.ST_WAREHOUSES.Remove(warehouseToDelete);
+                warehouseToDelete.Active = false;
+                warehouseToDelete.UpdatedAt = DateTime.Now;
+                warehouseToDelete.UpdatedBy = user.Name;
+
+                _context.ST_WAREHOUSES.Update(warehouseToDelete);
                 await _context.SaveChangesAsync();
 
                 return Ok("Almoxarifado excluído com sucesso.");
