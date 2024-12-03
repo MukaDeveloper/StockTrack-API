@@ -356,7 +356,7 @@ namespace StockTrack_API.Controllers
             }
             catch (Exception ex)
             {
-                                // Reverte transação em caso de erro
+                // Reverte transação em caso de erro
                 await transaction.RollbackAsync();
                 return BadRequest(new { message = ex.Message });
             }
