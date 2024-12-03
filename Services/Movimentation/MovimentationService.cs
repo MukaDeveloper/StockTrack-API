@@ -247,6 +247,36 @@ namespace StockTrack_API.Services
             return mov;
         }
 
+        public async Task<Movimentation> DeleteMaterial(
+            int institutionId,
+            int materialId,
+            string userName,
+            string name,
+            string description = "Remoção de almoxarifado",
+            float quantity = 1
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = name ?? "Baixa de material",
+                    InstitutionId = institutionId,
+                    MovimentationBy = userName,
+                    MaterialId = materialId,
+                    Event = EMovimentationEvent.EXIT,
+                    Type = EMovimentationType.MATERIAL,
+                    Reason = EMovimentationReason.REMOVED,
+                    Date = DateTime.Now,
+                    Description = description,
+                    Quantity = quantity
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
+
         public async Task<Movimentation> AddUser(
             int institutionId,
             int userId,
