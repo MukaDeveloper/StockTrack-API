@@ -147,8 +147,46 @@ namespace StockTrack_API.Controllers
                             case ESolicitationStatus.WAITING:
                                 return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
                             case ESolicitationStatus.ACCEPT:
+                                
+
                                 solicitation.Status = ESolicitationStatus.ACCEPT;
                                 solicitation.ApprovedAt = updateSol.MovimentedAt;
+
+                                foreach (var item in solicitation.Items)
+                                {
+                                    var material = await _context.ST_MATERIALS
+                                        .Include(m => m.Status)
+                                        .FirstOrDefaultAsync(m => m.Id == item.MaterialId);
+
+                                    if (material == null)
+                                    {
+                                        throw new Exception($"Material com ID {item.MaterialId} não encontrado.");
+                                    }
+
+                                    var availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
+                                    var borrowedStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.BORROWED);
+                                    if (availableStatus == null || availableStatus.Quantity < item.Quantity)
+                                    {
+                                        throw new Exception($"Quantidade insuficiente para o material com ID {item.MaterialId}.");
+                                    }
+                                    if (borrowedStatus == null)
+                                    {
+                                        material.Status.Add(new MaterialStatus
+                                        {
+                                            Status = EMaterialStatus.BORROWED,
+                                            Quantity = item.Quantity,
+                                        });
+                                        borrowedStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.BORROWED);
+                                        if (borrowedStatus == null)
+                                        {
+                                            throw new Exception($"Erro ao adicionar status de empréstimo para o material com ID {item.MaterialId}.");
+                                        }
+                                    }
+
+                                    availableStatus.Quantity -= item.Quantity;
+                                    borrowedStatus.Quantity += item.Quantity;
+                                    _context.ST_MATERIALS.Update(material);
+                                }
                                 break;
                             case ESolicitationStatus.DECLINED:
                                 solicitation.Status = ESolicitationStatus.DECLINED;
@@ -181,10 +219,48 @@ namespace StockTrack_API.Controllers
                             case ESolicitationStatus.RETURNED:
                                 solicitation.Status = ESolicitationStatus.RETURNED;
                                 solicitation.ReturnedAt = updateSol.MovimentedAt;
+
+                                foreach (var item in solicitation.Items)
+                                {
+                                    var material = await _context.ST_MATERIALS
+                                        .Include(m => m.Status)
+                                        .FirstOrDefaultAsync(m => m.Id == item.MaterialId);
+
+                                    if (material == null)
+                                    {
+                                        throw new Exception($"Material com ID {item.MaterialId} não encontrado.");
+                                    }
+
+                                    var borrowedStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.BORROWED);
+                                    var availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
+                                    if (borrowedStatus == null || borrowedStatus.Quantity < item.Quantity)
+                                    {
+                                        throw new Exception($"Informações divergentes para o material com ID {item.MaterialId}. Contate o suporte.");
+                                    }
+                                    if (availableStatus == null)
+                                    {
+                                        material.Status.Add(new MaterialStatus
+                                        {
+                                            Status = EMaterialStatus.AVAILABLE,
+                                            Quantity = item.Quantity,
+                                        });
+                                        availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
+                                        if (availableStatus == null)
+                                        {
+                                            throw new Exception($"Erro ao adicionar status de disponível para o material com ID {item.MaterialId}.");
+                                        }
+                                    }
+
+                                    borrowedStatus.Quantity -= item.Quantity;
+                                    availableStatus.Quantity += item.Quantity;
+                                    _context.ST_MATERIALS.Update(material);
+                                }
                                 break;
                             default:
                                 throw new Exception($"Estado {updateSol.Status} inválido");
                         }
+                        break;
+                    case ESolicitationStatus.RETURNED:
                         break;
                 }
 
