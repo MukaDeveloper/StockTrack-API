@@ -363,7 +363,7 @@ namespace StockTrack_API.Controllers
                 _context.ST_WAREHOUSES.Update(warehouseToDelete);
                 await _context.SaveChangesAsync();
 
-                return Ok("Almoxarifado excluído com sucesso.");
+                return Ok();
             }
             catch (Exception ex)
             {

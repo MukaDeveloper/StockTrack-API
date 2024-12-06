@@ -20,7 +20,7 @@ namespace StockTrack_API.Data
         public required DbSet<MaterialWarehouses> ST_MATERIAL_WAREHOUSES { get; set; }
         public required DbSet<WarehouseUsers> ST_WAREHOUSE_USERS { get; set; }
         public required DbSet<Solicitation> ST_SOLICITATIONS { get; set; }
-        public required DbSet<Solicitation> ST_SOLICITATION_MATERIALS { get; set; }
+        public required DbSet<SolicitationMaterials> ST_SOLICITATION_MATERIALS { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -201,7 +201,7 @@ namespace StockTrack_API.Data
                     StreetName = "Rua Alcantara",
                     StreetNumber = "113",
                     Complement = "",
-                    Neightboor = "Vila Guilherme",
+                    Neighborhood = "Vila Guilherme",
                     City = "Sao Paulo",
                     State = "SP",
                     CEP = "02110010",
@@ -216,7 +216,7 @@ namespace StockTrack_API.Data
                     StreetName = "Rua Alcantara",
                     StreetNumber = "113",
                     Complement = "",
-                    Neightboor = "Vila Guilherme",
+                    Neighborhood = "Vila Guilherme",
                     City = "Sao Paulo",
                     State = "SP",
                     CEP = "02110010",

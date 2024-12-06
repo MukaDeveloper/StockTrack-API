@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace StockTrack_API.Migrations
 {
     /// <inheritdoc />
-    public partial class aaa : Migration
+    public partial class AllTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -77,7 +77,7 @@ namespace StockTrack_API.Migrations
                     StreetName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StreetNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Complement = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Neightboor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Neighborhood = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     State = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CEP = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -270,8 +270,10 @@ namespace StockTrack_API.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     SolicitedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpectReturnAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReturnedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    BorroadAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    ApprovedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeclinedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BorroadAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReturnedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -458,7 +460,7 @@ namespace StockTrack_API.Migrations
 
             migrationBuilder.InsertData(
                 table: "ST_INSTITUTIONS",
-                columns: new[] { "Id", "AccessCode", "CEP", "City", "Complement", "Name", "Neightboor", "Nickname", "State", "StreetName", "StreetNumber" },
+                columns: new[] { "Id", "AccessCode", "CEP", "City", "Complement", "Name", "Neighborhood", "Nickname", "State", "StreetName", "StreetNumber" },
                 values: new object[,]
                 {
                     { 1, "000", "02110010", "Sao Paulo", "", "Servidor de testes", "Vila Guilherme", "Testes", "SP", "Rua Alcantara", "113" },
@@ -468,7 +470,7 @@ namespace StockTrack_API.Migrations
             migrationBuilder.InsertData(
                 table: "ST_USERS",
                 columns: new[] { "Id", "AccessDate", "CreatedAt", "Email", "Name", "PasswordHash", "PasswordSalt", "PhotoUrl", "Verified", "VerifiedAt", "VerifiedScheduled", "VerifiedToken" },
-                values: new object[] { 1, null, new DateTime(2024, 12, 1, 22, 15, 56, 888, DateTimeKind.Local).AddTicks(674), "admin@stocktrack.com", "Admin", new byte[] { 125, 131, 1, 16, 58, 168, 27, 5, 150, 234, 140, 128, 244, 149, 136, 122, 112, 66, 19, 53, 128, 222, 154, 191, 200, 254, 45, 205, 155, 144, 252, 70, 78, 36, 82, 184, 135, 23, 202, 51, 23, 184, 197, 51, 187, 35, 16, 145, 172, 10, 165, 122, 216, 154, 234, 109, 255, 49, 98, 33, 127, 25, 79, 14 }, new byte[] { 202, 228, 130, 205, 131, 130, 224, 204, 64, 129, 174, 5, 95, 228, 23, 119, 32, 48, 166, 13, 27, 231, 20, 94, 248, 176, 40, 45, 4, 252, 186, 45, 194, 86, 215, 177, 125, 4, 5, 102, 80, 4, 38, 108, 252, 51, 246, 128, 176, 62, 19, 107, 122, 97, 53, 86, 253, 132, 76, 222, 144, 89, 157, 100, 242, 114, 67, 133, 5, 176, 67, 137, 43, 137, 100, 214, 146, 234, 203, 242, 108, 233, 220, 205, 127, 36, 223, 173, 91, 135, 85, 210, 196, 22, 209, 199, 114, 207, 38, 24, 169, 250, 97, 32, 100, 186, 137, 30, 50, 212, 87, 170, 246, 226, 54, 146, 196, 138, 88, 142, 204, 64, 91, 100, 52, 159, 136, 30 }, "https://imgur.com/mOXzZLE.png", true, new DateTime(2024, 12, 1, 22, 15, 56, 888, DateTimeKind.Local).AddTicks(688), null, null });
+                values: new object[] { 1, null, new DateTime(2024, 12, 3, 21, 19, 25, 201, DateTimeKind.Local).AddTicks(9285), "admin@stocktrack.com", "Admin", new byte[] { 165, 177, 42, 93, 86, 230, 251, 199, 229, 235, 191, 72, 241, 1, 204, 252, 89, 203, 3, 177, 188, 26, 94, 181, 239, 96, 140, 75, 24, 248, 119, 183, 37, 255, 38, 99, 228, 1, 188, 144, 217, 69, 202, 164, 118, 168, 42, 225, 222, 179, 129, 46, 137, 186, 5, 39, 46, 56, 99, 146, 53, 123, 32, 153 }, new byte[] { 222, 29, 182, 146, 3, 227, 116, 250, 111, 64, 145, 38, 99, 214, 2, 84, 85, 96, 195, 191, 48, 167, 198, 76, 241, 115, 167, 154, 236, 165, 225, 64, 226, 29, 101, 0, 167, 218, 79, 211, 96, 223, 94, 188, 163, 12, 159, 230, 199, 10, 105, 73, 249, 57, 135, 125, 114, 181, 156, 28, 106, 71, 174, 178, 43, 164, 139, 56, 0, 121, 140, 55, 15, 239, 34, 95, 20, 18, 134, 115, 60, 226, 120, 175, 123, 11, 71, 238, 133, 63, 221, 32, 73, 240, 130, 188, 152, 225, 107, 26, 64, 93, 19, 63, 174, 187, 83, 139, 71, 28, 116, 123, 128, 51, 22, 114, 90, 100, 19, 174, 104, 216, 240, 166, 154, 195, 227, 246 }, "https://imgur.com/mOXzZLE.png", true, new DateTime(2024, 12, 3, 21, 19, 25, 201, DateTimeKind.Local).AddTicks(9302), null, null });
 
             migrationBuilder.InsertData(
                 table: "UserRoleEntity",
@@ -484,12 +486,12 @@ namespace StockTrack_API.Migrations
             migrationBuilder.InsertData(
                 table: "ST_AREAS",
                 columns: new[] { "Id", "Active", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "Name", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1, true, new DateTime(2024, 12, 2, 1, 15, 56, 888, DateTimeKind.Utc).AddTicks(876), "Admin", "Área de Testes", 1, "Teste", new DateTime(2024, 12, 2, 1, 15, 56, 888, DateTimeKind.Utc).AddTicks(877), "" });
+                values: new object[] { 1, true, new DateTime(2024, 12, 4, 0, 19, 25, 201, DateTimeKind.Utc).AddTicks(9570), "Admin", "Área de Testes", 1, "Teste", new DateTime(2024, 12, 4, 0, 19, 25, 201, DateTimeKind.Utc).AddTicks(9570), "" });
 
             migrationBuilder.InsertData(
                 table: "ST_MATERIALS",
                 columns: new[] { "Id", "Active", "CreatedAt", "CreatedBy", "Description", "ImageURL", "InstitutionId", "Manufacturer", "MaterialType", "Measure", "Name", "RecordNumber", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1, true, new DateTime(2024, 12, 2, 1, 15, 56, 888, DateTimeKind.Utc).AddTicks(934), "", "Notebook ThinkPad", "", 1, "ThinkPad", 0, "UN", "Notebook", 123456, new DateTime(2024, 12, 2, 1, 15, 56, 888, DateTimeKind.Utc).AddTicks(934), "" });
+                values: new object[] { 1, true, new DateTime(2024, 12, 4, 0, 19, 25, 201, DateTimeKind.Utc).AddTicks(9636), "", "Notebook ThinkPad", "", 1, "ThinkPad", 0, "UN", "Notebook", 123456, new DateTime(2024, 12, 4, 0, 19, 25, 201, DateTimeKind.Utc).AddTicks(9637), "" });
 
             migrationBuilder.InsertData(
                 table: "ST_USER_INSTITUTIONS",
@@ -515,12 +517,12 @@ namespace StockTrack_API.Migrations
             migrationBuilder.InsertData(
                 table: "ST_MOVIMENTATIONS",
                 columns: new[] { "Id", "AreaId", "Date", "Description", "Event", "InstitutionId", "MaterialId", "MovimentationBy", "Name", "Quantity", "Reason", "Type", "UserId", "WarehouseId" },
-                values: new object[] { 1, 1, new DateTime(2024, 12, 1, 22, 15, 56, 888, DateTimeKind.Local).AddTicks(1075), "Adição de área \"Teste\"", 0, 1, null, "Admin", "Área Teste", 1f, 0, 1, null, null });
+                values: new object[] { 1, 1, new DateTime(2024, 12, 3, 21, 19, 25, 201, DateTimeKind.Local).AddTicks(9736), "Adição de área \"Teste\"", 0, 1, null, "Admin", "Área Teste", 1f, 0, 1, null, null });
 
             migrationBuilder.InsertData(
                 table: "ST_WAREHOUSES",
                 columns: new[] { "Id", "Active", "AreaId", "CreatedAt", "CreatedBy", "Description", "InstitutionId", "Name", "UpdatedAt", "UpdatedBy" },
-                values: new object[] { 1, true, 1, new DateTime(2024, 12, 2, 1, 15, 56, 888, DateTimeKind.Utc).AddTicks(904), "", "Almoxarifado de informática", 1, "Informática", new DateTime(2024, 12, 2, 1, 15, 56, 888, DateTimeKind.Utc).AddTicks(904), "" });
+                values: new object[] { 1, true, 1, new DateTime(2024, 12, 4, 0, 19, 25, 201, DateTimeKind.Utc).AddTicks(9602), "", "Almoxarifado de informática", 1, "Informática", new DateTime(2024, 12, 4, 0, 19, 25, 201, DateTimeKind.Utc).AddTicks(9602), "" });
 
             migrationBuilder.InsertData(
                 table: "ST_MATERIAL_WAREHOUSES",
