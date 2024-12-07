@@ -570,6 +570,26 @@ namespace StockTrack_API.Controllers
             }
         }
 
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePasswordAsync()
+        {
+            try
+            {
+                int institutionId = _institutionService.GetInstitutionId();
+                var (user, userInstitution) = _userService.GetUserAndInstitution(institutionId);
+
+                Institution? institution = await _context.ST_INSTITUTIONS.FirstOrDefaultAsync(i =>
+                    i.Id == institutionId
+                );
+                
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPatch("change-institution")]
         public IActionResult ChangeInstitutionAsync()
         {
