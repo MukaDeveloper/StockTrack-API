@@ -13,17 +13,11 @@ namespace StockTrack_API.Controllers
     public class MovimentationsController : ControllerBase
     {
         private readonly DataContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly InstitutionService _instituionService;
 
-        public MovimentationsController(
-            DataContext context,
-            IHttpContextAccessor httpContextAccessor,
-            InstitutionService instituionService
-        )
+        public MovimentationsController(DataContext context, InstitutionService instituionService)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
             _instituionService = instituionService;
         }
 
@@ -35,7 +29,7 @@ namespace StockTrack_API.Controllers
                 int institutionId = _instituionService.GetInstitutionId();
 
                 Movimentation? mov = await _context.ST_MOVIMENTATIONS.FirstOrDefaultAsync(iBusca =>
-                    iBusca.Id == id
+                    iBusca.Id == id && iBusca.InstitutionId == institutionId
                 );
 
                 if (mov == null)

@@ -157,26 +157,32 @@ namespace StockTrack_API.Data
             // Solicitações
             modelBuilder.Entity<Solicitation>().HasKey(s => s.Id);
 
-            modelBuilder.Entity<Solicitation>()
+            modelBuilder
+                .Entity<Solicitation>()
                 .HasOne(s => s.UserInstitution)
                 .WithMany(ui => ui.Solicitations)
                 .HasForeignKey(s => new { s.UserId, s.InstitutionId });
 
-            modelBuilder.Entity<Solicitation>()
+            modelBuilder
+                .Entity<Solicitation>()
                 .HasMany(s => s.Items)
                 .WithOne(sm => sm.Solicitation)
                 .HasForeignKey(sm => sm.SolicitationId);
 
             // Items da solicitação
-            modelBuilder.Entity<SolicitationMaterials>().HasKey(sm => new { sm.MaterialId, sm.SolicitationId });
+            modelBuilder
+                .Entity<SolicitationMaterials>()
+                .HasKey(sm => new { sm.MaterialId, sm.SolicitationId });
 
-            modelBuilder.Entity<SolicitationMaterials>()
+            modelBuilder
+                .Entity<SolicitationMaterials>()
                 .HasOne(sm => sm.Material)
                 .WithMany()
                 .HasForeignKey(sm => sm.MaterialId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<SolicitationMaterials>()
+            modelBuilder
+                .Entity<SolicitationMaterials>()
                 .HasOne(sm => sm.Solicitation)
                 .WithMany(s => s.Items)
                 .HasForeignKey(sm => sm.SolicitationId)
@@ -422,7 +428,6 @@ namespace StockTrack_API.Data
 
         protected override void ConfigureConventions(
             ModelConfigurationBuilder configurationBuilder
-        )
-        { }
+        ) { }
     }
 }
