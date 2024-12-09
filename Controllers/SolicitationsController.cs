@@ -19,19 +19,19 @@ namespace StockTrack_API.Controllers
     {
         private readonly DataContext _context;
 
-        // private readonly MovimentationService _movimentationService;
+        private readonly MovimentationService _movimentationService;
         private readonly InstitutionService _institutionService;
         private readonly UserService _userService;
 
         public SolicitationsController(
             DataContext context,
-            // MovimentationService movimentationService,
+            MovimentationService movimentationService,
             InstitutionService instituionService,
             UserService userService
         )
         {
             _context = context;
-            // _movimentationService = movimentationService;
+            _movimentationService = movimentationService;
             _institutionService = instituionService;
             _userService = userService;
         }
@@ -60,6 +60,7 @@ namespace StockTrack_API.Controllers
                 return BadRequest("A solicitação deve conter materiais.");
             }
 
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 ArgumentNullException.ThrowIfNull(solicitation);
@@ -101,10 +102,19 @@ namespace StockTrack_API.Controllers
                     return BadRequest("Houve um problema ao registrar sua solicitação.");
                 }
 
+                await _movimentationService.NewSolicitation(
+                    institutionId,
+                    res.Id,
+                    $"Solicitação #{res.Id}",
+                    res.UserInstitution.UserName
+                );
+
+                await transaction.CommitAsync();
                 return Ok(EnvelopeFactory.factoryEnvelope(res));
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -112,6 +122,7 @@ namespace StockTrack_API.Controllers
         [HttpPut("update")]
         public async Task<IActionResult> UpdateSolicitationAsync(UpdateSolicitationReq updateSol)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 ArgumentNullException.ThrowIfNull(updateSol);
@@ -147,7 +158,7 @@ namespace StockTrack_API.Controllers
                             case ESolicitationStatus.WAITING:
                                 return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
                             case ESolicitationStatus.ACCEPT:
-                                
+
 
                                 solicitation.Status = ESolicitationStatus.ACCEPT;
                                 solicitation.ApprovedAt = updateSol.MovimentedAt;
@@ -167,7 +178,7 @@ namespace StockTrack_API.Controllers
                                     var borrowedStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.BORROWED);
                                     if (availableStatus == null || availableStatus.Quantity < item.Quantity)
                                     {
-                                        throw new Exception($"Quantidade insuficiente para o material com ID {item.MaterialId}.");
+                                        throw new Exception($"Essa solicitação não pode mais ser aceita porque nem todos os materiais estão disponíveis.");
                                     }
                                     if (borrowedStatus == null)
                                     {
@@ -296,10 +307,19 @@ namespace StockTrack_API.Controllers
                         .ToList(),
                 };
 
+                await _movimentationService.UpdateSolicitation(
+                    institutionId,
+                    solicitation.Id,
+                    $"Solicitação #{solicitation.Id}",
+                    res.UserInstitution.UserName
+                );
+
+                await transaction.CommitAsync();
                 return Ok(EnvelopeFactory.factoryEnvelope(res));
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -433,6 +453,10 @@ namespace StockTrack_API.Controllers
                     SolicitedAt = s.SolicitedAt,
                     ExpectReturnAt = s.ExpectReturnAt,
                     Status = s.Status.ToString(),
+                    ReturnedAt = s.ReturnedAt ?? null,
+                    ApprovedAt = s.ApprovedAt ?? null,
+                    DeclinedAt = s.DeclinedAt ?? null,
+                    BorroadAt = s.BorroadAt ?? null,
                     Items = s
                         .Items.Select(item => new GetSolicitationItemsRes
                         {

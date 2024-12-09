@@ -16,6 +16,12 @@ namespace StockTrack_API.Models
 
         public DateTime SolicitedAt { get; set; }
         public DateTime ExpectReturnAt { get; set; }
+
+        public DateTime? ApprovedAt { get; set; }
+        public DateTime? DeclinedAt { get; set; }
+        public DateTime? BorroadAt { get; set; }
+        public DateTime? ReturnedAt { get; set; }
+
         public string Status { get; set; } = string.Empty;
     }
 

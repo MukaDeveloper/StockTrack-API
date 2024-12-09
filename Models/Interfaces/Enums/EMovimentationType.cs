@@ -6,9 +6,6 @@ namespace StockTrack_API.Models.Interfaces.Enums
         AREA,
         WAREHOUSE,
         MATERIAL,
-        LOAN,
-        MAINTENANCE,
-        GENERAL,
-        CONSUMPTION,
+        SOLICITATION
     }
 }
