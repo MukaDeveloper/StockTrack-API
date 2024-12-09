@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using StockTrack_API.Data;
-using StockTrack_API.Models.Interfaces.Enums;
 using StockTrack_API.Models;
+using StockTrack_API.Models.Interfaces;
+using StockTrack_API.Models.Interfaces.Enums;
+using StockTrack_API.Models.Interfaces.Request;
+using StockTrack_API.Models.Interfaces.Response.Material;
 using StockTrack_API.Services;
 using StockTrack_API.Utils;
-using StockTrack_API.Models.Interfaces.Response.Material;
-using StockTrack_API.Models.Interfaces.Request;
-using StockTrack_API.Models.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.IdentityModel.Tokens;
 
 namespace StockTrack_API.Controllers
 {
@@ -51,8 +51,8 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 // Busca o material pelo ID e pelo institutionId no banco de dados através do contexto
-                Material? material = await _context.ST_MATERIALS
-                    .Include(m => m.Status)
+                Material? material = await _context
+                    .ST_MATERIALS.Include(m => m.Status)
                     .FirstOrDefaultAsync(m =>
                         m.Id == id && m.InstitutionId == institutionId && m.Active == true
                     );
@@ -79,7 +79,9 @@ namespace StockTrack_API.Controllers
                 int institutionId = _institutionService.GetInstitutionId();
 
                 List<Material> list = await _context
-                    .ST_MATERIALS.Where(m => m.InstitutionId == institutionId && m.Id > lastDocId && m.Active == true)
+                    .ST_MATERIALS.Where(m =>
+                        m.InstitutionId == institutionId && m.Id > lastDocId && m.Active == true
+                    )
                     .OrderBy(m => m.Id)
                     .Take(limit)
                     .Include(m => m.Status)
@@ -87,24 +89,27 @@ namespace StockTrack_API.Controllers
                     .ToListAsync();
 
                 List<GetAllRes> materials = list.Select(material => new GetAllRes
-                {
-                    Id = material.Id,
-                    Name = material.Name,
-                    Description = material.Description,
-                    ImageURL = material.ImageURL,
-                    Manufacturer = material.Manufacturer,
-                    RecordNumber = material.RecordNumber,
-                    MaterialType = material.MaterialType.ToString(),
-                    Measure = material.Measure,
-                    Status = material.Status.Select(status => new MaterialStatusDto
                     {
-                        Status = status.Status.ToString(),
-                        Quantity = status.Quantity
-                    }
-                    ).ToList(),
-                    MaterialWarehouses = material.MaterialWarehouses.Select(
-                        mw => mw.WarehouseId).ToList(),
-                }).ToList();
+                        Id = material.Id,
+                        Name = material.Name,
+                        Description = material.Description,
+                        ImageURL = material.ImageURL,
+                        Manufacturer = material.Manufacturer,
+                        RecordNumber = material.RecordNumber,
+                        MaterialType = material.MaterialType.ToString(),
+                        Measure = material.Measure,
+                        Status = material
+                            .Status.Select(status => new MaterialStatusDto
+                            {
+                                Status = status.Status.ToString(),
+                                Quantity = status.Quantity,
+                            })
+                            .ToList(),
+                        MaterialWarehouses = material
+                            .MaterialWarehouses.Select(mw => mw.WarehouseId)
+                            .ToList(),
+                    })
+                    .ToList();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(materials));
             }
@@ -135,19 +140,22 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Área do armazém é obrigatória.");
 
                 // Verificação de almoxarifado
-                Warehouse? wh = await _context.ST_WAREHOUSES
-                    .FirstOrDefaultAsync(w => w.Id == newMaterial.WarehouseId && w.Active && w.InstitutionId == institutionId);
+                Warehouse? wh = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(w =>
+                    w.Id == newMaterial.WarehouseId && w.Active && w.InstitutionId == institutionId
+                );
 
                 if (wh == null)
                     throw new Exception("Almoxarifado não encontrado ou inválido!");
 
                 // Verificação de materiais já existentes com o mesmo registro
-                Material? existingMaterial = await _context.ST_MATERIALS
-                    .Where(m => m.InstitutionId == institutionId && m.Active == true)
+                Material? existingMaterial = await _context
+                    .ST_MATERIALS.Where(m => m.InstitutionId == institutionId && m.Active == true)
                     .FirstOrDefaultAsync(m => m.RecordNumber == newMaterial.RecordNumber);
 
                 if (existingMaterial != null)
-                    throw new Exception("Número de registro já utilizado para outro material ativo!");
+                    throw new Exception(
+                        "Número de registro já utilizado para outro material ativo!"
+                    );
 
                 // Validação específica de tipo do material
                 var materialType = Enum.Parse<EMaterialType>(newMaterial.MaterialType);
@@ -155,7 +163,8 @@ namespace StockTrack_API.Controllers
                 switch (materialType)
                 {
                     case EMaterialType.LOAN:
-                        if (newMaterial.quantity <= 0) newMaterial.quantity = 1;
+                        if (newMaterial.quantity <= 0)
+                            newMaterial.quantity = 1;
                         if (newMaterial.RecordNumber <= 0)
                             throw new Exception("Número de registro inválido!");
                         break;
@@ -167,44 +176,55 @@ namespace StockTrack_API.Controllers
                 }
 
                 // Criação do material
-                Material materialToAdd = new()
-                {
-                    Active = true,
-                    CreatedAt = DateTime.Now,
-                    CreatedBy = user.Name,
-                    Description = newMaterial.Description,
-                    ImageURL = newMaterial.ImageURL,
-                    InstitutionId = institutionId,
-                    Manufacturer = newMaterial.Manufacturer,
-                    MaterialType = materialType,
-                    Measure = newMaterial.Measure,
-                    Name = newMaterial.Name,
-                    RecordNumber = newMaterial.RecordNumber,
-                    Status = new List<MaterialStatus>
-            {
-                new MaterialStatus
-                {
-                    Quantity = newMaterial.quantity,
-                    Status = EMaterialStatus.AVAILABLE
-                }
-            },
-                };
+                Material materialToAdd =
+                    new()
+                    {
+                        Active = true,
+                        CreatedAt = DateTime.Now,
+                        CreatedBy = user.Name,
+                        Description = newMaterial.Description,
+                        ImageURL = newMaterial.ImageURL,
+                        InstitutionId = institutionId,
+                        Manufacturer = newMaterial.Manufacturer,
+                        MaterialType = materialType,
+                        Measure = newMaterial.Measure,
+                        Name = newMaterial.Name,
+                        RecordNumber = newMaterial.RecordNumber,
+                        Status = new List<MaterialStatus>
+                        {
+                            new MaterialStatus
+                            {
+                                Quantity = newMaterial.quantity,
+                                Status = EMaterialStatus.AVAILABLE,
+                            },
+                        },
+                    };
 
                 // Adiciona e salva o material
                 await _context.ST_MATERIALS.AddAsync(materialToAdd);
                 await _context.SaveChangesAsync();
 
                 // Busca e valida material adicionado
-                Material? res = await _context.ST_MATERIALS
-                    .FirstOrDefaultAsync(m => m.Id == materialToAdd.Id && m.Active);
+                Material? res = await _context.ST_MATERIALS.FirstOrDefaultAsync(m =>
+                    m.Id == materialToAdd.Id && m.Active
+                );
 
                 if (res == null)
-                    throw new Exception("Houve um erro ao referenciar seu material. Verifique se o mesmo foi adicionado!");
+                    throw new Exception(
+                        "Houve um erro ao referenciar seu material. Verifique se o mesmo foi adicionado!"
+                    );
 
                 // Confirma transação
                 await transaction.CommitAsync();
                 // Registra a movimentação
-                await _movimentationService.AddMaterial(institutionId, materialToAdd.Id, user.Name, materialToAdd.Name, materialToAdd.Description, materialToAdd.Quantity);
+                await _movimentationService.AddMaterial(
+                    institutionId,
+                    materialToAdd.Id,
+                    user.Name,
+                    materialToAdd.Name,
+                    materialToAdd.Description,
+                    materialToAdd.Quantity
+                );
 
                 return Ok(EnvelopeFactory.factoryEnvelope(res));
             }
@@ -230,8 +250,8 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
 
                 // Busca o material existente para atualização
-                Material? material = await _context.ST_MATERIALS
-                    .Where(m => m.InstitutionId == institutionId && m.Active)
+                Material? material = await _context
+                    .ST_MATERIALS.Where(m => m.InstitutionId == institutionId && m.Active)
                     .Include(m => m.MaterialWarehouses) // Inclui relação N:N
                     .FirstOrDefaultAsync(m => m.Id == updatedMaterial.Id);
 
@@ -239,14 +259,19 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Material não encontrado ou inativo!");
 
                 // Validação de registro único, se alterado
-                if (updatedMaterial.RecordNumber.HasValue && updatedMaterial.RecordNumber != material.RecordNumber)
+                if (
+                    updatedMaterial.RecordNumber.HasValue
+                    && updatedMaterial.RecordNumber != material.RecordNumber
+                )
                 {
-                    bool recordExists = await _context.ST_MATERIALS
-                        .Where(m => m.InstitutionId == institutionId && m.Active)
+                    bool recordExists = await _context
+                        .ST_MATERIALS.Where(m => m.InstitutionId == institutionId && m.Active)
                         .AnyAsync(m => m.RecordNumber == updatedMaterial.RecordNumber);
 
                     if (recordExists)
-                        throw new Exception("Número de registro já utilizado para outro material ativo!");
+                        throw new Exception(
+                            "Número de registro já utilizado para outro material ativo!"
+                        );
                 }
 
                 // Atualiza os campos fornecidos
@@ -254,9 +279,10 @@ namespace StockTrack_API.Controllers
                 material.Description = updatedMaterial.Description ?? material.Description;
                 material.ImageURL = updatedMaterial.ImageURL ?? material.ImageURL;
                 material.Manufacturer = updatedMaterial.Manufacturer ?? material.Manufacturer;
-                material.MaterialType = updatedMaterial.MaterialType != null
-                    ? Enum.Parse<EMaterialType>(updatedMaterial.MaterialType)
-                    : material.MaterialType;
+                material.MaterialType =
+                    updatedMaterial.MaterialType != null
+                        ? Enum.Parse<EMaterialType>(updatedMaterial.MaterialType)
+                        : material.MaterialType;
                 material.Measure = updatedMaterial.Measure ?? material.Measure;
                 material.RecordNumber = updatedMaterial.RecordNumber ?? material.RecordNumber;
                 material.Active = updatedMaterial.Active ?? material.Active;
@@ -266,21 +292,28 @@ namespace StockTrack_API.Controllers
                 // Verifica e vincula o almoxarifado, se enviado
                 if (updatedMaterial.WarehouseId.HasValue)
                 {
-                    Warehouse? warehouse = await _context.ST_WAREHOUSES
-                        .FirstOrDefaultAsync(w => w.Id == updatedMaterial.WarehouseId && w.Active && w.InstitutionId == institutionId);
+                    Warehouse? warehouse = await _context.ST_WAREHOUSES.FirstOrDefaultAsync(w =>
+                        w.Id == updatedMaterial.WarehouseId
+                        && w.Active
+                        && w.InstitutionId == institutionId
+                    );
 
                     if (warehouse == null)
                         throw new Exception("Almoxarifado inválido ou inativo!");
 
                     // Verifica se o vínculo já existe
-                    bool warehouseLinked = material.MaterialWarehouses.Any(mw => mw.WarehouseId == warehouse.Id);
+                    bool warehouseLinked = material.MaterialWarehouses.Any(mw =>
+                        mw.WarehouseId == warehouse.Id
+                    );
                     if (!warehouseLinked)
                     {
-                        material.MaterialWarehouses.Add(new MaterialWarehouses
-                        {
-                            MaterialId = material.Id,
-                            WarehouseId = warehouse.Id,
-                        });
+                        material.MaterialWarehouses.Add(
+                            new MaterialWarehouses
+                            {
+                                MaterialId = material.Id,
+                                WarehouseId = warehouse.Id,
+                            }
+                        );
                     }
                 }
 
@@ -291,7 +324,14 @@ namespace StockTrack_API.Controllers
                 // Confirma transação
                 await transaction.CommitAsync();
                 // Registra a movimentação
-                await _movimentationService.UpdateMaterial(institutionId, material.Id, user.Name, material.Name, material.Description, material.Quantity);
+                await _movimentationService.UpdateMaterial(
+                    institutionId,
+                    material.Id,
+                    user.Name,
+                    material.Name,
+                    material.Description,
+                    material.Quantity
+                );
 
                 return Ok(EnvelopeFactory.factoryEnvelope(material));
             }
@@ -318,12 +358,19 @@ namespace StockTrack_API.Controllers
                 }
 
                 Material? materialToDelete =
-                    await _context.ST_MATERIALS.FirstOrDefaultAsync(x => x.Id == materialId && x.Active == true)
-                    ?? throw new Exception("Material não encontrado");
+                    await _context.ST_MATERIALS.FirstOrDefaultAsync(x =>
+                        x.Id == materialId && x.Active == true
+                    ) ?? throw new Exception("Material não encontrado");
 
-                List<Solicitation>? listSolicitationMaterials = await _context.ST_SOLICITATIONS
-                    .Include(s => s.Items) // Inclui os itens relacionados
-                    .Where(s => s.Items.Any(i => i.MaterialId == materialId) && (s.Status != ESolicitationStatus.RETURNED || s.Status != ESolicitationStatus.DECLINED))
+                List<Solicitation>? listSolicitationMaterials = await _context
+                    .ST_SOLICITATIONS.Include(s => s.Items) // Inclui os itens relacionados
+                    .Where(s =>
+                        s.Items.Any(i => i.MaterialId == materialId)
+                        && (
+                            s.Status != ESolicitationStatus.RETURNED
+                            || s.Status != ESolicitationStatus.DECLINED
+                        )
+                    )
                     .ToListAsync();
 
                 if (listSolicitationMaterials.Count > 0)
@@ -350,7 +397,14 @@ namespace StockTrack_API.Controllers
                 // Confirma transação
                 await transaction.CommitAsync();
                 // Registra a movimentação
-                await _movimentationService.UpdateMaterial(institutionId, materialToDelete.Id, user.Name, materialToDelete.Name, materialToDelete.Description, materialToDelete.Quantity);
+                await _movimentationService.UpdateMaterial(
+                    institutionId,
+                    materialToDelete.Id,
+                    user.Name,
+                    materialToDelete.Name,
+                    materialToDelete.Description,
+                    materialToDelete.Quantity
+                );
 
                 return Ok();
             }

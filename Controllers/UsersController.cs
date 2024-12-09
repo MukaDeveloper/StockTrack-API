@@ -170,7 +170,6 @@ namespace StockTrack_API.Controllers
         {
             try
             {
-
                 if (credentials.Email.IsNullOrEmpty() || credentials.PasswordString.IsNullOrEmpty())
                 {
                     throw new Exception("Todos os campos são obrigatórios.");
@@ -316,7 +315,7 @@ namespace StockTrack_API.Controllers
                         UserId = member.UserId,
                         InstitutionId = member.InstitutionId,
                         UserRole = userRole,
-                        Solicitations = new List<Solicitation>()
+                        Solicitations = new List<Solicitation>(),
                     };
 
                 await _movimentationService.AddUser(
@@ -581,7 +580,7 @@ namespace StockTrack_API.Controllers
                 Institution? institution = await _context.ST_INSTITUTIONS.FirstOrDefaultAsync(i =>
                     i.Id == institutionId
                 );
-                
+
                 return Ok();
             }
             catch (Exception ex)

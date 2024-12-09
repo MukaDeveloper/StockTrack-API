@@ -17,10 +17,10 @@ namespace StockTrack_API.Models
         public UserInstitution? UserInstitution { get; set; }
 
         public ESolicitationStatus Status { get; set; }
-        
+
         public DateTime SolicitedAt { get; set; } = DateTime.UtcNow;
         public DateTime ExpectReturnAt { get; set; } = DateTime.UtcNow;
-        
+
         public DateTime? ApprovedAt { get; set; }
         public DateTime? DeclinedAt { get; set; }
         public DateTime? BorroadAt { get; set; }
