@@ -102,12 +102,14 @@ namespace StockTrack_API.Controllers
                     return BadRequest("Houve um problema ao registrar sua solicitação.");
                 }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 await _movimentationService.NewSolicitation(
                     institutionId,
                     res.Id,
                     $"Solicitação #{res.Id}",
                     res.UserInstitution.UserName
                 );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
                 await transaction.CommitAsync();
                 return Ok(EnvelopeFactory.factoryEnvelope(res));
@@ -159,43 +161,62 @@ namespace StockTrack_API.Controllers
                                 return Ok(EnvelopeFactory.factoryEnvelope(solicitation));
                             case ESolicitationStatus.ACCEPT:
 
-
                                 solicitation.Status = ESolicitationStatus.ACCEPT;
                                 solicitation.ApprovedAt = updateSol.MovimentedAt;
 
                                 foreach (var item in solicitation.Items)
                                 {
-                                    var material = await _context.ST_MATERIALS
-                                        .Include(m => m.Status)
+                                    var material = await _context
+                                        .ST_MATERIALS.Include(m => m.Status)
                                         .FirstOrDefaultAsync(m => m.Id == item.MaterialId);
 
                                     if (material == null)
                                     {
-                                        throw new Exception($"Material com ID {item.MaterialId} não encontrado.");
+                                        throw new Exception(
+                                            $"Material com ID {item.MaterialId} não encontrado."
+                                        );
                                     }
 
-                                    var availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
-                                    var borrowedStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.BORROWED);
-                                    if (availableStatus == null || availableStatus.Quantity < item.Quantity)
+                                    var availableStatus = material.Status.FirstOrDefault(s =>
+                                        s.Status == EMaterialStatus.AVAILABLE
+                                    );
+                                    var borrowedStatus = material.Status.FirstOrDefault(s =>
+                                        s.Status == EMaterialStatus.BORROWED
+                                    );
+                                    if (
+                                        availableStatus == null
+                                        || availableStatus.Quantity < item.Quantity
+                                    )
                                     {
-                                        throw new Exception($"Essa solicitação não pode mais ser aceita porque nem todos os materiais estão disponíveis.");
+                                        throw new Exception(
+                                            $"Essa solicitação não pode mais ser aceita porque nem todos os materiais estão disponíveis."
+                                        );
                                     }
                                     if (borrowedStatus == null)
                                     {
-                                        material.Status.Add(new MaterialStatus
-                                        {
-                                            Status = EMaterialStatus.BORROWED,
-                                            Quantity = item.Quantity,
-                                        });
-                                        borrowedStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.BORROWED);
+                                        material.Status.Add(
+                                            new MaterialStatus
+                                            {
+                                                Status = EMaterialStatus.BORROWED,
+                                                Quantity = item.Quantity,
+                                            }
+                                        );
+                                        borrowedStatus = material.Status.FirstOrDefault(s =>
+                                            s.Status == EMaterialStatus.BORROWED
+                                        );
                                         if (borrowedStatus == null)
                                         {
-                                            throw new Exception($"Erro ao adicionar status de empréstimo para o material com ID {item.MaterialId}.");
+                                            throw new Exception(
+                                                $"Erro ao adicionar status de empréstimo para o material com ID {item.MaterialId}."
+                                            );
                                         }
+                                    }
+                                    else
+                                    {
+                                        borrowedStatus.Quantity += item.Quantity;
                                     }
 
                                     availableStatus.Quantity -= item.Quantity;
-                                    borrowedStatus.Quantity += item.Quantity;
                                     _context.ST_MATERIALS.Update(material);
                                 }
                                 break;
@@ -221,7 +242,9 @@ namespace StockTrack_API.Controllers
                         }
                         break;
                     case ESolicitationStatus.DECLINED:
-                        throw new Exception($"Essa solicitação foi recusada e não pode ser alterada");
+                        throw new Exception(
+                            $"Essa solicitação foi recusada e não pode ser alterada"
+                        );
                     case ESolicitationStatus.WITHDRAWN:
                         switch (Enum.Parse<ESolicitationStatus>(updateSol.Status))
                         {
@@ -233,32 +256,49 @@ namespace StockTrack_API.Controllers
 
                                 foreach (var item in solicitation.Items)
                                 {
-                                    var material = await _context.ST_MATERIALS
-                                        .Include(m => m.Status)
+                                    var material = await _context
+                                        .ST_MATERIALS.Include(m => m.Status)
                                         .FirstOrDefaultAsync(m => m.Id == item.MaterialId);
 
                                     if (material == null)
                                     {
-                                        throw new Exception($"Material com ID {item.MaterialId} não encontrado.");
+                                        throw new Exception(
+                                            $"Material com ID {item.MaterialId} não encontrado."
+                                        );
                                     }
 
-                                    var borrowedStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.BORROWED);
-                                    var availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
-                                    if (borrowedStatus == null || borrowedStatus.Quantity < item.Quantity)
+                                    var borrowedStatus = material.Status.FirstOrDefault(s =>
+                                        s.Status == EMaterialStatus.BORROWED
+                                    );
+                                    var availableStatus = material.Status.FirstOrDefault(s =>
+                                        s.Status == EMaterialStatus.AVAILABLE
+                                    );
+                                    if (
+                                        borrowedStatus == null
+                                        || borrowedStatus.Quantity < item.Quantity
+                                    )
                                     {
-                                        throw new Exception($"Informações divergentes para o material com ID {item.MaterialId}. Contate o suporte.");
+                                        throw new Exception(
+                                            $"Informações divergentes para o material com ID {item.MaterialId}. Contate o suporte."
+                                        );
                                     }
                                     if (availableStatus == null)
                                     {
-                                        material.Status.Add(new MaterialStatus
-                                        {
-                                            Status = EMaterialStatus.AVAILABLE,
-                                            Quantity = item.Quantity,
-                                        });
-                                        availableStatus = material.Status.FirstOrDefault(s => s.Status == EMaterialStatus.AVAILABLE);
+                                        material.Status.Add(
+                                            new MaterialStatus
+                                            {
+                                                Status = EMaterialStatus.AVAILABLE,
+                                                Quantity = item.Quantity,
+                                            }
+                                        );
+                                        availableStatus = material.Status.FirstOrDefault(s =>
+                                            s.Status == EMaterialStatus.AVAILABLE
+                                        );
                                         if (availableStatus == null)
                                         {
-                                            throw new Exception($"Erro ao adicionar status de disponível para o material com ID {item.MaterialId}.");
+                                            throw new Exception(
+                                                $"Erro ao adicionar status de disponível para o material com ID {item.MaterialId}."
+                                            );
                                         }
                                     }
 
@@ -278,6 +318,7 @@ namespace StockTrack_API.Controllers
                 _context.ST_SOLICITATIONS.Update(solicitation);
                 await _context.SaveChangesAsync();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 var res = new GetSolicitationRes
                 {
                     Id = solicitation.Id,
@@ -306,6 +347,7 @@ namespace StockTrack_API.Controllers
                         })
                         .ToList(),
                 };
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
                 await _movimentationService.UpdateSolicitation(
                     institutionId,
@@ -378,6 +420,7 @@ namespace StockTrack_API.Controllers
                 })
                 .ToList();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             return new GetSolicitationRes
             {
                 Id = newSolicitation.Id,
@@ -395,6 +438,7 @@ namespace StockTrack_API.Controllers
                 ExpectReturnAt = newSolicitation.ExpectReturnAt,
                 Status = newSolicitation.Status.ToString(),
             };
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         private async Task<List<GetSolicitationRes>> GetSolicitationsAsync()
@@ -437,6 +481,7 @@ namespace StockTrack_API.Controllers
             }
 
             // Efetua a consulta no banco com todos os itens necessários
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var list = await solicitationsQuery
                 .Select(s => new GetSolicitationRes
                 {
@@ -471,6 +516,7 @@ namespace StockTrack_API.Controllers
                         .ToList(),
                 })
                 .ToListAsync();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             return list;
         }
