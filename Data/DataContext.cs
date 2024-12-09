@@ -115,6 +115,13 @@ namespace StockTrack_API.Data
                 .HasForeignKey(m => m.MaterialId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder
+                .Entity<Movimentation>()
+                .HasOne(m => m.Solicitation)
+                .WithMany()
+                .HasForeignKey(m => m.SolicitationId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // MaterialWarehouses
             modelBuilder
                 .Entity<MaterialWarehouses>()
@@ -148,7 +155,7 @@ namespace StockTrack_API.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Solicitações
-                modelBuilder.Entity<Solicitation>().HasKey(s => s.Id);
+            modelBuilder.Entity<Solicitation>().HasKey(s => s.Id);
 
             modelBuilder.Entity<Solicitation>()
                 .HasOne(s => s.UserInstitution)
@@ -196,8 +203,8 @@ namespace StockTrack_API.Data
                 {
                     Id = 1,
                     AccessCode = "000",
-                    Name = "Servidor de testes",
-                    Nickname = "Testes",
+                    Name = "Manutenção",
+                    Nickname = "Manutenção",
                     StreetName = "Rua Alcantara",
                     StreetNumber = "113",
                     Complement = "",
@@ -245,8 +252,8 @@ namespace StockTrack_API.Data
                 {
                     Active = true,
                     Id = 1,
-                    Name = "Teste",
-                    Description = "Área de Testes",
+                    Name = "Norte",
+                    Description = "Conjunto de almoxarifados da área norte",
                     InstitutionId = institutionTest.Id,
                     CreatedBy = admin.Name,
                 };
@@ -329,14 +336,28 @@ namespace StockTrack_API.Data
                     new Movimentation()
                     {
                         Id = 1,
-                        Name = "Área Teste",
-                        Description = "Adição de área \"Teste\"",
+                        Name = "Norte",
+                        Description = "Adição de área \"Norte\"",
                         MovimentationBy = admin.Name,
                         InstitutionId = 1,
                         AreaId = 1,
                         Date = DateTime.Now,
                         Event = EMovimentationEvent.ENTRY,
                         Type = EMovimentationType.AREA,
+                        Reason = EMovimentationReason.INSERTION,
+                        Quantity = 1,
+                    },
+                    new Movimentation()
+                    {
+                        Id = 2,
+                        Name = warehouse.Name,
+                        Description = "Adição de almoxarifado \"Informática\"",
+                        MovimentationBy = admin.Name,
+                        InstitutionId = 1,
+                        WarehouseId = 1,
+                        Date = DateTime.Now,
+                        Event = EMovimentationEvent.ENTRY,
+                        Type = EMovimentationType.WAREHOUSE,
                         Reason = EMovimentationReason.INSERTION,
                         Quantity = 1,
                     }
@@ -401,6 +422,7 @@ namespace StockTrack_API.Data
 
         protected override void ConfigureConventions(
             ModelConfigurationBuilder configurationBuilder
-        ) { }
+        )
+        { }
     }
 }

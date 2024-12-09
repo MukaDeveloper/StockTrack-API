@@ -360,5 +360,61 @@ namespace StockTrack_API.Services
 
             return mov;
         }
+
+        public async Task<Movimentation> NewSolicitation(
+            int institutionId,
+            int solicitationId,
+            string solicitationName,
+            string movBy
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = solicitationName ?? "Nova solicitação",
+                    InstitutionId = institutionId,
+                    MovimentationBy = movBy,
+                    SolicitationId = solicitationId,
+                    Event = EMovimentationEvent.ENTRY,
+                    Type = EMovimentationType.SOLICITATION,
+                    Reason = EMovimentationReason.INSERTION,
+                    Date = DateTime.Now,
+                    Description = "Nova solicitação",
+                    Quantity = 1,
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
+
+        public async Task<Movimentation> UpdateSolicitation(
+            int institutionId,
+            int solicitationId,
+            string solicitationName,
+            string movBy
+        )
+        {
+            Movimentation mov =
+                new()
+                {
+                    Name = solicitationName ?? "Edição de solicitação",
+                    InstitutionId = institutionId,
+                    MovimentationBy = movBy,
+                    SolicitationId = solicitationId,
+                    Event = EMovimentationEvent.EDIT,
+                    Type = EMovimentationType.SOLICITATION,
+                    Reason = EMovimentationReason.EDIT,
+                    Date = DateTime.Now,
+                    Description = "Edição de solicitação",
+                    Quantity = 1,
+                };
+
+            _context.ST_MOVIMENTATIONS.Add(mov);
+            await _context.SaveChangesAsync();
+
+            return mov;
+        }
     }
 }

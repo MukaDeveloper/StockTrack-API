@@ -253,7 +253,7 @@ namespace StockTrack_API.Controllers
                 _context.ST_AREAS.Update(areaToDelete);
                 await _context.SaveChangesAsync();
 
-                return Ok("Área excluída com sucesso");
+                return Ok();
             }
             catch (Exception ex)
             {

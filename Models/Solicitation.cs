@@ -14,7 +14,7 @@ namespace StockTrack_API.Models
 
         public int UserId { get; set; }
         public int InstitutionId { get; set; }
-        public required UserInstitution UserInstitution { get; set; }
+        public UserInstitution? UserInstitution { get; set; }
 
         public ESolicitationStatus Status { get; set; }
         
