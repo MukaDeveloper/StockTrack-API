@@ -23,7 +23,7 @@ namespace StockTrack_API.Models
         public int? UserId { get; set; }
         public User? User { get; set; }
 
-        public int SolicitationId { get; set; }
+        public int? SolicitationId { get; set; }
         public Solicitation? Solicitation { get; set; }
 
         public EMovimentationEvent Event { get; set; }

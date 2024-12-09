@@ -8,11 +8,11 @@ namespace StockTrack_API.Models
         public int Id { get; set; }
         public string Description { get; set; } = string.Empty;
 
-        public required List<GetSolicitationItemsRes> Items { get; set; }
+        public List<GetSolicitationItemsRes>? Items { get; set; }
 
         public int UserId { get; set; }
         public int InstitutionId { get; set; }
-        public required UserInstitutionRes UserInstitution { get; set; }
+        public UserInstitutionRes? UserInstitution { get; set; }
 
         public DateTime SolicitedAt { get; set; }
         public DateTime ExpectReturnAt { get; set; }
