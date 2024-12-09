@@ -641,7 +641,6 @@ namespace StockTrack_API.Migrations
                             Name = "Norte",
                             Quantity = 1f,
                             Reason = 0,
-                            SolicitationId = 0,
                             Type = 1
                         },
                         new
@@ -655,7 +654,6 @@ namespace StockTrack_API.Migrations
                             Name = "Informática",
                             Quantity = 1f,
                             Reason = 0,
-                            SolicitationId = 0,
                             Type = 2,
                             WarehouseId = 1
                         });
@@ -971,7 +969,7 @@ namespace StockTrack_API.Migrations
                     b.HasOne("StockTrack_API.Models.Solicitation", "Solicitation")
                         .WithMany()
                         .HasForeignKey("SolicitationId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("StockTrack_API.Models.User", "User")

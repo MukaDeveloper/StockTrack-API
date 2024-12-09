@@ -50,8 +50,11 @@ namespace StockTrack_API.Controllers
 
                 if (userInstitution.UserRole == EUserRole.WAREHOUSEMAN)
                 {
-                    list = list.Where(w => w.Warehousemans != null
-                        && w.Warehousemans.Any(wh => wh.UserId == userInstitution.UserId)).ToList();
+                    list = list.Where(w =>
+                            w.Warehousemans != null
+                            && w.Warehousemans.Any(wh => wh.UserId == userInstitution.UserId)
+                        )
+                        .ToList();
                 }
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -72,7 +75,9 @@ namespace StockTrack_API.Controllers
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .Where(w => w.InstitutionId == institutionId && w.AreaId == areaId && w.Active == true)
+                    .Where(w =>
+                        w.InstitutionId == institutionId && w.AreaId == areaId && w.Active == true
+                    )
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -93,7 +98,9 @@ namespace StockTrack_API.Controllers
                 List<Warehouse> list = await _context
                     .ST_WAREHOUSES.Include(w => w.Area)
                     .Include(w => w.Warehousemans)
-                    .Where(w => w.InstitutionId == institutionId && w.Id == warehouseId && w.Active == true)
+                    .Where(w =>
+                        w.InstitutionId == institutionId && w.Id == warehouseId && w.Active == true
+                    )
                     .ToListAsync();
 
                 return Ok(EnvelopeFactory.factoryEnvelopeArray(list));
@@ -152,9 +159,13 @@ namespace StockTrack_API.Controllers
                     throw new Exception("Sem autorização.");
                 }
 
-                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x => x.Id == data.AreaId && x.Active == true);
-                Warehouse? warehouse = await _context.ST_WAREHOUSES
-                    .Where((a) => a.InstitutionId == institutionId && a.Active == true)
+                Area? area = await _context.ST_AREAS.FirstOrDefaultAsync(x =>
+                    x.Id == data.AreaId && x.Active == true
+                );
+                Warehouse? warehouse = await _context
+                    .ST_WAREHOUSES.Where(
+                        (a) => a.InstitutionId == institutionId && a.Active == true
+                    )
                     .FirstOrDefaultAsync(x => x.Name.ToLower() == data.Name.ToLower());
 
                 if (warehouse != null)
@@ -274,8 +285,8 @@ namespace StockTrack_API.Controllers
                 }
                 if (warehouse.Warehousemans != null)
                 {
-                    List<WarehouseUsers>? warehouseUsers = await _context.ST_WAREHOUSE_USERS
-                        .Where(wu => wu.WarehouseId == warehouse.Id)
+                    List<WarehouseUsers>? warehouseUsers = await _context
+                        .ST_WAREHOUSE_USERS.Where(wu => wu.WarehouseId == warehouse.Id)
                         .ToListAsync();
 
                     if (warehouseUsers.Count > 0)
@@ -335,8 +346,9 @@ namespace StockTrack_API.Controllers
                 }
 
                 Warehouse? warehouseToDelete =
-                    await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x => x.Id == warehouseId && x.Active == true)
-                    ?? throw new Exception("Almoxarifado não encontrado");
+                    await _context.ST_WAREHOUSES.FirstOrDefaultAsync(x =>
+                        x.Id == warehouseId && x.Active == true
+                    ) ?? throw new Exception("Almoxarifado não encontrado");
 
                 List<MaterialWarehouses>? listMaterialWarehouses = await _context
                     .ST_MATERIAL_WAREHOUSES.Where(m => m.WarehouseId == warehouseId)
